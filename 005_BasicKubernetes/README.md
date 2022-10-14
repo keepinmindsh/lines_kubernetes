@@ -96,6 +96,10 @@ spec:
 
 ## hostPath
 
+- 각 Node의 path 사용  
+  - hostPath는 자기 Node 내에서만 사용이 가능함.
+  - 각각의 노드에는 각 노드 자신을 위해서 사용되는 파일들. Pod 내의 본인 호스트의 파일 내용 읽거나 써야함. 
+
 ## PVC/PV
 
 
