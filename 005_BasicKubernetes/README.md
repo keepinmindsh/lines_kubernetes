@@ -66,6 +66,36 @@ spec:
 type: LoadBalancer 
 ```
 
+# Object - Volume
 
+## emptyDir 
+
+- Pod 안에서 생성되므로 Pod가 문제가 될 경우 데이터가 Pod가 없어질 때 사라질 수 있음 
+
+```yaml
+apiVersion: v1
+kind: Pod 
+metadata:
+  name: pod-volume-1 
+spec:
+  containers:
+  - name : container1 
+    image : tmkube/init 
+    volumeMounts: 
+      - name: empty-dir 
+        mountPath: /mount1 
+  - name : container2 
+    image: tmkube/init 
+    volumeMounts: 
+    - name : empty-dir 
+      mountPath : /mount2 
+  volumns: 
+  - name: emtpy-dir
+    emptyDir: {}
+```
+
+## hostPath
+
+## PVC/PV
 
 
