@@ -99,7 +99,88 @@ spec:
 - 각 Node의 path 사용  
   - hostPath는 자기 Node 내에서만 사용이 가능함.
   - 각각의 노드에는 각 노드 자신을 위해서 사용되는 파일들. Pod 내의 본인 호스트의 파일 내용 읽거나 써야함. 
+  - Host Path는 Node에 있는 데이터를 파드에서 사용하기 위함임. 
+
+```yaml
+apiVersion: v1
+kind: Pod 
+metadata: 
+  name: pod-volume-2 
+spec:
+  containers:
+  - name: container 
+    image: tmkube/init
+    volumeMounts:
+    - name: host-path 
+      mountPath: /mount1 
+  volumes: 
+  - name: host-path 
+    hostPath: 
+      path: /node-v  # 사전에 반드시 Node에 경로가 있어야함! 
+      type: Directory
+```
 
 ## PVC/PV
+
+- Persistent Volume Claim 
+  - Persistent Volume
+
+### PV 정의 생성 
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume 
+metadata: 
+  name: pv-01 
+spec: 
+  capacity: # 중요
+    storage: 1G 
+  accessModes: # 중요 
+    - ReadWriteOnce 
+  local:
+    path: /node-v 
+  nodeAffinity: 
+    require: 
+      nodeSelectorTerms: 
+        - matchExpressions: 
+          - {key: node, operator: ln, values: [node1]}
+  
+```
+
+### PVC 생성
+
+```yaml
+apiVersion: v1 
+kind: PersitentVolumnClaim 
+metadata: 
+  name: pvc-01
+spec: 
+  accessModes: 
+    - ReadWriteOnce 
+  resources: 
+    requests: 
+      storage: 1G
+storageClassName: ""
+```
+
+### PVC - PV 연결
+
+### Pod 생성시 마운팅
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-volume-3 
+spec:
+  containers: 
+  - name: container 
+    image: tmkube/init 
+    volumeMounts: 
+    - name: pvc-pv
+      persistentVolumeClaim:
+        claimName: pvc-01         
+```
+
 
 
