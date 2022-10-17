@@ -23,7 +23,7 @@ type: ClusterIP
 
 ## NodePort 
 
-- 모든 Node에 Port 할당 
+- 모든 Node 에 Port 할당 
 - 내가 다수 노드가 있는 서비스에 대해서 1번 노드로만 전달하더라도 연결되어 있는 각 파드로 자동으로 분산되어 호출됨. 
   - 하지만 만약 내가 원하는 IP에 대해서만 설정하고 싶은 경우 
     - externalTrafficPolicy: Local 
@@ -71,6 +71,7 @@ type: LoadBalancer
 ## emptyDir 
 
 - Pod 안에서 생성되므로 Pod가 문제가 될 경우 데이터가 Pod가 없어질 때 사라질 수 있음 
+  - 언제 삭제되어도 상관이 없는 데이터를 담아야함! 
 
 ```yaml
 apiVersion: v1
@@ -96,10 +97,12 @@ spec:
 
 ## hostPath
 
-- 각 Node의 path 사용  
-  - hostPath는 자기 Node 내에서만 사용이 가능함.
+- 각 Node 의 path 사용  
+  - hostPath 는 자기 Node 내에서만 사용이 가능함.
   - 각각의 노드에는 각 노드 자신을 위해서 사용되는 파일들. Pod 내의 본인 호스트의 파일 내용 읽거나 써야함. 
-  - Host Path는 Node에 있는 데이터를 파드에서 사용하기 위함임. 
+  - Host Path 는 Node 에 있는 데이터를 파드에서 사용하기 위함임.
+  - Pod 간의 파일 공유가 가능함!!  
+  
 
 ```yaml
 apiVersion: v1
@@ -117,7 +120,7 @@ spec:
   - name: host-path 
     hostPath: 
       path: /node-v  # 사전에 반드시 Node에 경로가 있어야함! 
-      type: Directory
+      type: DirectoryOrCreate
 ```
 
 ## PVC/PV
@@ -136,14 +139,14 @@ spec:
   capacity: # 중요
     storage: 1G 
   accessModes: # 중요 
-    - ReadWriteOnce 
+    - ReadWriteOnce / ReadOnlyMany
   local:
     path: /node-v 
   nodeAffinity: 
     require: 
       nodeSelectorTerms: 
         - matchExpressions: 
-          - {key: node, operator: ln, values: [node1]}
+          - {key: kubernetes.io/hostname , operator: ln, values: [k8s-node1]}
   
 ```
 
@@ -151,7 +154,7 @@ spec:
 
 ```yaml
 apiVersion: v1 
-kind: PersitentVolumnClaim 
+kind: PersistentVolumeClaim 
 metadata: 
   name: pvc-01
 spec: 
