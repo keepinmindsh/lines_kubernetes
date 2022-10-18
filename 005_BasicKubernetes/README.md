@@ -256,7 +256,49 @@ data:
   Key: MTlzNA==
 ```
 
+## Env ( File )
 
+```shell
 
+$ kubectl create configmap cm-file --from-file=./file.txt 
 
+$ kubectl create secret generic sec-file --from-file=./file.txt 
 
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: file 
+spec: 
+  containers: 
+    - name : container 
+      image : tmkube/init 
+      env: 
+        - name: file 
+          valueFrom: 
+            configMapKeyRef: 
+              name: cm-file 
+              key: file.txt 
+```
+
+## Volume Mount(File)
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: mount 
+spec: 
+  containers: 
+    - name: container 
+      image: tmkube/init 
+      volumeMounts: 
+      - name: file-volume 
+        mountPath : /mount 
+volumes: 
+  - name: file-volume 
+    configMap: 
+      name: cm-file 
+```
