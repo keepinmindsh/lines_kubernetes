@@ -101,8 +101,7 @@ spec:
   - hostPath 는 자기 Node 내에서만 사용이 가능함.
   - 각각의 노드에는 각 노드 자신을 위해서 사용되는 파일들. Pod 내의 본인 호스트의 파일 내용 읽거나 써야함. 
   - Host Path 는 Node 에 있는 데이터를 파드에서 사용하기 위함임.
-  - Pod 간의 파일 공유가 가능함!!  
-  
+  - Pod 간의 파일 공유가 가능함!!
 
 ```yaml
 apiVersion: v1
@@ -166,6 +165,20 @@ spec:
 storageClassName: ""
 ```
 
+```yaml
+apiVersion: v1 
+kind: PersistentVolumeClaim 
+metadata: 
+  name: pvc-01
+spec: 
+  accessModes: 
+    - ReadOnlyMany  
+  resources: 
+    requests: 
+      storage: 3G
+storageClassName: ""
+```
+
 ### PVC - PV 연결
 
 ### Pod 생성시 마운팅
@@ -184,6 +197,66 @@ spec:
       persistentVolumeClaim:
         claimName: pvc-01         
 ```
+
+# Object - ConfigMap, Select
+
+- 각 서비스의 설정에 따라서 개발 / 상용 환경에 따라서 설정을 다르게 구성할 수 있어야함. 
+  - SSH, User, Key etc 
+- 일반 상수를 모아서 관리할 수 있는 것을 말하며 Pod 기동시 각각의 설정을 일거가서 사용할 수 있음.  
+  - ConfigMap : 일반 상수 관련 
+  - Secret : 보안 관련 
+- 컨테이너 생성시 설정항목을 환경 변수처럼 설정할 수 있도록 세팅해두면 Config Map 만을 변경하여 개발, 상용으로 분류 가능함. 
+
+## ConfigMap 
+
+- Key : Value
+
+## Secret 
+
+데이터는 메모리에 저장되어 있음, 1 메가 바이트까지만 저장할 수 있음. 
+시크릿이 너무 많아지면 메모리 상의 이슈가 될 수 있음 
+
+- Key : Value 
+  - Base64로 구성해야함!!
+
+## Sample 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: pod-1
+spec: 
+  containers: 
+    - name : container 
+      image : tmkube/init 
+      evnFrom : 
+        - configMapRef:
+            name: cm-dev 
+        - secretRef: 
+            name: sec-dev
+```
+
+```yaml
+apiVersion: v1 
+kind: configMap 
+metadata: 
+  name: cm-dev 
+data: 
+  SSH: False 
+  User: dev
+```
+
+```yaml
+apiVersion: v1 
+kind: Secret 
+metadata: 
+  name: sec-dev 
+data: 
+  Key: MTlzNA==
+```
+
+
 
 
 
