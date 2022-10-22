@@ -312,5 +312,107 @@ volumes:
 
 # Object - Namespace, ResourceQuota, LimitRange
 
-
 ![Namespace, Resource Quota, Limit Range](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/kubenetes_image01.png)
+
+## Namespace 
+
+- Pod 명이 중복될 수 없음. Namespace 각각에서는 동일한 파드명을 사용할 수 있다. 
+- 각각의 서로 다른 Namespace 간에서 Pod는 서로 네트워크 연결이 가능하지만 이 제어는 Namespace Policy를 이용할 수 있다. 
+
+### Namespace 1 
+
+```yaml
+apiVersion: v1 
+kind: Namespace 
+metadata: 
+  name: nm-1 
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-1 
+  namespace: nm-1 
+  labels: 
+    nm : pod1 
+spec: 
+  containers:
+  ... 
+```
+
+### Namespace 2 
+
+```yaml
+apiVersion: v1 
+kind: Namespace 
+metadata: 
+  name: nm-2 
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-1 
+  namespace: nm-2 
+  labels: 
+    nm : pod1 
+spec: 
+  containers:
+  ... 
+```
+
+## Resource Quota 
+
+```yaml
+apiVersion: v1 
+kind: ResourceQuota 
+metadata:
+  name: rq-1 
+  namespace: nm-1 
+spec: 
+  hard: 
+    requests.memory: 3Gi 
+    limits.memory: 6Gi
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: pod-2 
+spec:
+  containers: 
+  - name: container 
+    image: tmkube/app
+  resources:
+    requests:
+      memory: 2Gi 
+    limits:
+      memory: 2Gi 
+```
+
+## Limit Range 
+
+```yaml
+apiVersion: v1 
+kind: LimitRange 
+metadata: 
+  name: lr-1
+  namespace: nm-1 
+spec:
+  limits:
+    - type: Container 
+      min: 
+        memory: 1Gi 
+      max: 
+        memory: 4Gi 
+      defaultRequest: 
+        memory: 1Gi 
+      default: 
+        memory: 2Gi 
+      maxLimitRequestRatio: 
+        memory: 3
+```
+
