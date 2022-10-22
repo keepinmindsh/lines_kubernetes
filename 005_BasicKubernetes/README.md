@@ -232,9 +232,9 @@ spec:
       image : tmkube/init 
       evnFrom : 
         - configMapRef:
-            name: cm-dev 
+            name: cm-dev # Config Map 을 연동 
         - secretRef: 
-            name: sec-dev
+            name: sec-dev # Secret 을 연동 
 ```
 
 ```yaml
@@ -258,10 +258,15 @@ data:
 
 ## Env ( File )
 
+환경 변수 방식은 한번 주입하면 끝이므로 파드의 환경변수에 대한 변경은 불가함. 파드가 다시 만들어질 때 가능함. 
+
 ```shell
 
+# Config Map 생성
+# Base 64로 변경되기 때문에 내부 파일에 Base64로 되어 있으면 두번 암호화가 되는 것임!   
 $ kubectl create configmap cm-file --from-file=./file.txt 
 
+# 
 $ kubectl create secret generic sec-file --from-file=./file.txt 
 
 ```
@@ -285,6 +290,8 @@ spec:
 
 ## Volume Mount(File)
 
+볼륨의 경우 볼륨에서 수정한 설정의 경우 동작중인 파드에 영향을 미치고 있음 
+
 ```yaml
 apiVersion: v1 
 kind: Pod 
@@ -302,3 +309,8 @@ volumes:
     configMap: 
       name: cm-file 
 ```
+
+# Object - Namespace, ResourceQuota, LimitRange
+
+
+![Namespace, Resource Quota, Limit Range](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/kubenetes_image01.png)
