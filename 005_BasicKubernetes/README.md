@@ -416,3 +416,79 @@ spec:
         memory: 3
 ```
 
+# Object - Controller 
+
+- Auto Healing 
+- Auto Scaling
+- Job
+  - CronJb
+  - Job
+- Upgrade/Rollback 
+
+## Controller - Replication Controller, ReplicaSet 
+
+- Template
+
+```yaml
+apiVersion: v1
+kind: Pod 
+metadata: 
+  name: pod-1 
+  labels: 
+    type: web
+spec:
+  containers:
+    - name: container 
+      image: tmkube/app:v1
+```
+
+```yaml
+apiVersion: v1 
+kind: ReplicationContoller 
+metadata: 
+  name: replication-1 
+spec: 
+  replicas: 1
+  selector: 
+    type: web 
+  template: 
+    metadata: 
+      name: pod-1 
+      labels: 
+        type: web 
+    spec: 
+      containers: 
+      - name: container 
+        image: tmkube/app:v2
+```
+
+- Replicas
+
+- Selector
+  - Replicas에서만 존재하는 기능임. 
+  - matchLabels 
+  - matchExpressions
+
+![matchExpressions](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/matchExpressions.png)
+
+```yaml
+apiVersion: v1 
+kind: ReplicaSet 
+metadata: 
+  name: replica-1 
+spec:
+  replicas: 3
+  selector: 
+    matchLabels: 
+      type: web 
+    matchExpressions: 
+    - {key: ver, operator: Exists}
+    # Exists, DoesNotExist, In, Notin
+    # Exists : 내가 키를 정하고 내가 가지고 있는 키를 가지고 파드를 가져와서 들어감. 
+    # DoesNotExist
+    # In : 키와 값을 지정할 때, 포함되는 것들을 모두 가져옴. 
+    # NotIn: 해당되지 않는 파드 가져올 수 있게 처리 
+  template: 
+    metadata: 
+      name: pod 
+```
