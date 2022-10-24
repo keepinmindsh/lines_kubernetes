@@ -1,3 +1,5 @@
+# Pod
+
 # Object - Service 
 
 ## ClusterIP 
@@ -553,7 +555,6 @@ spec:
 
 ### Rolling Update
 
-
 ```yaml
 apiVersion: v1 
 kind: Service 
@@ -589,4 +590,96 @@ spec:
       containers: 
       - name: container 
         image: tmkube/app:v1 
+```
+## Controller - DaemonSet, Job, CronJob 
+
+### DaemonSet
+
+노드의 자원 상태와 상관 없이 모든 노드에 파드가 하나씩 생긴다는 특징이 있음 
+
+- 주로 성능 수집/상태 관리 
+- 프로메테우스 와 같은 성능 수집 파드 설정 ( Prometheus ) 
+- 문제 파악을 위한 로그 ( Fluentd )
+- 각각의 자원을 세팅 함. ( GlusterFS )
+
+```yaml
+apiVersion: v1 
+kind: DaemonSet 
+metadata: 
+  name: daemonset-1 
+spec: 
+  selector: 
+    matchLabels: 
+      type: app
+  template: 
+    metadata: 
+      labels: 
+        type:app 
+    spec:
+      nodeSelector:
+        os: centos 
+      containers: 
+        - name: container
+          image: tmkube/app 
+          paths: 
+          - containerPort: 8080 
+            hostPort: 18080 
+```
+
+### Job 
+
+- Job을 통해 만들어진 Pod 가 있음 
+- Controller 에 의해서 만들어진 Pod 들은 장애가 생겼을 때 복구가 가능할 수 있음
+- ReplicaSet
+  - Recreate
+  - Restart
+
+```yaml
+apiVersion: batch/v1 
+kind: Job 
+metadata: 
+  name: job-1 
+spec: 
+  completion: 6
+  parallelism: 2
+  activeDeadlineSeconds: 30 
+  template: 
+      spec: 
+        restartPolicy: Never 
+        containers: 
+        - name:  container 
+          image: tmkube/init
+```
+
+### CronJob 
+
+- CronJob
+  - Job들을 주기적으로 동작하게끔 사용함.
+  - 아래와 같은 활용 범위가 있음 
+    - Backup 
+    - Checking 
+    - Messaging
+
+#### Concurrent Policy 
+
+- Allow 
+- Forbid 
+- Replace
+
+```yaml
+apiVersion: batch/v1 
+kind: CronJob 
+metadata: 
+  name: cron-job 
+spec: 
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Allow 
+  jobTemplate: 
+    spec: 
+      template:
+        spec: 
+          restartPolicy: Never 
+          containers: 
+          - name: container
+            image: tmkube/app 
 ```
