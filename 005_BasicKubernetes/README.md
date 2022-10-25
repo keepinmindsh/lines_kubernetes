@@ -1,5 +1,89 @@
 # Pod
 
+## Lifecycle 
+
+- Pending 
+  - ReadinessProbe
+  - Policy
+- Running 
+  - LivenessProbe 
+  - Qos 
+- Succeeded
+  - Policy
+- Failed 
+  - Policy
+
+```yaml
+status:
+  phase: Pending  # Pending, Running, Succeeded, Failed, UnKnown 
+  conditions: # Initialized , ContainerReady, PodScheduled, Ready 
+  - type: Initialized
+    status: 'True'
+    lastProbeTime: null 
+    lastTransitionTime: '2019-09-26T22:07:56Z'
+  - type: PodScheduled 
+    status: 'True'
+    lastProbeTime: null 
+    lastTransitionTime: '2019-09-26T22:07:56Z'
+  - type: ContainersReady
+    status: 'False'
+    lastProbeTime: null
+    lastTransitionTime: '2019-09-26T22:08:11Z'
+    reason: ContainersNotReady # ContainerNotReady, PodCompleted 
+  - type: Ready
+    status: 'False'
+    lastProbeTime: null
+    lastTransitionTime: '2019-09-26T22:08:11Z'
+    reason: ContainersNotReady
+  containerStatuses:
+  - name: container 
+    state: # Waiting, Running, Terminated  
+      waiting: 
+        reason: ContainerCreating  # ContainerCreating, CrashLoopBackOff, Error, Completed 
+    lastState: {}
+    ready: false
+    restartCount: 0 
+    image: tmkube/init
+    imageID: ''
+    started: false
+```
+
+- Pod 의 최초상태는 Pending 
+  - Container 가 기동되기 전에 설정되어야할 항목이 있음 
+  - Pending 상태에서 Failed 로 상태가 변경될 수 있음 
+  - Pending 상태에서 Unknown 으로 상태가 변경될 수 있음
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: myapp-pod 
+  labels: 
+    app: myapp
+spec: 
+  containers: 
+  - name: myapp-container
+    image: busybox:1.28 
+    command: [ 'sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers: # 본 Container 보다 먼저 실행되었다고 판단하는 것 
+  - name: init-myservice 
+    image: busybox:1.28 
+    command: [ 'sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2; done;']
+  - name: init-mydb 
+    image: busybox:1.28
+    command: [ 'sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
+```
+
+- Pod 의 그 다음 단계는 Running
+  - Running 단게에서는 Unknown으로 변경될 수 있음
+  - Unkown 상태는 Failed 상태로 변경이 가능함.
+
+- Pod 의 마지막 상태는 Failed 또는 Succeeded 
+
+- 마지막으로 Pod의 상태는 무조건 
+  - ContainerReady : False 
+  - Ready : False
+
 # Object - Service 
 
 ## ClusterIP 
