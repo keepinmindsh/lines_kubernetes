@@ -84,6 +84,21 @@ spec:
   - ContainerReady : False 
   - Ready : False
 
+### Pod ( ReadinessProbe, LivenessProbe )
+
+기본적으로 Pod를 종료할 때 별다른 설정 없이 종료하게 되면 종료되기 전까지의 시점에 기존의 Pod가 종료되기전, 신규 Pod 가 구성된 시점으로 
+50:50의 확률로 서비스가 정상적으로 종료가 안된 Pod로 요청이 접수 될 수 있는데, 이건 신규 Pod가 기동되는 시점도 동일하다.    
+
+- ReadinessProbe 
+  - App 구동 순간에 트래픽 실패를 없앰 
+
+- LivenessProbe 
+  - App 장애시 지속적인 트래픽 실패를 없앰 
+
+![Deployments](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ProbesSettings01.png)
+
+![Deployments](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ProbesSettings02.png)
+
 # Object - Service 
 
 ## ClusterIP 
