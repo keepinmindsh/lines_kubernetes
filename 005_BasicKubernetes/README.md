@@ -152,9 +152,9 @@ spec:
     - Pod 
       - Toleration 
         - key 
-        - operator 
+        - operator : Equal, Exists  
         - value 
-        - effect 
+        - effect : NoSchedule, PreferNoSchedule, NoExecute 
   - Pod가 Toleration을 설정해야 Taint로 설정된 Node로 Pod 세팅이 가능함. 
 
 # Object - Service 
