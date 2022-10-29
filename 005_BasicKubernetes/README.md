@@ -125,6 +125,38 @@ spec:
   - OOM Score 
 - BestEffort 
 
+## Node Scheduling 
+
+- Node 선택 : 원하는 노드로 자원 할당이 되도록 관리할 수 있음 
+  - NodeName 
+  - NodeSelector 
+  - NodeAffinity
+    - matchExpressions 
+      - required, preferred 
+        - key 
+        - operator : Exists, DoesNotExist, In, NotIn, Gt, Lt
+
+- Pod 간 집중/분산 
+  - Pod Affinity 
+    - podAffinity 
+      - matchExpressions
+        - key : type 
+        - operator : ~ 
+        - values:[~]
+    - topologyKey 
+  - Anti-Affinity 
+    - podAntiAffinity 
+
+- Node에 할당 제한 
+  - Toleration / Taint
+    - Pod 
+      - Toleration 
+        - key 
+        - operator 
+        - value 
+        - effect 
+  - Pod가 Toleration을 설정해야 Taint로 설정된 Node로 Pod 세팅이 가능함. 
+
 # Object - Service 
 
 ## ClusterIP 
