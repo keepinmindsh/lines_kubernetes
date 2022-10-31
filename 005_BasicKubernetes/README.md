@@ -248,6 +248,20 @@ Selector와 Label 없이 직접 Pod에 연결하는 방식으로 만들 수 있�
 
 # Object - Volume
 
+Kubernetes Cluster 분리해서 관리가 된다! 
+
+- External Network
+  - HostPath 
+  - Local
+  - On-Premise Solution 
+  - NFS 
+- Internal Network
+  - AWS 
+  - GCP 
+  - Azure 
+
+![matchExpressions](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/volumn_advanced.png)
+
 ## emptyDir 
 
 - Pod 안에서 생성되므로 Pod가 문제가 될 경우 데이터가 Pod가 없어질 때 사라질 수 있음 
@@ -489,6 +503,14 @@ volumes:
     configMap: 
       name: cm-file 
 ```
+
+## Dynamic Provisioning
+
+![Namespace, Resource Quota, Limit Range](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/dynamic_provisioning.png)
+
+- StorageClass  
+
+- Status & ReclaimPolicy 
 
 # Object - Namespace, ResourceQuota, LimitRange
 

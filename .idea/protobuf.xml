@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BufFileManager">
+    <libraries>
+      <module>
+        <name>buf.build/googleapis/googleapis</name>
+        <path>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/783e4b5374fa488ab068d08af9658438</path>
+        <reference>buf.build/googleapis/googleapis:783e4b5374fa488ab068d08af9658438</reference>
+        <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/783e4b5374fa488ab068d08af9658438/buf.yaml</yaml>
+      </module>
+    </libraries>
+  </component>
+</project>
