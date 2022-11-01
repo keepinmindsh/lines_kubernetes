@@ -883,3 +883,13 @@ spec:
           - name: container
             image: tmkube/app 
 ```
+
+# Access to the Kubernetes API 
+
+![Access Kubernetes API](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/access_kubernetes_api.png)
+
+## Authentication
+
+### X509 Certs, kubectl, ServiceAccount 
+
+![Access Kubernetes API](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/authentication.png)
