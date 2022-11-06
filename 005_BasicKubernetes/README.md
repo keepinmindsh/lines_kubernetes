@@ -907,3 +907,35 @@ spec:
 ### RBAC, Role, RoleBinding Detail 
 
 ![Access Kubernetes API](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/authrization001.png)
+
+# Kubernetes Dashboard 구성 
+
+- ClusterRole 
+  - ClusterRoleBinding 
+
+- kubeconfig 
+  - Client crt
+  - Client Key 
+
+- kubernetes-metrics-scraper 
+
+# StatefulSet 
+
+![Stateful Set](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/statefulset.png)
+
+## Stateless Application
+
+- 볼륨이 반드시 필요하지 않음. 
+- 요청에 대해서 분산이 될 수 있도록 처리 
+
+### ReplicaSet
+
+## Stateful Application
+
+- 각각의 역할에 따라서 Volume 각각 나뉘어지는 경우가 많음
+- 각 App의 역할에 맞게 요청이 수신이 들어와야함, Stateless와 분산의 개념이 다름. 
+
+### StatefulSet 
+
+- Ordinal Index 로 순차적으로 Pod가 생성됨. 
+  - 중간에 Pod가 삭제가되면 동일한 이름으로 인덱스가 세팅이 됩니다. 
