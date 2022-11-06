@@ -56,6 +56,17 @@ restartPolicy 는 동일한 노드에서 kubelet에 의한 컨테이너 재시�
   - Always, OnFailure, Never
   - 기본 값 : Always
 
+### Pod Condition 
+
+- **PodScheduled**
+  - 파드가 노드에 스케줄되었다.
+- **ContainersReady**
+  - 파드의 모든 컨테이너가 준비되었다.
+- **Initialized**
+  - 모든 초기화 컨테이너가 성공적으로 완료(completed)되었다.
+- **Ready**
+  - 파드는 요청을 처리할 수 있으며 일치하는 모든 서비스의 로드 밸런싱 풀에 추가되어야 한다.
+
 ### References 
 
 ```yaml
