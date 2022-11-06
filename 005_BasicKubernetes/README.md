@@ -10,18 +10,53 @@
 
 # Pod
 
-## Lifecycle 
+## Lifecycle
 
-- Pending 
-  - ReadinessProbe
-  - Policy
-- Running 
-  - LivenessProbe 
-  - Qos 
-- Succeeded
-  - Policy
-- Failed 
-  - Policy
+### Pod Lifecycle 
+
+Pod 의 기본적인 라이프사이클은 Pending Phase 에서 시작해서, 만약 주요한 컨테이너의 최소 한 개의 상태가 OK로 시작되면  Running Phase 로 변경된다.  
+그런 다음 파드의 컨테이너가 실패로 종료되었는지 여부에 따라 Succeeded 또는 Failed 로 변경된다. 
+
+- **Pending** 
+  - 파드가 쿠버네티스 클러스터에서 승인되었지만, 하나 이상의 컨테이너가 설정되지 않았고 실행할 준비가 되지 않았다. 여기에는 파드가 스케줄되기 이전까지의 시간 뿐만 아니라 네트워크를 통한 컨테이너 이미지 다운로드 시간도 포함된다.
+    - ReadinessProbe
+    - Policy
+- **Running**
+  - 파드가 노드에 바인딩되었고, 모든 컨테이너가 생성되었다. 적어도 하나의 컨테이너가 아직 실행 중이거나, 시작 또는 재시작 중에 있다.
+    - LivenessProbe 
+    - Qos 
+- **Succeeded**
+  - 파드에 있는 모든 컨테이너들이 성공적으로 종료되었고, 재시작되지 않을 것이다.
+    - Policy
+- **Failed**
+  - 파드에 있는 모든 컨테이너가 종료되었고, 적어도 하나 이상의 컨테이너가 실패로 종료되었다. 즉, 해당 컨테이너는 non-zero 상태로 빠져나왔거나(exited) 시스템에 의해서 종료(terminated)되었다.
+    - Policy
+- **Unknown**
+  - 어떤 이유에 의해서 파드의 상태를 얻을 수 없다. 이 단계는 일반적으로 파드가 실행되어야 하는 노드와의 통신 오류로 인해 발생한다.
+
+### Container Status 
+
+- **Waiting** 
+  - 만약 컨테이너가 Running 또는 Terminated 상태가 아니면, Waiting 상태이다. Waiting 상태의 컨테이너는 시작을 완료하는 데 필요한 작업(예를 들어, 컨테이너 이미지 레지스트리에서 컨테이너 이미지 가져오거나, 시크릿(Secret) 데이터를 적용하는 작업)을 계속 실행하고 있는 중이다. kubectl 을 사용하여 컨테이너가 Waiting 인 파드를 쿼리하면, 컨테이너가 해당 상태에 있는 이유를 요약하는 Reason 필드도 표시된다.
+
+- **Running**
+  - Running 상태는 컨테이너가 문제없이 실행되고 있음을 나타낸다. postStart 훅이 구성되어 있었다면, 이미 실행되고 완료되었다. kubectl 을 사용하여 컨테이너가 Running 인 파드를 쿼리하면, 컨테이너가 Running 상태에 진입한 시기에 대한 정보도 볼 수 있다.
+
+- **Terminated**
+  - Terminated 상태의 컨테이너는 실행을 시작한 다음 완료될 때까지 실행되었거나 어떤 이유로 실패했다. kubectl 을 사용하여 컨테이너가 Terminated 인 파드를 쿼리하면, 이유와 종료 코드 그리고 해당 컨테이너의 실행 기간에 대한 시작과 종료 시간이 표시된다.
+
+### ContainerRestartPolicy 
+
+restartPolicy 는 파드의 모든 컨테이너에 적용된다.   
+restartPolicy 는 동일한 노드에서 kubelet에 의한 컨테이너 재시작만을 의미한다.   
+파드의 컨테이너가 종료된 후, kubelet은 5분으로 제한되는 지수 백오프 지연(10초, 20초, 40초, …)으로 컨테이너를 재시작한다.    
+컨테이너가 10분 동안 아무런 문제없이 실행되면, kubelet은 해당 컨테이너의 재시작 백오프 타이머를 재설정한다.
+
+- **restartPolicy** 
+  - Always, OnFailure, Never
+  - 기본 값 : Always
+
+### References 
 
 ```yaml
 status:
