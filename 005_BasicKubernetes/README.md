@@ -1000,3 +1000,25 @@ spec:
 ## Ingress Controller 
 
 - Nginx, Kong 
+
+# Autoscaler - HPA 
+
+![HPA](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/hpa.png)
+
+- HPA 
+  - HPA의 리소스를 체크하고 있다가 컨트롤러의 ReplicaSet를 증가시키는 작업을 할 수 있다. 
+    - Scale Out 
+    - Scale In 
+  - 기동이 빠르게 되는 App 
+  - Stateless App  
+
+![HPA Detail](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/hpa_detail.png)
+
+- VPA
+  - StateFul App에 대해서 수직적으로 리소스를 증가시키는 작업을 수행함. 
+    - Scale Up 
+    - Scale Down 
+- CA 
+  - 동적으로 워커노드를 추가시킬 경우, Node를 추가하여 Pod를 이동하여 동작할 수 있도록 하는 것! 
+
+## HPA 
