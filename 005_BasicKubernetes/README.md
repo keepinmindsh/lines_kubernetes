@@ -1,3 +1,45 @@
+# Kubernetes - Hello World 
+
+- 기동할 App.js 만들기 
+```javascript
+consthttp = require('http')
+constos = require('os')
+
+console.log("Kubia server starting...")
+
+consthandler =function(request, response) {
+    console.log("Received request from " + request.connection.remoteAddress);
+    response.writeHead(200)
+    response.end("You've hit " + os.hostname() + "\n")
+};
+
+constwww = http.createServer(handler);
+www.listen(8080)
+```
+
+- Dockerfile 만들기 
+```dockerfile
+FROM node:7
+ADD app.js/app.js
+
+ENTRYPOINT["node", "app.js"]
+```
+
+- Docker Image 빌드 하기 
+```shell
+docker build . -t lines_appjs -f ~/sources/02_linesgits/lines_kubernetes/008_dockerfiles/213_dockerfilesamples/Dockerfile
+```
+
+- Docker Container 기동하기 
+```shell
+docker run --name lines-appjs-container -p 8080:8080 -d lines_appjs
+```
+
+- 컨테이너 내부 정보 세세히 살피기
+```shell
+ docker inspect lines-appjs-container
+```
+
 # Kubernetes의 이해 
 
 - 개발자가 애플리케이션 핵심 기능에 집중 할 수 있도록 지원 
