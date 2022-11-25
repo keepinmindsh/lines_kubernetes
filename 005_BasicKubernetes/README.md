@@ -239,6 +239,8 @@ spec:
   - OOM Score 
 - BestEffort 
 
+> [Assign Memory Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/)
+
 ## Node Scheduling 
 
 - Node 선택 : 원하는 노드로 자원 할당이 되도록 관리할 수 있음 
