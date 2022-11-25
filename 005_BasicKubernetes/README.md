@@ -634,12 +634,43 @@ volumes:
 
 ## Namespace 
 
+--- 
+
 - Pod 명이 중복될 수 없음. Namespace 각각에서는 동일한 파드명을 사용할 수 있다. 
 - 각각의 서로 다른 Namespace 간에서 Pod는 서로 네트워크 연결이 가능하지만 이 제어는 Namespace Policy를 이용할 수 있다. 
+
+---
+
+Service Accounts는 쿠버네티스 API에 의해서 관리되는 사용들이다. 각 계정은 특정한 namespaces에 연결된다. Service Account는 Credentials의 묶음으로 Secrets 로서 저장된다. 
+그리고 클러스터 내에서 쿠버네티스 API와 통신/대화하는 것을 허용하는 각각의 Pod들로 마운트된다. 
+
+---
 
 > [Name Spaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)  
 > [Name Spaces by resources quota](https://kubernetes.io/docs/concepts/policy/resource-quotas/)  
 > [Share a Cluster with Namespaces](https://kubernetes.io/docs/tasks/administer-cluster/namespaces/)  
+
+
+### Namespace 생성 
+
+현재의 Namespace에서 특정 서비스 어카운트로 생성되는데 아래의 코드와 같이 동작한다. 
+
+- Service Account 생성 예제 
+
+```shell 
+
+kubectl create serviceaccount jenkins
+
+```
+
+- Token 생성 예제 
+
+```shell 
+
+kubectl create token jenkins
+
+```
+
 
 ### Namespace 1 
 
