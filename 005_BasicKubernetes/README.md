@@ -637,6 +637,10 @@ volumes:
 - Pod 명이 중복될 수 없음. Namespace 각각에서는 동일한 파드명을 사용할 수 있다. 
 - 각각의 서로 다른 Namespace 간에서 Pod는 서로 네트워크 연결이 가능하지만 이 제어는 Namespace Policy를 이용할 수 있다. 
 
+> [Name Spaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)  
+> [Name Spaces by resources quota](https://kubernetes.io/docs/concepts/policy/resource-quotas/)  
+> [Share a Cluster with Namespaces](https://kubernetes.io/docs/tasks/administer-cluster/namespaces/)  
+
 ### Namespace 1 
 
 ```yaml
