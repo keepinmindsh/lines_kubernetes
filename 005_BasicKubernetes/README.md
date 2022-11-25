@@ -649,6 +649,7 @@ Service Accounts는 쿠버네티스 API에 의해서 관리되는 사용들이�
 > [Name Spaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)  
 > [Name Spaces by resources quota](https://kubernetes.io/docs/concepts/policy/resource-quotas/)  
 > [Share a Cluster with Namespaces](https://kubernetes.io/docs/tasks/administer-cluster/namespaces/)  
+> [Namespace와 ServiceAccount의 상관관계 설명](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
 
 
 ### Namespace 생성 
