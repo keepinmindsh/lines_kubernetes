@@ -1046,6 +1046,103 @@ spec:
 
 ![Access Kubernetes API](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/authentication.png)
 
+
+##### Service Account 
+
+- kubernetes의 service account 생성하기
+
+```shell 
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-robot
+EOF
+
+```
+
+- Service Account 명 생성 규칙 
+
+**DNS Subdomain Names**
+
+Most resource types require a name that can be used as a DNS subdomain name as defined in [RFC 1123](https://tools.ietf.org/html/rfc1123). This means the name must:
+
+1. contain no more than 253 characters.     
+2. contain only lowercase alphanumeric characters, '-' or '.'     
+3. start with an alphanumeric character.    
+4. end with an alphanumeric character.  
+
+- 실제 생성된 계정을 확인해보면, 
+
+```shell
+
+kubectl get serviceaccounts/build-robot -o yaml
+
+```
+
+- Token를 생성하려면, ( Kubectl - Dashboard  로그인 시에도 사용 가능 )
+
+```shell 
+
+kubectl create token build-robot
+
+```
+
+- 오랫동안 유지될 수 잇는 API Token을 만들어야 하는 경우 
+
+```shell 
+
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: build-robot-secret
+  annotations:
+    kubernetes.io/service-account.name: build-robot
+type: kubernetes.io/service-account-token
+EOF
+
+```
+
+- token 정보를 확인하려면,  
+
+```shell 
+
+kubectl get secret/build-robot-secret -o yaml
+
+```
+
+- secret 정보 설명을 확인하려면, 
+
+```shell 
+
+kubectl describe secrets/build-robot-secret
+
+```
+
+- 실제 정보를 조회한 결과 
+
+```shell 
+
+kubectl describe secrets/default-secret
+Name:         default-secret
+Namespace:    default
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: default
+              kubernetes.io/service-account.uid: 629a131a-6adc-460a-b61a-9207deead3d2
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1099 bytes
+namespace:  7 bytes
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IjZBNU5HVnlKX1owaWU4NG9wTktVSldqQ0p5U241a0FocFNUWFV0cE9majgifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtc2VjcmV0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiI2MjlhMTMxYS02YWRjLTQ2MGEtYjYxYS05MjA3ZGVlYWQzZDIiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6ZGVmYXVsdDpkZWZhdWx0In0.YBFz3B4UgCQHJUyKSxDagFjGKLqirBOGjUCRo_7YRznxGP982ldYf6_-UeTkCoDA8sFZ7YiL5GJICOqmb1Hut2Qi6casvURfHs0LmAPVxefF5-WRcOpkiT-KLjuBE7vhBlgU_sXwE4bHIsxeS0afYCydDRHxRQj0QkCEnTK2UEzHP0S3yLzNHGQscYU9CEv5ZzggxSaL7xf9In2RdazezDlhUw2R9PMjXM6pMDyPK6-gLIV-XZSuhnc11CNboYQdeKvzy7sLLddwxvBlhPurqFtwVeEfnSbv2SmuSApneYsdGk6362rcvDbM0pHK4xebMmBpaa487wIU62q6QMlZqQ
+
+```
+
+
 ### RBAC, Role, RoleBinding Detail 
 
 ![Access Kubernetes API](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/authrization001.png)
