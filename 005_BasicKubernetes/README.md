@@ -40,6 +40,39 @@ docker run --name lines-appjs-container -p 8080:8080 -d lines_appjs
  docker inspect lines-appjs-container
 ```
 
+- 컨테이너 내부에서 셀을 실행하기 
+  - -i : 표준 입력을 오픈 상태로 유지한다. 셸을 명령어를 입력하기 위해 필요하다. 
+  - -t : 의사 터미널을 할당한다. 
+```shell
+$ docker exec -it lines-appjs-container bash
+
+root@dac3baead0a0:/# ls
+app.js	bin  boot  dev	etc  home  lib	lib64  media  mnt  opt	proc  root  run  sbin  srv  sys  tmp  usr  var
+```
+
+- 내부에서 컨테이너 탐색 
+
+```shell
+root@dac3baead0a0:/# ps aux
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root         1  0.5  1.2 786924 100244 ?       Ssl  13:21   0:01 /usr/bin/qemu-x86_64 /usr/local/bin/node node app.js
+root        12  0.0  0.1 169292 11356 pts/0    Ssl  13:22   0:00 /usr/bin/qemu-x86_64 /bin/bash bash
+root        22  0.0  0.1 166168  9876 ?        Rl+  13:21   0:00 ps aux
+```
+
+> 이와 같이 실행 중인 컨테이너에 진입하는 것은 컨테이너에 실행 중인 애플리케이션을 디버깅 할 때 유용하다. 문제가 있을 때  
+> 가장 먼저 해야할 것은 애플리케이션이 보고 있는 시스템의 실제 상태를 탐색하는 것이다. 애플리케이션이 자체의 고유한 파일 시스템을 
+> 보고 있을 뿐만 아니라 프로세스, 사용자, 호스트 이름, 네트워크 인터페이스도 고유한 것을 보고 있다는 사실을 명심해야 한다. 
+
+- 컨테이너 중지와 삭제 
+
+```shell
+
+$ docker stop lines-appjs-container 
+$ docker rm lines-appjs-container
+
+```
+
 # Kubernetes의 이해 
 
 - 개발자가 애플리케이션 핵심 기능에 집중 할 수 있도록 지원 
