@@ -116,11 +116,28 @@ gcloud components install kubectl
 
 ```
 
+#### 클러스터 생성 및 노드 조회, 확인하기 
+
+```shell 
+
+$ gcloud container clusters create lines-admin --num-nodes 3 --machine-type e2-micro --region us-central1 
+
+$ kubectl get nodes 
+
+$ gcloud compute ssh <node-name> # 노드로 로그인해 노드에 무엇이 실행 중인지 살펴볼 수 있다. 
+
+```
+
 
 # Kubernetes의 이해 
 
 - 개발자가 애플리케이션 핵심 기능에 집중 할 수 있도록 지원 
 - 운영 팀이 효과적으로 리소스를 활용할 수 있도록 지원
+
+## 클러스터의 개념 이해하기 
+
+각 노드는 도커, Kubelet, kube-proxy 를 실행한다. Kubectl 클라이언트 명령어는 마스터 노드에서 실행 중인 
+쿠버네티스 API 서버로 REST 요청을 보내 클러스터와 상호작용 한다. 
 
 ## 마스터 노드 ( 컨트롤 플레인 ) 
 
