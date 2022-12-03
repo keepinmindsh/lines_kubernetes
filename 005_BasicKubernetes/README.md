@@ -73,6 +73,35 @@ $ docker rm lines-appjs-container
 
 ```
 
+- 이미지 레지스트리에 이미지 푸시 
+
+```shell
+$ docker tag {tag_name} {images_name}
+
+$ docker images | head 
+REPOSITORY                                                           TAG                                                                          IMAGE ID       CREATED         SIZE
+gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/webhook      <none>                                                                       8c011a76d60c   9 days ago      74.7MB
+gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/controller   <none>                                                                       2932d83e8134   9 days ago      84.1MB
+gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/resolvers    <none>                                                                       9473b5b8afef   9 days ago      87.2MB
+lines_appjs                                                          latest                                                                       790e7eb77626   2 weeks ago     660MB
+ngrinder/controller                                                  latest                                                                       fc413d0f027b   5 weeks ago     453MB
+ngrinder/agent                                                       latest                                                                       6fe65a3190ff   8 weeks ago     173MB
+hubproxy.docker.internal:5000/docker/desktop-kubernetes              kubernetes-v1.25.2-cni-v1.1.1-critools-v1.24.2-cri-dockerd-v0.2.5-1-debian   181339469f74   2 months ago    349MB
+k8s.gcr.io/kube-apiserver                                            v1.25.2                                                                      0b1fb9b45fa3   2 months ago    123MB
+k8s.gcr.io/kube-proxy                                                v1.25.2                                                                      68348500321c   2 months ago    58MB
+
+$ docker push 
+```
+
+Docker를 쓸 때의 무엇보다 좋은 점은 애플리케이션이 언제 어디서나 동일한 환경을 유지한다는 것이다. 사용자의 머신에서 정상적으로 실행되면 어느 리눅스 머신에서도 
+잘 실행된다. 호스트 머신에 Node.js가 설치되어 있는지를 걱정할 필요가 없다. 
+
+- 어느 환경에서도 아래와 같이 실행이 가능하다. 
+
+```shell
+$ docker run -p 8080:8080 -d {Repository Name}
+```
+
 # Kubernetes의 이해 
 
 - 개발자가 애플리케이션 핵심 기능에 집중 할 수 있도록 지원 
