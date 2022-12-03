@@ -102,6 +102,21 @@ Docker를 쓸 때의 무엇보다 좋은 점은 애플리케이션이 언제 어
 $ docker run -p 8080:8080 -d {Repository Name}
 ```
 
+# GKE 환경에서 Kubernetes Engine을 활용하기 
+
+#### GCP 활성화 및 GCloud SDK를 설치한다. 
+
+- GCP 활성화는 Billing을 등록하면 되고, 신규 가입자는 무료 사용 기간에 따른 Credit을 제공한다. 
+
+#### kubectl 명령행 도구 설치 한다. 
+
+```shell 
+
+gcloud components install kubectl
+
+```
+
+
 # Kubernetes의 이해 
 
 - 개발자가 애플리케이션 핵심 기능에 집중 할 수 있도록 지원 
