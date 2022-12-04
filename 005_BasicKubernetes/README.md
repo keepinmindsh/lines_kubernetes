@@ -104,11 +104,11 @@ $ docker run -p 8080:8080 -d {Repository Name}
 
 # GKE 환경에서 Kubernetes Engine을 활용하기 
 
-#### GCP 활성화 및 GCloud SDK를 설치한다. 
+### GCP 활성화 및 GCloud SDK를 설치한다. 
 
 - GCP 활성화는 Billing을 등록하면 되고, 신규 가입자는 무료 사용 기간에 따른 Credit을 제공한다. 
 
-#### kubectl 명령행 도구 설치 한다. 
+### kubectl 명령행 도구 설치 한다. 
 
 ```shell 
 
@@ -116,7 +116,7 @@ gcloud components install kubectl
 
 ```
 
-#### 클러스터 생성 및 노드 조회, 확인하기 
+### 클러스터 생성 및 노드 조회, 확인하기 
 
 ```shell 
 
@@ -125,11 +125,175 @@ $ gcloud beta container --project "프로젝트명" clusters create "클러스�
 
 $ kubectl get nodes 
 
+NAME                                           STATUS   ROLES    AGE   VERSION
+gke-lines-cluster-default-pool-0f0b3237-bxgp   Ready    <none>   18h   v1.23.12-gke.100
+gke-lines-cluster-default-pool-0f0b3237-d5ks   Ready    <none>   18h   v1.23.12-gke.100
+gke-lines-cluster-default-pool-0f0b3237-wmnh   Ready    <none>   18h   v1.23.12-gke.100
+
 $ gcloud compute ssh <node-name> # 노드로 로그인해 노드에 무엇이 실행 중인지 살펴볼 수 있다. 
+# 해당 Node로 직접 접근이 가능해진다. 처음 접급시에는 접근 계정 비밀번호를 요청한다. 요청 받은 정보에 따라 접근할 수 있다. 
 
 ```
 
-#### 바로 안될 경우 Tips
+### 오브젝트 세부정보 가져오기
+
+```shell 
+
+$ kubectl describe node gke-lines-cluster-default-pool-0f0b3237-wmnh
+# 아래의 정보가 출력됨! 
+
+Name:               gke-lines-cluster-default-pool-0f0b3237-wmnh
+Roles:              <none>
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/instance-type=e2-medium
+                    beta.kubernetes.io/os=linux
+                    cloud.google.com/gke-boot-disk=pd-standard
+                    cloud.google.com/gke-container-runtime=containerd
+                    cloud.google.com/gke-cpu-scaling-level=2
+                    cloud.google.com/gke-max-pods-per-node=110
+                    cloud.google.com/gke-nodepool=default-pool
+                    cloud.google.com/gke-os-distribution=cos
+                    cloud.google.com/machine-family=e2
+                    cloud.google.com/private-node=false
+                    failure-domain.beta.kubernetes.io/region=us-central1
+                    failure-domain.beta.kubernetes.io/zone=us-central1-c
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=gke-lines-cluster-default-pool-0f0b3237-wmnh
+                    kubernetes.io/os=linux
+                    node.kubernetes.io/instance-type=e2-medium
+                    topology.gke.io/zone=us-central1-c
+                    topology.kubernetes.io/region=us-central1
+                    topology.kubernetes.io/zone=us-central1-c
+Annotations:        container.googleapis.com/instance_id: 4759028284894128442
+                    csi.volume.kubernetes.io/nodeid:
+                      {"pd.csi.storage.gke.io":"projects/lines-infra/zones/us-central1-c/instances/gke-lines-cluster-default-pool-0f0b3237-wmnh"}
+                    node.alpha.kubernetes.io/ttl: 0
+                    node.gke.io/last-applied-node-labels:
+                      cloud.google.com/gke-boot-disk=pd-standard,cloud.google.com/gke-container-runtime=containerd,cloud.google.com/gke-cpu-scaling-level=2,clou...
+                    node.gke.io/last-applied-node-taints:
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Sat, 03 Dec 2022 18:37:14 +0900
+Taints:             <none>
+Unschedulable:      false
+Lease:
+  HolderIdentity:  gke-lines-cluster-default-pool-0f0b3237-wmnh
+  AcquireTime:     <unset>
+  RenewTime:       Sun, 04 Dec 2022 13:08:13 +0900
+Conditions:
+  Type                          Status  LastHeartbeatTime                 LastTransitionTime                Reason                          Message
+  ----                          ------  -----------------                 ------------------                ------                          -------
+  FrequentKubeletRestart        False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   NoFrequentKubeletRestart        kubelet is functioning properly
+  FrequentDockerRestart         False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   NoFrequentDockerRestart         docker is functioning properly
+  FrequentContainerdRestart     False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   NoFrequentContainerdRestart     containerd is functioning properly
+  KernelDeadlock                False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   KernelHasNoDeadlock             kernel has no deadlock
+  ReadonlyFilesystem            False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   FilesystemIsNotReadOnly         Filesystem is not read-only
+  CorruptDockerOverlay2         False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   NoCorruptDockerOverlay2         docker overlay2 is functioning properly
+  FrequentUnregisterNetDevice   False   Sun, 04 Dec 2022 13:04:20 +0900   Sat, 03 Dec 2022 18:37:16 +0900   NoFrequentUnregisterNetDevice   node is functioning properly
+  NetworkUnavailable            False   Sun, 04 Dec 2022 02:36:43 +0900   Sun, 04 Dec 2022 02:36:43 +0900   RouteCreated                    NodeController create implicit route
+  MemoryPressure                False   Sun, 04 Dec 2022 13:05:57 +0900   Sat, 03 Dec 2022 18:33:54 +0900   KubeletHasSufficientMemory      kubelet has sufficient memory available
+  DiskPressure                  False   Sun, 04 Dec 2022 13:05:57 +0900   Sat, 03 Dec 2022 18:33:54 +0900   KubeletHasNoDiskPressure        kubelet has no disk pressure
+  PIDPressure                   False   Sun, 04 Dec 2022 13:05:57 +0900   Sat, 03 Dec 2022 18:33:54 +0900   KubeletHasSufficientPID         kubelet has sufficient PID available
+  Ready                         True    Sun, 04 Dec 2022 13:05:57 +0900   Sat, 03 Dec 2022 18:37:24 +0900   KubeletReady                    kubelet is posting ready status. AppArmor enabled
+Addresses:
+  InternalIP:   10.128.0.12
+  ExternalIP:   104.197.253.1
+  InternalDNS:  gke-lines-cluster-default-pool-0f0b3237-wmnh.us-central1-c.c.lines-infra.internal
+  Hostname:     gke-lines-cluster-default-pool-0f0b3237-wmnh.us-central1-c.c.lines-infra.internal
+Capacity:
+  attachable-volumes-gce-pd:  15
+  cpu:                        2
+  ephemeral-storage:          98831908Ki
+  hugepages-1Gi:              0
+  hugepages-2Mi:              0
+  memory:                     4025932Ki
+  pods:                       110
+Allocatable:
+  attachable-volumes-gce-pd:  15
+  cpu:                        940m
+  ephemeral-storage:          47060071478
+  hugepages-1Gi:              0
+  hugepages-2Mi:              0
+  memory:                     2880076Ki
+  pods:                       110
+System Info:
+  Machine ID:                 98ba85889e472221ab6ebb48fac36520
+  System UUID:                98ba8588-9e47-2221-ab6e-bb48fac36520
+  Boot ID:                    a9bf8280-7357-4192-9a51-90a7132b2541
+  Kernel Version:             5.10.133+
+  OS Image:                   Container-Optimized OS from Google
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  containerd://1.5.13
+  Kubelet Version:            v1.23.12-gke.100
+  Kube-Proxy Version:         v1.23.12-gke.100
+PodCIDR:                      10.120.0.0/24
+PodCIDRs:                     10.120.0.0/24
+ProviderID:                   gce://lines-infra/us-central1-c/gke-lines-cluster-default-pool-0f0b3237-wmnh
+Non-terminated Pods:          (5 in total)
+  Namespace                   Name                                                       CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                       ------------  ----------  ---------------  -------------  ---
+  kube-system                 fluentbit-gke-xr8f4                                        100m (10%)    0 (0%)      200Mi (7%)       500Mi (17%)    18h
+  kube-system                 gke-metrics-agent-2nm8v                                    8m (0%)       0 (0%)      100Mi (3%)       100Mi (3%)     18h
+  kube-system                 kube-proxy-gke-lines-cluster-default-pool-0f0b3237-wmnh    100m (10%)    0 (0%)      0 (0%)           0 (0%)         18h
+  kube-system                 metrics-server-v0.5.2-866bc7fbf8-kf2tf                     48m (5%)      43m (4%)    105Mi (3%)       355Mi (12%)    18h
+  kube-system                 pdcsi-node-4bd8g                                           10m (1%)      0 (0%)      20Mi (0%)        100Mi (3%)     18h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource                   Requests     Limits
+  --------                   --------     ------
+  cpu                        266m (28%)   43m (4%)
+  memory                     425Mi (15%)  1055Mi (37%)
+  ephemeral-storage          0 (0%)       0 (0%)
+  hugepages-1Gi              0 (0%)       0 (0%)
+  hugepages-2Mi              0 (0%)       0 (0%)
+  attachable-volumes-gce-pd  0            0
+Events:
+  Type     Reason            Age                From            Message
+  ----     ------            ----               ----            -------
+  Warning  NodeSysctlChange  31m (x4 over 18h)  sysctl-monitor  {"unmanaged": {"net.netfilter.nf_conntrack_buckets": "32768"}}
+
+```
+
+### Kubectl Alias 설정 
+
+```shell 
+
+$ vi ~/.zshrc # 본인이 사용하는 Shell에 맞춰 등록 
+
+# K8S Setting
+alias k=kubectl
+
+```
+
+### Kubectl tab 자동완성  
+
+약간 이런 느낌으로 세팅해야함 
+
+```shell 
+
+$ k describe
+debug     -- Create debugging sessions for troubleshooting workloads and nodes
+delete    -- Delete resources by file names, stdin, resources and names, or by resources and label selector
+describe  -- Show details of a specific resource or group of resources
+
+```
+
+- 자동완성으로 shell을 세팅하려면 아래와 같이 zsh | bash 에 설정 해야함. 
+
+```shell
+
+# K8S Setting
+alias k=kubectl
+source <(kubectl completion zsh) ## 이게 추가 되어야 함! 
+
+```
+
+- zshrc 
+  - https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-zsh/ 
+- bashrc 
+  - https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-bash-linux/
+
+### 진행 과정 상의 에러 해결 Tips
 
 - GKE의 Cluster로 접근이 안되는 경우, 
 
