@@ -120,13 +120,63 @@ gcloud components install kubectl
 
 ```shell 
 
-$ gcloud container clusters create lines-admin --num-nodes 3 --machine-type e2-micro --region us-central1 
+# 아래의 명령어로 gcloud sdk에서 사용이 가능하다. 
+$ gcloud beta container --project "프로젝트명" clusters create "클러스터명" --zone "us-central1-c" --no-enable-basic-auth --cluster-version "1.23.12-gke.100" --release-channel "regular" --machine-type "e2-medium" --image-type "COS_CONTAINERD" --disk-type "pd-balanced" --disk-size "100" --metadata disable-legacy-endpoints=true --scopes "https://www.googleapis.com/auth/devstorage.read_only","https://www.googleapis.com/auth/logging.write","https://www.googleapis.com/auth/monitoring","https://www.googleapis.com/auth/servicecontrol","https://www.googleapis.com/auth/service.management.readonly","https://www.googleapis.com/auth/trace.append" --max-pods-per-node "110" --num-nodes "3" --logging=SYSTEM,WORKLOAD --monitoring=SYSTEM --enable-ip-alias --network "projects/lines-infra/global/networks/default" --subnetwork "projects/lines-infra/regions/us-central1/subnetworks/default" --no-enable-intra-node-visibility --default-max-pods-per-node "110" --no-enable-master-authorized-networks --addons HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver --enable-autoupgrade --enable-autorepair --max-surge-upgrade 1 --max-unavailable-upgrade 0 --enable-shielded-nodes --node-locations "us-central1-c"
 
 $ kubectl get nodes 
 
 $ gcloud compute ssh <node-name> # 노드로 로그인해 노드에 무엇이 실행 중인지 살펴볼 수 있다. 
 
 ```
+
+#### 바로 안될 경우 Tips
+
+- GKE의 Cluster로 접근이 안되는 경우, 
+
+```shell 
+
+$ kubectl get nodes
+The connection to the server kubernetes.docker.internal:6443 was refused - did you specify the right host or port?
+
+```
+
+[해결방안](https://cloud.google.com/kubernetes-engine/docs/troubleshooting)    
+
+하지만 아래와 같이 하면 바로 동작하지는 않음...  
+
+```shell
+
+sudo gcloud container clusters get-credentials lines-cluster
+ERROR: (gcloud.container.clusters.get-credentials) One of [--zone, --region] must be supplied: Please specify location.
+
+```
+
+실제 GKE 클러스터가 구성된 Region을 같이 붙여서 사용한다. 
+
+> 참고로 Region을 기본으로 설정해두는 Config가 있을 것 같지만 우선은 아래와 같이 했다.  
+
+```shell 
+
+$ sudo gcloud container clusters get-credentials lines-cluster --region=us-central1-c
+Fetching cluster endpoint and auth data.
+kubeconfig entry generated for lines-cluster.
+
+```
+
+kubecetl 명령어 동작확인 
+
+```shell 
+
+kubectl get nodes
+W1204 12:56:24.439537   22454 gcp.go:119] WARNING: the gcp auth plugin is deprecated in v1.22+, unavailable in v1.26+; use gcloud instead.
+To learn more, consult https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+NAME                                           STATUS   ROLES    AGE   VERSION
+gke-lines-cluster-default-pool-0f0b3237-bxgp   Ready    <none>   18h   v1.23.12-gke.100
+gke-lines-cluster-default-pool-0f0b3237-d5ks   Ready    <none>   18h   v1.23.12-gke.100
+gke-lines-cluster-default-pool-0f0b3237-wmnh   Ready    <none>   18h   v1.23.12-gke.100
+
+```
+
 
 
 # Kubernetes의 이해 
