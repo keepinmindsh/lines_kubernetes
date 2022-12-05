@@ -84,6 +84,18 @@ RUN ["/usr/local/bin/hello", "--help"]
 RUN [ "<실행파일>", "<매개변수1>", "<매개변수2>" ] 형식이다.  
 FROM 으로 설정한 이미지의 bin/bash 실행 파일을 사용하지 않는 방식이다.
 
+### WORKDIR
+
+WORKDIR 명령문은 쉘(shell)의 cd 명령문처럼 컨테이너 상에서 작업 디텍토리로 전환을 위해서 사용됩니다. WORKDIR 명령문으로 작업 디렉터리를 전환하면 그 이후에 등장하는 모든 RUN, CMD, ENTRYPOINT, COPY, ADD 명령문은 해당 디렉터리를 기준으로 실행됩니다.   
+
+```dockerfile
+WORKDIR <이동할 경로>
+
+/usr/app으로 작업 디렉터리 전환
+
+WORKDIR /usr/app
+```
+
 ### CMD
 
 ```shell
