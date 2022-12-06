@@ -293,7 +293,117 @@ source <(kubectl completion zsh) ## 이게 추가 되어야 함!
 - bashrc 
   - https://kubernetes.io/docs/tasks/tools/included/optional-kubectl-configs-bash-linux/
 
+### Image 를 생성 후, Google Container Registry 에 업로드 하기 
+
+```shell
+
+$ docker build . -t lines_admin_nextjs -f /Users/lines/sources/01_bonggit/admin-site/frontend/deployments/Dockerfile
+
+```
+
+
+```shell
+
+$ docker run --rm -it -p 8080:3000 --name lines-admin-front lines_admin_nextjs:latest
+
+```
+
+```shell
+
+$ docker tag lines_admin_nextjs gcr.io/lines-infra/lines_admin_front:v1.0
+
+```
+
+```shell
+
+$ docker push gcr.io/lines-infra/lines_admin_front:v1.0
+The push refers to repository [gcr.io/lines-infra/lines_admin_front]
+4ac7e340b9ea: Pushed
+554c25c70525: Pushed
+17ce195f1be2: Pushed
+e98f1e5696ab: Pushed
+c0eb9dbb3b12: Pushed
+a34c94d043a9: Pushed
+c7540bf7dad1: Pushed
+57712d92e078: Layer already exists
+e3b722a14653: Layer already exists
+75b8cff8c6ab: Layer already exists
+17bec77d7fdc: Layer already exists
+v1.0: digest: sha256:1f79a61939bdaf706b660e4d0be147eac3b3483c3c12c54ed66e99858903b435 size: 2627
+
+```
+
+```shell
+$ kubectl run lines-cluster --image=gcr.io/lines-infra/lines_admin_front:v1.0 --port=3000                   
+pod/lines-cluster created
+```
+
+```shell
+$ kubectl get pods
+```
+
+```shell
+
+# 아래의 명령어는 동작하지 않음. 
+$ kubectl expose rc lines-cluster --type=LoadBalancer --name lines-admin-front-http
+
+# 변경 
+$ kubectl expose pod lines-cluster --type=LoadBalancer --name lines-admin-front-http
+
+```
+
 ### 진행 과정 상의 에러 해결 Tips
+
+- kubectl expose rc lines-cluster --type=LoadBalancer --name lines-admin-front-http 동작하지 않는 경우 
+
+```shell
+
+$ kubectl expose rc lines-cluster --type=LoadBalancer --name lines-admin-front-http
+Error from server (NotFound): replicationcontrollers "lines-cluster" not found
+
+```
+
+> [Loadbalancer 연동 실습](https://velog.io/@roon-replica/k8s-2-b.-k8s-%EC%8B%A4%EC%8A%B5)
+
+- kubectl run lines-cluster --image=gcr.io/lines-infra/lines_admin_front:v1.0 --port=8080 동작하지 않는 경우
+
+> [Stack Over Flow 해결 가이드](https://stackoverflow.com/questions/72042794/when-creating-pod-it-go-into-crashloopbackoff-logs-show-exec-usr-local-bin-do)
+
+```shell
+
+exec /usr/local/bin/docker-entrypoint.sh: exec format error 
+
+```
+
+- gcr.io/lines-infra/lines_admin_front:v1.0 동작하지 않는 경우 
+
+> [권한 세팅 가이드 GCP](https://cloud.google.com/container-registry/docs/advanced-authentication)
+
+```shell 
+
+$ gcloud auth activate-service-account 948099043330-compute@developer.gserviceaccount.com  --key-file=./lines-infra-c67d9a1eafc9.json
+Activated service account credentials for: [948099043330-compute@developer.gserviceaccount.com]
+
+$ gcloud auth configure-docker
+Adding credentials for all GCR repositories.
+WARNING: A long list of credential helpers may cause delays running 'docker build'. We recommend passing the registry name to configure only the registry you are using.
+After update, the following will be written to your Docker config file located at [/Users/lines/.docker/config.json]:
+ {
+  "credHelpers": {
+    "gcr.io": "gcloud",
+    "us.gcr.io": "gcloud",
+    "eu.gcr.io": "gcloud",
+    "asia.gcr.io": "gcloud",
+    "staging-k8s.gcr.io": "gcloud",
+    "marketplace.gcr.io": "gcloud"
+  }
+}
+
+Do you want to continue (Y/n)?  Y
+
+Docker configuration file updated.
+
+```
 
 - GKE의 Cluster로 접근이 안되는 경우, 
 
