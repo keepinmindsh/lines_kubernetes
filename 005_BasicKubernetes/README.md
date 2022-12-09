@@ -8,7 +8,7 @@
 
 # Kubernetes - Objects 
 
-- [Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/003)
+- [Pod 에 대한 Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/003)
 
 ## QoS classes 
 
