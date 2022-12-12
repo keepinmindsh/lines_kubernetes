@@ -146,3 +146,63 @@ spec:
 ![Deployments](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ProbesSettings01.png)
 
 ![Deployments](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ProbesSettings02.png)
+
+
+## QoS classes
+
+설정에 따라 파드에 필요한 성능을 관리하는 방식을 제공함.  
+예) 3개의 파드 중 1개의 파드에 성능이 더 필요할 경우 3개중 하나를 죽이고 파드 하나로 성능을 올려주는 역할을 설정할 수 있음.
+
+![Deployments](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/qos_class.png)
+
+```yaml
+kind: Prod 
+spec:
+  containers:
+    - resources:
+        requests:
+          memory: 1G
+          cpu: 2
+        limits:
+          memory: 2G
+          cpu: 4
+```
+
+- Guaranteed
+- Burstable
+    - OOM Score
+- BestEffort
+
+> [Assign Memory Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/)
+
+## Node Scheduling
+
+- Node 선택 : 원하는 노드로 자원 할당이 되도록 관리할 수 있음
+    - NodeName
+    - NodeSelector
+    - NodeAffinity
+        - matchExpressions
+            - required, preferred
+                - key
+                - operator : Exists, DoesNotExist, In, NotIn, Gt, Lt
+
+- Pod 간 집중/분산
+    - Pod Affinity
+        - podAffinity
+            - matchExpressions
+                - key : type
+                - operator : ~
+                - values:[~]
+        - topologyKey
+    - Anti-Affinity
+        - podAntiAffinity
+
+- Node에 할당 제한
+    - Toleration / Taint
+        - Pod
+            - Toleration
+                - key
+                - operator : Equal, Exists
+                - value
+                - effect : NoSchedule, PreferNoSchedule, NoExecute
+    - Pod가 Toleration을 설정해야 Taint로 설정된 Node로 Pod 세팅이 가능함. 
