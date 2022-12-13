@@ -1,5 +1,12 @@
-
 # Pod
+
+- Pod 는 다수개의 컨테이너를 구성할 수 있음
+
+## Label 
+
+- 목적에 따라 오브젝트를 분류하기 위해서 사용함. 
+  - key : value 구조로 작성할 수 있음
+  - Service 의 역할에 따라서 Label 을 묶어서 연결 및 접근하기 처리할 수 있음
 
 ## Lifecycle
 
@@ -176,6 +183,15 @@ spec:
 > [Assign Memory Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/)
 
 ## Node Scheduling
+
+- 직접 서택 방법 
+  - nodeSelector 
+    - hostname 
+- 쿠버네티스가 선택하는 방법
+- 스케쥴링을 알아서 하는 방법으로 노드가 알아서 세팅해서 구겅할 수 있는 방식임. 
+  - request.memory 
+  - limits.memory 
+  - Memory, CPU에 초과 상황에 따라 다르게 대응함.
 
 - Node 선택 : 원하는 노드로 자원 할당이 되도록 관리할 수 있음
     - NodeName
