@@ -181,7 +181,7 @@ apiVersion: v1
 kind: Pod 
 metadata: 
   name: pod-1 
-  labels: 
+  labels:             
     type: web
 spec:
   containers:
