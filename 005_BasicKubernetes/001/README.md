@@ -450,3 +450,5 @@ gke-lines-cluster-default-pool-0f0b3237-d5ks   Ready    <none>   18h   v1.23.12-
 gke-lines-cluster-default-pool-0f0b3237-wmnh   Ready    <none>   18h   v1.23.12-gke.100
 
 ```
+
+> [Kubernetes Docs](https://kubernetes.io/docs/)

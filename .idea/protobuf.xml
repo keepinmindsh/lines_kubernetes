@@ -4,6 +4,12 @@
     <libraries>
       <module>
         <name>buf.build/googleapis/googleapis</name>
+        <path>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/75b4300737fb4efca0831636be94e517</path>
+        <reference>buf.build/googleapis/googleapis:75b4300737fb4efca0831636be94e517</reference>
+        <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/75b4300737fb4efca0831636be94e517/buf.yaml</yaml>
+      </module>
+      <module>
+        <name>buf.build/googleapis/googleapis</name>
         <path>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/783e4b5374fa488ab068d08af9658438</path>
         <reference>buf.build/googleapis/googleapis:783e4b5374fa488ab068d08af9658438</reference>
         <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/googleapis/googleapis/783e4b5374fa488ab068d08af9658438/buf.yaml</yaml>
