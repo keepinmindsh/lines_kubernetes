@@ -8,4 +8,4 @@ spec:
     app: lines-admin-nextjs
   ports:
   - port: 3000
-    targetPort: 8080
+    targetPort: 3000

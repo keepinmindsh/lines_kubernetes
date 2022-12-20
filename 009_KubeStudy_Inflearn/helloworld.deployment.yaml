@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: lines-admin-nextjs
-        image: gcr.io/lines-infra/lines_admin_front:v1.1
+        image: gcr.io/lines-infra/lines_admin_front:v1.2
         resources:
           requests:
             memory: "32Mi"
@@ -22,4 +22,4 @@ spec:
             memory: "1024Mi"
             cpu: "1024m"
         ports:
-        - containerPort: 8080
+        - containerPort: 3000
