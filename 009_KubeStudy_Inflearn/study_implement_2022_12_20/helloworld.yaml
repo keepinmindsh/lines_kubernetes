@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lines-admin-nextjs
+  labels:
+    name: lines-admin-nextjs
+spec:
+  containers:
+  - name: lines-admin-nextjs
+    image: gcr.io/google-containers/busybox
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8080
