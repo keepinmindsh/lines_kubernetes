@@ -125,7 +125,7 @@ $ kubectl expose pod lines-cluster --type=LoadBalancer --name lines-admin-front-
 
 ### Volume 
 
-GCP 의 경우 Cluster 및 Node 구성시 Storage 가 기본적으로 매핑됨. 
+GCP 의 경우 Cluster 및 Node 구성시 Storage 가 기본적으로 매핑되었음
 
 ### ConfigMap, Secret 
 

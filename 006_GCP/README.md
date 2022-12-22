@@ -23,7 +23,6 @@ $ gcloud projects list
 
 ```
 
-
 ### gcloud cli를 통한 kubernetes cluster 활성화 하기 
 
 ```shell 
@@ -38,7 +37,7 @@ Operation "operations/acf.p2-948099043330-c0f27b50-5523-4623-b28d-1cbe9e2b08ee" 
 
 ```shell
 
-gcloud container clusters create lines-admin --num-nodes 3 --machine-type e2-micro --region us-central1
+$ gcloud container clusters create lines-admin --num-nodes 3 --machine-type e2-micro --region us-central1
 
 ```
 
@@ -54,4 +53,4 @@ ERROR: (gcloud.container.clusters.create) ResponseError: code=400, message=Faile
 
 - [해결 방법 가이드](https://stackoverflow.com/questions/64537546/error-gcloud-container-clusters-create-responseerror-code-400-message-faile)
 
-cotainer.googleapis.com 이라는 서비스를 활성화 시켜야 한다고 한다. 
+container.googleapis.com 이라는 서비스를 활성화 시켜야 한다고 한다. 
