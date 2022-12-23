@@ -14,7 +14,7 @@
 - [ConfigMap/Secret 에 대한 Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/006)
 - [Dynamic Provisioning 에 대한 Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/007)
 - [Namespace, ResourceQuota, LimitRange 에 대한 Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/008)
-- [Controller 에 대한 Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/008)
+- [Controller 에 대한 Link 바로가기](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes/009)
 
 
 # Access to the Kubernetes API 

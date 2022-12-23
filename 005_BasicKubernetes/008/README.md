@@ -1,5 +1,3 @@
-
-
 # Object - Namespace, ResourceQuota, LimitRange
 
 ![Namespace, Resource Quota, Limit Range](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/kubenetes_image01.png)
@@ -9,12 +7,12 @@
 --- 
 
 - Pod 명이 중복될 수 없음. Namespace 각각에서는 동일한 파드명을 사용할 수 있다.
-- 각각의 서로 다른 Namespace 간에서 Pod는 서로 네트워크 연결이 가능하지만 이 제어는 Namespace Policy를 이용할 수 있다.
+- 각각의 서로 다른 Namespace 간에서 Pod 는 서로 네트워크 연결이 가능하지만 이 제어는 Namespace Policy 를 이용할 수 있다.
 
 ---
 
-Service Accounts는 쿠버네티스 API에 의해서 관리되는 사용들이다. 각 계정은 특정한 namespaces에 연결된다. Service Account는 Credentials의 묶음으로 Secrets 로서 저장된다.
-그리고 클러스터 내에서 쿠버네티스 API와 통신/대화하는 것을 허용하는 각각의 Pod들로 마운트된다.
+Service Accounts 는 쿠버네티스 API 에 의해서 관리되는 사용들이다. 각 계정은 특정한 namespaces 에 연결된다. Service Account 는 Credentials 의 묶음으로 Secrets 로서 저장된다.
+그리고 클러스터 내에서 쿠버네티스 API 와 통신/대화하는 것을 허용하는 각각의 Pod 들로 마운트된다.
 
 ---
 

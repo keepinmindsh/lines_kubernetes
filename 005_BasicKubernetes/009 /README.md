@@ -1,4 +1,3 @@
-
 # Object - Controller
 
 - Auto Healing
@@ -48,7 +47,7 @@ spec:
 - Replicas
 
 - Selector
-    - Replicas에서만 존재하는 기능임.
+    - Replicas 에서만 존재하는 기능임.
     - matchLabels
     - matchExpressions
 
@@ -74,6 +73,38 @@ spec:
   template: 
     metadata: 
       name: pod 
+```
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  # modify replicas according to your case
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3
+```
+
+- Replica Set 의 설정 가져오기 ( Shell )
+
+```shell
+$ kubectl get rs
+NAME                                      DESIRED   CURRENT   READY   AGE
+lines-admin-nextjs-deployment-dd954f84b   1         1         1       2d19h
 ```
 
 ## Controller - Deployment
