@@ -1,5 +1,15 @@
 # Tekton Pipeline 
 
+### Get Started 
+
+> [Tekton Getstarted](https://tekton.dev/docs/getting-started/)   
+> [Tekton CI/CD](https://hevodata.com/learn/tekton-ci-cd/)     
+> [Building k8s tekton](https://earthly.dev/blog/building-k8s-tekton/)
+
+### Tekton Hub 
+
+> [Tekton Hub](https://hub.tekton.dev/)
+
 ### Begin 
 
 ```shell
