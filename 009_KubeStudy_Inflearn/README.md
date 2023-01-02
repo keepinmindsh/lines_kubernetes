@@ -182,7 +182,109 @@ spec:
 
 ##### DaemonSet, Job, CronJob 
 
-- DaemonSet 
-  - 성능 수집 
+- DaemonSet
+  - Node의 자원 상태와 상관 없이 각 Node에 Pod가 생성됨. 
+    - 성능 수집 ( 모니터링 - 프로메테우스 ), 로그 수집(Fluentd), 스토리지 활용 (GlusterFS)
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-elasticsearch
+  template:
+    metadata:
+      labels:
+        name: fluentd-elasticsearch
+    spec:
+      tolerations:
+      # these tolerations are to have the daemonset runnable on control plane nodes
+      # remove them if your control plane nodes should not run pods
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: fluentd-elasticsearch
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+```
 
 - Job / CronJob 
+  - Job 에 의해 만들어진 Pod 
+    - 서비스 다운시 다시 다른 노드에 재생성되는 구조
+    - 프로세스가 일을 하지 않으면 Pod는 정지됨. 
+  - CronJob 
+    - 주기적으로 Job을 실행하기 위해서 사용함. 
+      - BackUp 
+      - Checking
+      - Messaging 
+      - etc 
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  completions: 6  # Job이 6개가 종료되기 전까지 완료되지 않음 
+  parallelism: 2  # 병렬적으로 Job을 실행함. 
+  activeDeadlineSeconds: 30 # 30초 후에 Job이 삭제됨. 
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl:5.34.0
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4
+
+```
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "* * * * *"
+  concurrencyPolicy: Allow # Forbid, Replace 
+  # Allow - 스케쥴에 따라서 Pod가 생성될 때 기존의 Pod의 종료 여부에 상관 없이 Pod가 스케쥴에 따라 무조건 생성됨. 
+  # Forbid - 기존의 Pod가 종료되지 않았다면 스케쥴 시간이 왔을 때 Job을 건너띄고 이후 Pod가 종료된 시점 이후에 Job이 추가 실행됨. 
+  # Replace - 기존의 Pod가 종료되지 않은 시점에 스케쥴 시간이 되면 Pod는 새로 만들어지지만 Job은 신규 Pod로 연결되는 구조가 된다. 
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox:1.28
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure
+``` 
+
