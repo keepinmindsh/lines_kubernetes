@@ -288,3 +288,41 @@ spec:
           restartPolicy: OnFailure
 ``` 
 
+### Pod's Lifecycle 
+
+> [Pod's Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+
+#### Phase 
+
+- Pending 
+- Running 
+- Succeeded
+- Failed 
+- UnKnown 
+
+#### Conditions
+
+- Initialized
+- ContainerReady 
+- PodScheduled 
+- Ready
+
+#### Reason
+
+- ContainersNotReady 
+- PodCompleted
+
+#### ContainerStatuses 
+
+#### State 
+
+- Waiting
+- Running
+- Terminated
+
+#### Reason 
+
+- ContainerCreating
+- CrashLoopBackOff
+- Error
+- Completed
