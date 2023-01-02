@@ -385,3 +385,14 @@ spec:
       initialDelaySeconds: 3
       periodSeconds: 3
 ```
+
+### QosClass ( Guaranteed, Burstable, BestEffort )
+
+- Guaranteed 
+  - 모든 Container에 Request와 Limit가 설정 
+  - Request와 Limit에는 Memory와 CPU가 모두 설정 
+  - 각 Container 내에 Memory와 CPU의 Request와 Limit 값이 같음 
+- Burstable 
+  - OOM Score - Request의 설정된 메모리와 App에서 사용하는 메모리로 비율 ( App Memory / Request Memory ) 을 검토하여 Pod를 제거할 수 있음 
+- BestEffort 
+  - 어떤 Container 내에도 Request와 Limit 미설정 
