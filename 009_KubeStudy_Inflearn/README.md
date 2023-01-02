@@ -292,6 +292,8 @@ spec:
 
 > [Pod's Lifecycle](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
 
+![Pod's Lifecycle](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/pod-lifecycle.png)
+
 #### Phase 
 
 - Pending 
@@ -326,3 +328,60 @@ spec:
 - CrashLoopBackOff
 - Error
 - Completed
+
+### Pod - ReadinessProbe, LivenessProbe 
+
+- ReadinessProbe 
+  - App 구동 순간에 트래픽 실패를 없앰. 
+
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-exec
+spec:
+  containers:
+  - name: liveness
+    image: registry.k8s.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600
+    readinessProbe:
+      exec:
+        command:
+          - cat
+          - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+```
+
+- LivenessProbe 
+  - App 장애시 지속적인 트래픽 실패를 없앰. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-http
+spec:
+  containers:
+  - name: liveness
+    image: registry.k8s.io/liveness
+    args:
+    - /server
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: 8080
+        httpHeaders:
+        - name: Custom-Header
+          value: Awesome
+      initialDelaySeconds: 3
+      periodSeconds: 3
+```
