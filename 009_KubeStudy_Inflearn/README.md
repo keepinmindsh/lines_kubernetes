@@ -450,3 +450,85 @@ spec:
   - name: qos-demo-3-ctr
     image: nginx
 ```
+
+### Assigning Pods to Node ( Node Scheduling )
+
+> [Assign Pods to Node](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
+
+#### Node 선택 
+- NodeName : 상용환경에서는 잘 사용하지 않음 
+- NodeSelector : 파드에 키와 값을 매칭후 Node 중에서 자원이 높은 쪽에 파드 생성 
+- NodeAffinity 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution: # 키가 있어야 반드시 설정 가능함. 
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: topology.kubernetes.io/zone
+            operator: In
+            values:
+            - antarctica-east1
+            - antarctica-west1
+      preferredDuringSchedulingIgnoredDuringExecution: # 키가 없는 경우에도 적절하게 설정됨. 
+      - weight: 1   # 점수를 매겨서 가중치에 따라서 Node 선택 
+        preference:
+          matchExpressions:
+          - key: another-node-label-key
+            operator: In
+            values:
+            - another-node-label-value
+  containers:
+  - name: with-node-affinity
+    image: registry.k8s.io/pause:2.0
+```
+
+#### Pod간 집중/분산
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: security
+            operator: In
+            values:
+            - S1
+        topologyKey: topology.kubernetes.io/zone
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: security
+              operator: In
+              values:
+              - S2
+          topologyKey: topology.kubernetes.io/zone
+  containers:
+  - name: with-pod-affinity
+    image: registry.k8s.io/pause:2.0
+```
+
+- Pod Affinity
+- Anti-Affinity 
+
+#### Node에 할당 제한 
+
+> [Taints, Toleration](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/)
+
+- Toleration 
+- Taint 
