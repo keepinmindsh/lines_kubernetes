@@ -133,3 +133,56 @@ GCP 의 경우 Cluster 및 Node 구성시 Storage 가 기본적으로 매핑되�
 
 > [Trouble Shooting - Stack OverFlow](https://stackoverflow.com/questions/53452120/gcp-kubernetes-workload-does-not-have-minimum-availability)     
 > [Trouble Shooting - GCP](https://cloud.google.com/kubernetes-engine/docs/troubleshooting)
+
+# 2차 스터디 자료 
+
+### Controller 
+
+- Auto Healing 
+- Auto Scaling 
+- Software Update 
+- Job 
+
+##### ReplicaSet / Selector 
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  # modify replicas according to your case
+  replicas: 3
+  selector: # 키와 값이 같아야 설정할수 있게 처리, matchExpressions 에는 key, operator ( Exists, DoesNotExist, In, NotIn )를 설정할 수 있음  
+    matchLabels:
+      tier: frontend
+  template: # 서비스가 장애가 나거나 정상적으로 동작하지 않을 때 Template 으로 사용이 가능하다. 
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3
+```
+
+##### Deployment 
+
+- ReCreate 
+  - 다운 타임이 발생하므로 일시적으로 서비스 정지가 가능한 서비스에서만 사용 가능함. 
+- Rolling Update 
+  - 다운 타임 없으나, 리소스 비용이 일시적으로 증가함. 
+- Blue/Green 
+  - 서비스 다운 타임 없음. 리소스 비용이 2배가 필요함. 
+- Canary                                 
+  - 서비스 다운 타임 없음. 리소스 비용은 설정에 따라 증가하게됨. 
+
+##### DaemonSet, Job, CronJob 
+
+- DaemonSet 
+  - 성능 수집 
+
+- Job / CronJob 
