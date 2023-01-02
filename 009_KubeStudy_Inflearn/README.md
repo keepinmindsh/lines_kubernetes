@@ -388,11 +388,65 @@ spec:
 
 ### QosClass ( Guaranteed, Burstable, BestEffort )
 
+> [QoS Class](https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/)
+
 - Guaranteed 
   - 모든 Container에 Request와 Limit가 설정 
   - Request와 Limit에는 Memory와 CPU가 모두 설정 
   - 각 Container 내에 Memory와 CPU의 Request와 Limit 값이 같음 
+  
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: qos-demo
+  namespace: qos-example
+spec:
+  containers:
+  - name: qos-demo-ctr
+    image: nginx
+    resources:
+      limits:
+        memory: "200Mi"
+        cpu: "700m"
+      requests:
+        memory: "200Mi"
+        cpu: "700m"
+```  
+  
 - Burstable 
   - OOM Score - Request의 설정된 메모리와 App에서 사용하는 메모리로 비율 ( App Memory / Request Memory ) 을 검토하여 Pod를 제거할 수 있음 
+  - Request와 Limit가 모두 설정되어 있지 않는 경우 , 부분적인 설정 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: qos-demo-2
+  namespace: qos-example
+spec:
+  containers:
+  - name: qos-demo-2-ctr
+    image: nginx
+    resources:
+      limits:
+        memory: "200Mi"
+      requests:
+        memory: "100Mi"
+```
+
 - BestEffort 
   - 어떤 Container 내에도 Request와 Limit 미설정 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: qos-demo-3
+  namespace: qos-example
+spec:
+  containers:
+  - name: qos-demo-3-ctr
+    image: nginx
+```
