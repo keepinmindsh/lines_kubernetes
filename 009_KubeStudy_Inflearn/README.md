@@ -61,6 +61,20 @@ $ kubectl run lines-cluster --image=gcr.io/lines-infra/lines_admin_front:v1.0 --
     A container "fails" if it exits with a non-zero status.
   - Unknown: The state of the Pod cannot be determined.
 
+### Pod에 의한 직접 서비스 연결 
+
+```shell
+
+# pod 직접 생성 및 기동 방식 
+kubectl run lines-cluster --image=gcr.io/lines-infra/lines_admin_front:v1.0 --port=3000
+
+# pod를 직접 연결하여 사용하는 방식 
+kubectl expose pod lines-admin-front --type=LoadBalancer --name lines-admin-front-http
+
+```
+
+### 배포 설정 / yaml 설정
+
 ```shell
 
 # https://cloud.google.com/code/docs/intellij/install 
@@ -74,6 +88,7 @@ $ kubectl run lines-cluster --image=gcr.io/lines-infra/lines_admin_front:v1.0 --
 # https://cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl
 
 ```
+
 
 ```shell
 
@@ -110,6 +125,24 @@ $ kubectl delete service lines-admin-front-http
 
 $ kubectl
 
+```
+
+### Kubectl 를 이용한 삭제 방법 
+
+```shell
+kubectl get all
+
+NAME                    READY   STATUS    RESTARTS   AGE
+pod/lines-admin-front   1/1     Running   0          5m47s
+
+NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)          AGE
+service/kubernetes                   ClusterIP      10.124.0.1     <none>            443/TCP          33d
+service/lines-admin-nextjs-service   LoadBalancer   10.124.2.224   104.198.190.215   3000:32468/TCP   16d
+
+```
+
+```shell
+kubectl delete <name of deployment as displayed from get all command>
 ```
 
 ### Service 구성 
