@@ -23,7 +23,7 @@ source <(kubectl completion zsh) ## 이게 추가 되어야 함!
 
 ```shell
 
-$ docker build . -t lines_admin_nextjs -f /Users/lines/sources/01_bonggit/admin-site/frontend/deployments/Dockerfile
+$ docker build . -t gcr.io/lines-infra/lines_admin_front:v1.0 -f /Users/lines/sources/01_bonggit/admin-site/frontend/deployments/Dockerfile
 
 ```
 
@@ -31,7 +31,7 @@ $ docker build . -t lines_admin_nextjs -f /Users/lines/sources/01_bonggit/admin-
 
 ```shell
 
-$ docker run --rm -it -p 8080:3000 --name lines-admin-front lines_admin_nextjs:latest
+$ docker run --rm -it -p 8080:3000 --name lines-admin-front gcr.io/lines-infra/lines_admin_front:v1.0
 
 ```
 
