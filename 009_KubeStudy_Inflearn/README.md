@@ -1,5 +1,22 @@
 # 1차 Study 자료 
 
+### 쿠버네티스의 이해 
+
+쿠버네티스가 어떤 액션을 수행해야 하는지 정확하게 알려주는 대신에 시스템의 의도하는 상태를 선언적으로 변경하고 쿠버네티스가 실제 현재 상태를 검사해 의도한 상태로 조정 해야 한다. 
+쿠버네티스의 전체 기능은 이와 동일한 방식으로도 동작한다. 
+
+- Kubernetes Dashboard 
+
+> [GKE Dashboard 소식(쿠베 Dashboard 지원 중단됨)](https://cloud.google.com/kubernetes-engine/docs/concepts/dashboards)
+
+```shell
+# Dashboard 열기
+k cluster-info | grep dashboard
+
+# Dashboard 사용자/비밀번호 확인하기 
+gcloud container clusters describe lines-cluster | grep -E "(username|password):"
+```
+
 ### 사전 준비 
 
 ##### 자동완성으로 shell을 세팅하려면 아래와 같이 zsh | bash 에 설정 해야함.
@@ -60,6 +77,81 @@ $ kubectl run lines-cluster --image=gcr.io/lines-infra/lines_admin_front:v1.0 --
   - Failed: All containers in the Pod have terminated, and at least one container has terminated in failure. 
     A container "fails" if it exits with a non-zero status.
   - Unknown: The state of the Pod cannot be determined.
+
+### Pod 소개 
+
+파드는 하나 이상의 밀적하게 연관된 컨테이너 그룹으로 같은 워커 노드에서 같은 리눅스 네임 스페이스로 함께 실행된다. 
+
+- 파드 조회하기 
+
+```shell
+$ kubectl get pods 
+```
+
+파드는 하나의 컨테이너를 가지고 있지만 보통 파드는 원하는 만큼의 컨테이너를 포함시킬 수 있다. 
+
+
+- 파드를 조회할 때 파드 IP와 실행 중인 노드 표시하기 
+
+파드가 스케쥴링된 노드에 대한 정보를 확인하고 싶을 경우, -o wide 옵션을 사용하면 추가 열을 요청할 수 있다. 
+
+```shell
+
+kubectl get pods -o wide
+NAME                READY   STATUS    RESTARTS   AGE   IP            NODE                                           NOMINATED NODE   READINESS GATES
+lines-admin-front   1/1     Running   0          18h   10.120.3.14   gke-lines-cluster-default-pool-0f0b3237-wsfp   <none>           <none>
+
+```
+
+- kubectl describe로 파드 세부 정보 살펴보기 
+
+```shell
+k describe pod/lines-admin-front
+
+Name:         lines-admin-front
+Namespace:    default
+Priority:     0
+Node:         gke-lines-cluster-default-pool-0f0b3237-wsfp/10.128.0.15
+Start Time:   Fri, 06 Jan 2023 16:06:52 +0900
+Labels:       run=lines-admin-front
+Annotations:  <none>
+Status:       Running
+IP:           10.120.3.14
+IPs:
+  IP:  10.120.3.14
+Containers:
+  lines-admin-front:
+    Container ID:   containerd://ae1811b8033dd8880d6f9f59a88fcba34350d510bb427619c8f99b0a53ef7ec6
+    Image:          gcr.io/lines-infra/lines_admin_front:v0.1.0
+    Image ID:       gcr.io/lines-infra/lines_admin_front@sha256:bfc205a0d5ad0fe68b0737110ab709476cd72aef6df36ac97c0251875165f860
+    Port:           3000/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Fri, 06 Jan 2023 16:06:53 +0900
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-srzrx (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  kube-api-access-srzrx:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+                             
+```
 
 ### Pod에 의한 직접 서비스 연결 
 
@@ -147,6 +239,10 @@ kubectl delete <name of deployment as displayed from get all command>
 
 ### Service 구성 
 
+서비스는 다수 파드 앞에서 로드 밸런서 역할을 한다. 파드가 하나가 있으면 서비스는 이 파드 하나에 정적주소를 제공한다. 
+서비스를 지원하는 파드가 하나든지 그룹이든지에 관계없이 해당 파드가 클러스터 내에서 이동하면서 생성되고 삭제되며 IP가 
+변경되지만, 서비스는 항당 동일한 주소를 가진다. 
+
 ```shell
 
 $ kubectl apply -f helloworld.service.yaml
@@ -154,6 +250,12 @@ $ kubectl apply -f helloworld.service.yaml
 # 변경 
 $ kubectl expose pod lines-cluster --type=LoadBalancer --name lines-admin-front-http
 
+```
+
+- 서비스 조회하기 
+
+```shell
+kubectl get services
 ```
 
 ### Volume 
@@ -177,6 +279,8 @@ GCP 의 경우 Cluster 및 Node 구성시 Storage 가 기본적으로 매핑되�
 - Job 
 
 ##### ReplicaSet / Selector 
+
+> [ReplicaSet](https://kubernetes.io/ko/docs/concepts/workloads/controllers/replicaset/)
 
 ```yaml
 apiVersion: apps/v1
