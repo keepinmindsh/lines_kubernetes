@@ -287,6 +287,7 @@ GCP 의 경우 Cluster 및 Node 구성시 Storage 가 기본적으로 매핑되�
 
 > [ReplicaSet](https://kubernetes.io/ko/docs/concepts/workloads/controllers/replicaset/)
 
+
 ```yaml
 apiVersion: apps/v1
 kind: ReplicaSet
@@ -311,7 +312,15 @@ spec:
         image: gcr.io/google_samples/gb-frontend:v3
 ```
 
+> [GCP에서 ScaleUp](https://cloud.google.com/kubernetes-engine/docs/how-to/scaling-apps)
+
+```shell
+kubectl scale deployments lines-admin-nextjs-deployment --replicas 2
+```
+
 ##### Deployment 
+
+> [GKE Deployment](https://github.com/GoogleCloudPlatform/gke-deployment-testing-strategies)
 
 - ReCreate 
   - 다운 타임이 발생하므로 일시적으로 서비스 정지가 가능한 서비스에서만 사용 가능함. 
@@ -323,6 +332,8 @@ spec:
   - 서비스 다운 타임 없음. 리소스 비용은 설정에 따라 증가하게됨. 
 
 ##### DaemonSet, Job, CronJob 
+
+> [Daemon Set on GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/daemonset)
 
 - DaemonSet
   - Node의 자원 상태와 상관 없이 각 Node에 Pod가 생성됨. 
@@ -371,6 +382,46 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
+```
+
+```yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: ds-priority
+value: 1000000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "DaemonSet services."
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prometheus-exporter
+spec:
+  selector:
+    matchLabels:
+      name: prometheus-exporter
+  template:
+    metadata:
+      labels:
+        name: prometheus-exporter
+    spec:
+      priorityClassName: ds-priority
+      containers:
+        - name: prometheus-exporter
+          image: us-docker.pkg.dev/google-samples/containers/gke/prometheus-dummy-exporter:v0.2.0
+          command: ["./prometheus-dummy-exporter"]
+          args:
+            - --metric-name=custom_prometheus
+            - --metric-value=40
+            - --port=8080
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 200Mi
 ```
 
 - Job / CronJob 

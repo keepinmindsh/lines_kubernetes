@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: lines-admin-nextjs-deployment
 spec:
+  replicas: 2
   selector:
     matchLabels:
       app: lines-admin-nextjs
@@ -13,7 +14,7 @@ spec:
     spec:
       containers:
       - name: lines-admin-nextjs
-        image: gcr.io/lines-infra/lines_admin_front:v1.2
+        image: gcr.io/lines-infra/lines_admin_front:v0.1.0
         resources:
           requests:
             memory: "32Mi"
