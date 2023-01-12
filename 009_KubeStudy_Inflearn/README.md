@@ -648,12 +648,18 @@ spec:
 
 ### Assigning Pods to Node ( Node Scheduling )
 
+> [About Node](https://kubernetes.io/docs/concepts/architecture/nodes/)  
+
 > [Assign Pods to Node](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/)
+
+#### About Affinity 
+
+> [조대협의 블로그](https://bcho.tistory.com/1346)
 
 #### Node 선택 
 - NodeName : 상용환경에서는 잘 사용하지 않음 
 - NodeSelector : 파드에 키와 값을 매칭후 Node 중에서 자원이 높은 쪽에 파드 생성 
-- NodeAffinity 
+- NodeAffinity : 노드 어피니티(Node Affinity)는 노드 셀렉터와 비슷하게 노드의 레이블을 기반으로 파드를 스케쥴링합니다. 노드 어피니티와 노드셀렉터를 함께 설정할 수도 있으며, 이 때는 노드 어피니티와 노드셀렉터의 조건을 모두 만족하는 노드에 파드를 스케쥴링합니다.
 
 ```yaml
 apiVersion: v1
