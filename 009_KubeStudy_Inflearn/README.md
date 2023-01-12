@@ -435,6 +435,8 @@ spec:
       - Messaging 
       - etc 
 
+> [Jobs on GCP](https://cloud.google.com/kubernetes-engine/docs/how-to/jobs)
+
 ```yaml
 apiVersion: batch/v1
 kind: Job
