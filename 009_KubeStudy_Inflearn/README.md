@@ -829,4 +829,12 @@ metadata:
 spec: 
   type: ExternalName 
   externalName: github.github.io 
-```
+``` 
+
+### Volume 
+
+![Volume with Dynamic Provisioning](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/volume_advanced.png) 
+
+- Dynamic Provisioning 
+
+[실습 예정]
