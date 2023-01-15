@@ -736,7 +736,7 @@ spec:
 
 # 3차 스터디 자료
 
-### Object - Service
+### Object - Service 
 
 ##### Cluster IP 
 
@@ -755,6 +755,78 @@ spec:
 Pod의 경우, Pod 가 재생성되는 경우 할당된 IP가 동적으로 변경되기 때문에 Pod가 다른 Pod로 접급해야하는 경우에는, Headless, DNS Server 등을 사용해야  
 한다. 또한 Pod가 재 생성되는 경우 외부 연결이 될 때는 ExternalName을 활용한다. 
 
-- Headless 
-- EndPoint, External Name 
-  - FQDN = Fully Qualified Domain Name 
+- Headless
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: headless1 
+spec:
+  service: 
+    svc: headless 
+  ports: 
+    - port: 80 
+      targetPort: 8080 
+  clusterIP: none 
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod4 
+  labels: 
+    svc: headless1 
+spec: 
+  hostname: pod-a 
+  subdomain: headless1 
+  containers: 
+  - name: container 
+    image: kubia/app 
+```
+
+- EndPoint 
+  - Pod의 간의 서비스를 위해서 EndPoint를 만들어서 관리한다. 
+    - FQDN = Fully Qualified Domain Name
+  - Endpoint를 가지고 Pod와 Service를 연결할 수 있음 
+    - selector를 이용하는 것이 아닌 IP/Port를 이용해서 EndPoint를 연결해서 특정 Pod로 접근할 수 있게 된다. 
+
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: endpoint1 
+spec: 
+  selector: 
+    svc: endpoint 
+  ports: 
+    port: 8080
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod7 
+  labels: 
+    svc: endpoint
+spec: 
+  containers:
+    - name: container 
+      image: kubetm/app 
+```
+
+- External Name
+  - 도메인 이름을 정의한다. DNS Cache가 DNS를 찾아서 IP 주소를 찾아냄. 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: externalname1
+spec: 
+  type: ExternalName 
+  externalName: github.github.io 
+```
