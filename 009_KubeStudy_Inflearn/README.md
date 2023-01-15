@@ -733,3 +733,28 @@ spec:
 
 - Toleration 
 - Taint 
+
+# 3차 스터디 자료
+
+### Object - Service
+
+##### Cluster IP 
+
+- 대상 타켓 : Admin ( 내부 관리자 )
+
+##### Node Port 
+
+- 대상 타겟 : Internal User
+
+##### Load Balancer
+
+- 대상 타겟 : Cloud Provider 
+
+### Pod에 접근하는 방법 
+
+Pod의 경우, Pod 가 재생성되는 경우 할당된 IP가 동적으로 변경되기 때문에 Pod가 다른 Pod로 접급해야하는 경우에는, Headless, DNS Server 등을 사용해야  
+한다. 또한 Pod가 재 생성되는 경우 외부 연결이 될 때는 ExternalName을 활용한다. 
+
+- Headless 
+- EndPoint, External Name 
+  - FQDN = Fully Qualified Domain Name 
