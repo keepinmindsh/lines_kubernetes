@@ -205,6 +205,25 @@ Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists fo
 - 여러 컨테이너가 모여 하나의 구성 요소를 나타내는가, 혹은 개별적인 구성 요소인가? 
 - 컨테이너가 함께, 혹은 개별적으로 스케일링 되어야 하는가? 
 
+### Pod를 정의하는 주요 부분 소개 
+
+- Metadata
+  - 이름, 네임스페이스, 레이블 및 파드에 관한 기타 정보 포함
+- Spec 
+  - 파드 컨테이너, 불륨, 기타 데이터 등 파드 자체에 관한 실제 명세를 가진다. 
+- Status 
+  - 파드 상태, 각 컨테이너 설명과 상태, 파드 내부 IP, 기타 기본 정보 등 현재 실행 중인 파드이 관한 현재 정보를 포함한다. 
+
+실제로 사용할 수 있는 Pods의 속성에 대해서 나열함. 
+```shell 
+$ kubectl explain pods
+```
+
+파드를 구성하는 설정 내의 정확한 쓰임새를 표기함. 
+```shell
+$ kubectl explain pod.spec
+```
+
 ### Pod에 의한 직접 서비스 연결 
 
 ```shell
