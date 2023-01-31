@@ -946,3 +946,45 @@ spec:
           serviceName: hostname-service        # [3]
           servicePort: 80
 ```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hostname-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: webserver
+  template:
+    metadata:
+      name: my-webserver
+      labels:
+        app: webserver
+    spec:
+      containers:
+      - name: my-webserver
+        image: alicek106/ingress-annotation-test:0.0
+        ports:
+        - containerPort: 5000
+          name: flask-port
+
+```
+
+```yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  name: hostname-service
+spec:
+  ports:
+    - name: web-port
+      port: 80
+      targetPort: flask-port
+  selector:
+    app: webserver
+  type: ClusterIP ## 외부에 서비스를 노출할 필요가 없다면 ClusterIP 타입 사용할 것
+```
+
+> [출처] [k8s 09 시작하세요!] 쿠버네티스 인그레스(Ingress)|작성자 오디 아니구 오딘
