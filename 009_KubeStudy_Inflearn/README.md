@@ -904,3 +904,26 @@ spec:
 - Dynamic Provisioning 
 
 [실습 예정]
+
+
+## Inflearn 4일차 
+
+### StatefulSet 
+
+- Ordinal Index 로 순차적으로 Pod가 생성됨. 
+  - 중간에 Pod가 삭제가되면 동일한 이름으로 인덱스가 세팅이 됩니다.
+
+# Ingress 
+
+![Stateful Set](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ingress.png)
+
+![Stateful Set](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ingress_controller.png)
+
+- 서비스 로드 밸런싱 
+  - 각 서비스의 로드 밸런싱을 담당함. 각각의 Pod에 연결된 서비스에 맞게 보내주는 역할을 함. 
+- Canary Upgrade 
+  - 서비스 배포시 버전1의 앱과 버전2의 앱 사이의 배포시에 트래픽을 잉그레스를 통해서 조정한다. 
+
+## Ingress Controller 
+
+- Nginx, Kong 
