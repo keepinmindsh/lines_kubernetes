@@ -910,8 +910,59 @@ spec:
 
 ### StatefulSet 
 
+앞서 설명했던 Replication Controller, ReplicaSet, Deployment 등은 모두 상태가 없는 pod를 관리하는 용도였다.   
+StatefulSet은 이와 다르게 상태가 있는 Pod를 관리해주는 컨트롤러다. 
+
 - Ordinal Index 로 순차적으로 Pod가 생성됨. 
   - 중간에 Pod가 삭제가되면 동일한 이름으로 인덱스가 세팅이 됩니다.
+  - 삭제도 역순으로 삭제가 처리 됩니다. 
+
+- 예시    
+  - 데이터 페이스 : Master/Slave 구성에서 Master가 먼저 기동된 이후 Slave를 기동하고자 할 때,
+  - Kafka/Zookeeper : Master/Slave 구성에서 Master가 먼저 기동된 이후 Slave를 기동하고자 할 때, 
+  - MQ/Redis/MongoDB 등 
+  - 
+statefulset에서 데이타베이스와 같이 master,slave 구조가 있는 서비스들의 경우에는 service를 통해서 로드밸런싱을 하지 않고,  
+service 를 통해서 로드 밸런싱을 하는 것을 잘 사용하지 않고 개별 pod의 주소를 알고 접속해야 한다.   
+그래서 개별 Pod의 dns 이름이나 주소를 알아야 한다.   
+
+```yaml 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+ name: nginx
+spec:
+ selector:
+   matchLabels:
+     app: nginx
+ serviceName: "nginx"
+ replicas: 3
+ template:
+   metadata:
+     labels:
+       app: nginx
+   spec:
+     terminationGracePeriodSeconds: 10
+     containers:
+     - name: nginx
+       image: k8s.gcr.io/nginx-slim:0.8
+       ports:
+       - containerPort: 80
+         name: web
+       volumeMounts:
+       - name: www
+         mountPath: /usr/share/nginx/html
+ volumeClaimTemplates:
+ - metadata:
+     name: www
+   spec:
+     accessModes: [ "ReadWriteOnce" ]
+     storageClassName: "standard"
+     resources:
+       requests:
+         storage: 1Gi
+
+```
 
 # Ingress 
 
