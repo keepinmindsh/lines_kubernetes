@@ -927,3 +927,22 @@ spec:
 ## Ingress Controller 
 
 - Nginx, Kong 
+
+```yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-example
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: alicek106/example.com                # [1]
+    http:
+      paths:
+      - path: /echo-hostname                   # [2]
+        backend:
+          serviceName: hostname-service        # [3]
+          servicePort: 80
+```
