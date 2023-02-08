@@ -12,6 +12,8 @@
 
 ### Begin 
 
+> GCP 를 사용할 경우 Compute Engine 의 Service Account 에 대해서 적절한 권한을 반드시 부여할 것 
+
 ```shell
 $ kubectl apply --filename https://storage.googleapis.com/tekton-releases-nightly/pipeline/latest/release.yaml 
 namespace/tekton-pipelines unchanged
@@ -94,3 +96,4 @@ tekton-pipelines-controller-84f9885768-h9zqw   0/1     Terminating         8 (5m
 tekton-pipelines-webhook-6dbd4f6f84-9scrv      0/1     Running             0               23s
 ...
 ```
+
