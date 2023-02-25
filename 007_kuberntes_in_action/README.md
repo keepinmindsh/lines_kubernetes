@@ -167,3 +167,113 @@ $ docker build -t kubia .
 ## YAML 또는 JSON 디스크립터로 파드 생성  
 
 ### [API References](https://kubernetes.io/docs/reference/)
+
+### YAML 디스크립터 이해하기 
+
+- Metadata : 이름, 네임스페이스, 레이블 및 파드에 관한 기타 정보 포함 
+- Spec : 파드 컨테이너, 볼륨, 기타 데이터 등 파드 자체에 관한 실제 명세를 가진다. 
+- Status : 파드 상태, 각 컨테이너 설명과 상태, 파드 내부 IP, 기타 기본 정보 등 현재 실행 중인 파드에 관한 현재 정보를 포함한다. 
+
+```shell
+k get deployment lines-admin-nextjs-deployment -o yaml
+```
+
+```yaml
+apiVersion: apps/v1  # YAML 디스크립터에서 사용한 쿠버네티스 API 버전
+kind: Deployment     # 쿠버네티스 오브젝트/리소스 유형 
+metadata:            # 파드 메타 데이터 ( 이름, 레이블, 어노테이션 등 ) 
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"lines-admin-nextjs-deployment","namespace":"default"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"lines-admin-nextjs"}},"template":{"metadata":{"labels":{"app":"lines-admin-nextjs"}},"spec":{"containers":[{"image":"gcr.io/lines-infra/lines_admin_front:v0.1.0","name":"lines-admin-nextjs","ports":[{"containerPort":3000}],"resources":{"limits":{"cpu":"1024m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"32Mi"}}}]}}}}
+  creationTimestamp: "2023-01-12T13:11:58Z"
+  generation: 3
+  name: lines-admin-nextjs-deployment
+  namespace: default
+  resourceVersion: "54862222"
+  uid: a8dcd5bf-0aed-4175-8fd3-c68c456034a4
+spec:               # 정의 / 내용 
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: lines-admin-nextjs
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: lines-admin-nextjs
+    spec:
+      containers:
+      - image: gcr.io/lines-infra/lines_admin_front:v0.1.0
+        imagePullPolicy: IfNotPresent
+        name: lines-admin-nextjs
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 1024m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 32Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:           # 해당 오브젝트의 상세한 상태 
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: "2023-01-12T13:11:58Z"
+    lastUpdateTime: "2023-01-12T13:12:00Z"
+    message: ReplicaSet "lines-admin-nextjs-deployment-5f85b84f87" has successfully
+      progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2023-02-24T14:56:08Z"
+    lastUpdateTime: "2023-02-24T14:56:08Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 3
+  readyReplicas: 2
+  replicas: 2
+  updatedReplicas: 2
+```
+
+### Pod를 정의하는 간단한 YAML 작성하기 
+
+```yaml
+apiVersion: v1                # 디스크립터는 쿠버네티스 API 버전 v1을 준수함. 
+kind: Pod                     # 오브젝트 종류가 파드임 
+metadata:
+  name: lines-admin-nextjs    # 파드 이름 
+  labels:
+    name: lines-admin-nextjs
+spec:
+  containers:                 # 컨테이너를 만드는 컨테이너 이미지 
+  - name: lines-admin-nextjs  # 컨테이너 이름 
+    image: gcr.io/google-containers/busybox
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8080  # 어플리케이션 수신 포트 
+``` 
+
+### 컨테이너 포트 지정 ( ~ p124 )
+
+ 
