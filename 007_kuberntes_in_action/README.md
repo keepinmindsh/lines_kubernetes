@@ -388,3 +388,8 @@ NAME                                             READY   STATUS    RESTARTS   AG
 lines-admin-nextjs-deployment-5f85b84f87-mxz7b   1/1     Running   0          37h
 lines-admin-nextjs-deployment-5f85b84f87-nzb99   1/1     Running   0          37h
 ```
+
+> bash 쉘이 인식되는 기준으로 !env가 동작하지 않도록 느낌표를 처리하지 않도록 한다. 
+
+셀렉터는 쉼표는 구분된 여러 기준을 포함하는 것도 가능하다. 셀렉터를 통해 선택하기 위해서는 리소스가 모든 기준을 만족해야 한다.  
+예를 들어 제품 카탈로크 마이크로 서비스의 베타 릴리스인 파드를 선택하기 위해서는 app=pc,rel=beta 셀렉터를 사용한다. 
