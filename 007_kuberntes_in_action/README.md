@@ -292,6 +292,10 @@ kubectl explain {오브젝트명}
 kubectl logs lines-admin-nextjs
 ```
 
+```shell
+$ k logs lines-admin-nextjs-deployment-5f85b84f87-mxz7b
+```
+
 > 컨테이너 로그는 하루 단위로, 로그 파일이 10MB 크기에 도달할 때마다 순환된다. kubectl logs 명령은 마지막으로 순환된 로그 항목만 보여준다.
 
 - 컨테이너 이름을 지정해 다중 컨테이너ㅇ 파드에서 로그 가져오기 
@@ -300,4 +304,11 @@ kubectl logs lines-admin-nextjs
 kubectl logs lines-admin-nextjs -c lines-cluster
 ``` 
 
-### 파드에 요청 보내기
+### 파드에 요청 보내기 ( feat. Port Forward)
+
+```shell
+$ k port-forward service/lines-admin-nextjs-service 50101:3000
+```
+
+- 다양한 port-forward 방식 
+  - [Port Forward 를 통한 Application Cluster 에 접근하는 방법](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster)
