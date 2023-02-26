@@ -351,3 +351,40 @@ spec:
       - containerPort: 8080 
         protocol: TCP 
 ```
+
+```shell
+$  k create -f 007_kuberntes_in_action/p132_pod_yaml/lines_sample.yaml
+```
+
+```shell
+$ k get po -L creation_method,env 
+NAME                                             READY   STATUS    RESTARTS   AGE   CREATION_METHOD   ENV
+lines-admin-nextjs-deployment-5f85b84f87-mxz7b   1/1     Running   0          36h                     
+lines-admin-nextjs-deployment-5f85b84f87-nzb99   1/1     Running   0          36h                     
+lines-sample                                     1/1     Running   0          9s    manual 
+```
+
+## 레이블 셀렉터를 이용한 파드 부분 집합 나열  
+
+- 특정한 키를 포함하거나 포함하지 않는 레이블 
+- 특정한 키와 값을 가진 레이블 
+- 특정한 키를 갖고 있지만, 다른 값을 가진 레이블 
+
+```shell
+$ k get po -l creation_method=manual
+NAME           READY   STATUS    RESTARTS   AGE
+lines-sample   1/1     Running   0          18s
+```
+
+```shell
+$ k get po -l env --show-label
+NAME           READY   STATUS    RESTARTS   AGE   LABELS
+lines-sample   1/1     Running   0          45s   creation_method=manual,env=prod
+```
+
+```shell
+$  k get po -l '!env'    
+NAME                                             READY   STATUS    RESTARTS   AGE
+lines-admin-nextjs-deployment-5f85b84f87-mxz7b   1/1     Running   0          37h
+lines-admin-nextjs-deployment-5f85b84f87-nzb99   1/1     Running   0          37h
+```

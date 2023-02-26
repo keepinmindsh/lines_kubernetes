@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lines-sample
+  labels:
+    creation_method: manual
+    env: prod
+spec:
+  containers:
+  - name: kubia
+    image: luksa/kubia
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "128m"
+    ports:
+      - containerPort: 8080
+        protocol: TCP
