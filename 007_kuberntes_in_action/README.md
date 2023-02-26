@@ -312,3 +312,42 @@ $ k port-forward service/lines-admin-nextjs-service 50101:3000
 
 - 다양한 port-forward 방식 
   - [Port Forward 를 통한 Application Cluster 에 접근하는 방법](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster)
+
+## 레이블을 이용한 파드 구성 
+
+기본적으로 MSA 환경에서는 다양한 도메인의 서비스가 기동되어 사용되기 때문에, 각 Workloads 별로의 파드 수 증가는 파드를 분류할 필요가 생기게 된다.  
+예를 들어 마이크로서비스 아키텍처의 경우 배포된 마이크로 서비스의 수는 매우 쉽게 20개를 초과한다. 이러한 구성요소는 복제돼 여러 버전 혹은 릴시스가 동시에  
+실행된다. 이로 인해 시스템에 수백 개 파드가 생길 수 있다. 파드를 정리하는 메커니즘이 없다면 너무 크고 잏해하기 어려운 난장판이 되기 싶다. 
+
+### 레이블 소개 
+
+레이블은 파드와 모든 다른 쿠버네티스 리소스를 조직화 할 수 있는 단순하면서 강력한 쿠버네티스 기능이다. 레이블은 리소스에 첨부하는 키-값 쌍으로, 이 쌍은 
+레이블 셀렉터를 사용해 리소스를 선택할 때 활용된다. 
+
+- label 확인하기 
+
+```shell
+$ k get po --show-labels
+NAME                                             READY   STATUS    RESTARTS   AGE   LABELS
+lines-admin-nextjs-deployment-5f85b84f87-mxz7b   1/1     Running   0          36h   app=lines-admin-nextjs,pod-template-hash=5f85b84f87
+lines-admin-nextjs-deployment-5f85b84f87-nzb99   1/1     Running   0          36h   app=lines-admin-nextjs,pod-template-hash=5f85b84f87
+```
+
+- labels 이 적용되어 있는 Pod 생성하기 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: lines-sample 
+  labels:
+    creation_method: manual 
+    env: prod
+spec: 
+  containers: 
+    - image: luksa/luksa 
+      name: kubia 
+      ports: 
+      - containerPort: 8080 
+        protocol: TCP 
+```
