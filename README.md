@@ -17,3 +17,7 @@
 # Cloud Platform 
 
 - [GCP](https://github.com/keepinmindsh/lines_kubernetes/tree/main/006_GCP)
+
+# Tekton Pipeline 
+
+- [Tekton Pipeline](https://github.com/keepinmindsh/lines_kubernetes/tree/main/010_tekton_pipelines)
