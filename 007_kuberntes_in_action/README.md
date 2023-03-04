@@ -456,3 +456,50 @@ spec:
     ports:
       - containerPort: 8080
 ```
+
+## 파드에 어노테이션 달기 
+
+파드 및 다른 오브젝트는 레이블 이외에 어노테이션을 가질 수 있다. 어노테이션은 키-값 쌍으로 레이블과 비슷하지만 식별 정보를 갖지 않는다. 레이블은 오브젝트를 
+묶는데 사용할 수 있지만, 어노테이션는 그럴 수 없다.  
+ 어노테이션은 많은 정보를 보유할 수 있다. 이는 주로 도구들에서 사용된다. 특정 어노테이션은 쿠버네티스에 의해 자동으로 오브젝트에 추가되지만, 나머지 어노테이션은 사용자에 의해 수동으로 추가된다.  
+어노테이션은 쿠버네티스에 새로운 기능을 추가할 때 흔히 사용된다. 
+
+```shell
+$ k get deployment lines-admin-nextjs-deployment -o yaml
+```
+
+```yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"lines-admin-nextjs-deployment","namespace":"default"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"lines-admin-nextjs"}},"template":{"metadata":{"labels":{"app":"lines-admin-nextjs"}},"spec":{"containers":[{"image":"gcr.io/lines-infra/lines_admin_front:v0.1.0","name":"lines-admin-nextjs","ports":[{"containerPort":3000}],"resources":{"limits":{"cpu":"1024m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"32Mi"}}}]}}}}
+  creationTimestamp: "2023-01-12T13:11:58Z"
+  generation: 3
+  name: lines-admin-nextjs-deployment
+  namespace: default
+  resourceVersion: "54862222"
+  uid: a8dcd5bf-0aed-4175-8fd3-c68c456034a4
+spec:
+  progressDeadlineSeconds: 600
+```
+
+### 실제로 annotations 추가하기 
+
+```shell 
+$ k annotate deployment lines-admin-nextjs-deployment lines/admin-annotation="dream come true"
+```
+
+```shell
+$ k describe deployment lines-admin-nextjs-deployment 
+
+Name:                   lines-admin-nextjs-deployment
+Namespace:              default
+CreationTimestamp:      Thu, 12 Jan 2023 22:11:58 +0900
+Labels:                 <none>
+Annotations:            deployment.kubernetes.io/revision: 1
+                        lines/admin-annotation: dream come true
+```
+
