@@ -392,4 +392,67 @@ lines-admin-nextjs-deployment-5f85b84f87-nzb99   1/1     Running   0          37
 > bash 쉘이 인식되는 기준으로 !env가 동작하지 않도록 느낌표를 처리하지 않도록 한다. 
 
 셀렉터는 쉼표는 구분된 여러 기준을 포함하는 것도 가능하다. 셀렉터를 통해 선택하기 위해서는 리소스가 모든 기준을 만족해야 한다.  
-예를 들어 제품 카탈로크 마이크로 서비스의 베타 릴리스인 파드를 선택하기 위해서는 app=pc,rel=beta 셀렉터를 사용한다. 
+예를 들어 제품 카탈로크 마이크로 서비스의 베타 릴리스인 파드를 선택하기 위해서는 app=pc,rel=beta 셀렉터를 사용한다.
+
+
+# Section 4 
+
+## 레이블과 셀렉터를 이용한 파드 스케쥴링 제한  
+
+쿠버네티스는 모든 노드를 하나의 대규모 배포 플랫폼으로 노출하기 때문에, 파드가 어느 노드에 스케쥴링 됐느냐는 중요하지 않다. 각 파드는 요청한 만큼의 
+정확한 컴퓨팅 리소스를 할당 받는다.  
+
+### 하지만... 
+
+파드를 스케쥴링할 위치를 결정할 때 약간이라도 영향을 미치고 싶은 상황이 있다. 예를 들어 하드웨어 인프라가 동일하지 않는 경우를 들 수 있다. 워커 노드 일부는 
+HDD를 가지고 있고 나머지에는 SSD를 가지고 있는 경우, 특정 파드를 한 그룹웨 나머지 파드는 다른 그룹에 스케쥴링 되도록 할 수 있다. 
+
+### 워커노드 분류에 레이블 사용 
+
+노드를 포함한 모든 쿠버네티스 오브젝트에 레이블을 부탁할 수 있다. 일반적으로 ops 팀은 새 노드를 클러스터에 추가할 때, 노드가 제공하는 하드웨어나 파드를 스케줄링할 때 
+유용하게 사용할 수 있는 기타 사항을 레이블로 지정해 노드를 분류한다.
+
+```shell
+$ k get nodes
+ 
+NAME                                           STATUS   ROLES    AGE     VERSION
+gke-lines-cluster-default-pool-0f0b3237-ck61   Ready    <none>   7d22h   v1.24.9-gke.3200
+gke-lines-cluster-default-pool-0f0b3237-l1ie   Ready    <none>   7d21h   v1.24.9-gke.3200
+gke-lines-cluster-default-pool-0f0b3237-sfj8   Ready    <none>   7d22h   v1.24.9-gke.3200
+
+$ k label node gke-lines-cluster-default-pool-0f0b3237-ck61 test=true 
+node/gke-lines-cluster-default-pool-0f0b3237-ck61 labeled
+
+$ k get node -l test=true 
+NAME                                           STATUS   ROLES    AGE     VERSION
+gke-lines-cluster-default-pool-0f0b3237-ck61   Ready    <none>   7d22h   v1.24.9-gke.3200
+
+$ k get nodes -L test 
+NAME                                           STATUS   ROLES    AGE     VERSION            TEST
+gke-lines-cluster-default-pool-0f0b3237-ck61   Ready    <none>   7d22h   v1.24.9-gke.3200   true
+gke-lines-cluster-default-pool-0f0b3237-l1ie   Ready    <none>   7d22h   v1.24.9-gke.3200
+gke-lines-cluster-default-pool-0f0b3237-sfj8   Ready    <none>   7d22h   v1.24.9-gke.3200
+```
+
+#### NodeSelector를 통한 특정 Label의 Pod 배포 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: HelloWorld
+  labels:
+    name: HelloWorld
+spec:
+  nodeSelector:
+    test: "true"
+  containers:
+  - name: HelloWorld
+    image: gcr.io/google-containers/busybox
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8080
+```
