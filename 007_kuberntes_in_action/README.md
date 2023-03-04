@@ -503,3 +503,69 @@ Annotations:            deployment.kubernetes.io/revision: 1
                         lines/admin-annotation: dream come true
 ```
 
+## 네임스페이스를 사용한 리소스 그룹화  
+
+쿠버네티스 테임스페이스는 오브젝트 이름의 범위를 제공한다. 모든 리소스를 하나의 단일 네임 스페이스에 두는 대신에 여러 네임스페이스로 분할 할 수 있으며, 이렇게 
+분리된 네임스페이스는 같은 리소스 이름을 다른 네임스페이스에 걸쳐 여러번 사용할 수 있게 해준다.  
+
+### 필요한 부분은 
+
+여러 네임스페이스를 사용하면 많은 구성 요소를 가진 복잡한 시스템을 좀 더 작읍 개별 그룹으로 분리할 수 있다. 또한 멀티 테넌스 환경 처럼 리소스를 분리하는데 사용된다.  
+네임스페이스를 리소스를 격리하는 것 외에도 특정 사용자가 지정된 리소스에 접근할 수 있도록 허용하고, 개발 사용자가 사용할 수 있는 컴퓨팅 리소스를 제한하는 데에도 사용된다. 
+
+- 네임스페이스 조회 하고 Object 살펴보기 
+
+```shell
+$ k get ns 
+NAME                         STATUS   AGE
+argocd                       Active   3d23h
+default                      Active   91d
+kube-node-lease              Active   91d
+kube-public                  Active   91d
+kube-system                  Active   91d
+tekton-pipelines             Active   29d
+tekton-pipelines-resolvers   Active   29d
+```
+
+```shell
+$ k get configmap -n tekton-pipelines 
+config-artifact-bucket     0      27d
+config-artifact-pvc        0      27d
+config-defaults            1      27d
+config-leader-election     1      27d
+config-logging             3      27d
+config-observability       1      27d
+config-registry-cert       0      27d
+config-trusted-resources   1      27d
+feature-flags              12     27d
+kube-root-ca.crt           1      27d
+pipelines-info             1      27d
+```
+
+- namespace를 yaml로 만들어보기 / 확인하기 / 지우기 
+
+```yaml
+apiVersion: v1 
+kind: Namespace 
+metadata:
+  name: custom-namespace
+```
+
+```shell
+$ k create -f /Users/lines/sources/02_linesgits/lines_kubernetes/007_kuberntes_in_action/p146_create_namespaces/custom_namespace.yaml
+namespace/custom-namespace created
+
+$ k get namespaces 
+NAME                         STATUS   AGE
+argocd                       Active   4d
+custom-namespace             Active   78s
+default                      Active   91d
+kube-node-lease              Active   91d
+kube-public                  Active   91d
+kube-system                  Active   91d
+tekton-pipelines             Active   29d
+tekton-pipelines-resolvers   Active   29d
+
+$ k delete namespace custom-namespace
+namespace "custom-namespace" deleted
+```
