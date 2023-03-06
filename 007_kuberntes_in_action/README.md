@@ -569,3 +569,54 @@ tekton-pipelines-resolvers   Active   29d
 $ k delete namespace custom-namespace
 namespace "custom-namespace" deleted
 ```
+
+### 다른 네임 스페이스의 오브젝트 관리 및 격리 
+
+```shell
+$ k create -f deployment.yaml -n custom-namespace 
+``` 
+
+네임스페이스를 사용하면 오브젝트를 별도 그룹으로 분리해 특정한 네임스페이스 안에 속한 리소스를 대상으로 작업할 수 있게 해주지만, 
+실행 중인 오브젝트에 대한 격리는 제공하지 않는다. 
+
+## 파드 중지와 제거 
+
+```shell 
+$ k delete po lines-sample
+```
+
+### Label Selector를 이용한 파드 삭제  
+
+```shell
+$ k delete po -l create_method=manual
+
+$ k delete po -l rel=canary  
+```
+
+### Namespace 전체 삭제 
+
+명령을 사용해 네임스페이스 전체를 삭제할 수 있다. 
+
+```shell
+$ k delete ns custom-namespace 
+```
+
+### 네임스페이스를 유지하면서 네임스페이스 안에 있는 모든 파드 삭제 
+
+```shell
+$ k get pods 
+```
+
+아래와 같은 삭제 방식은 Replication Controller가 남아 있을 경우 다시 파드가 생성된다. 
+
+```shell
+$ k delete po --all 
+```
+
+namespace 내에서 존재하는 모든 오브젝트를 삭제하는 방식은 아래의 명령어를 활용할 수 있다.  
+
+```shell
+k delete all -all 
+```
+
+> 해당 명령은 Kubernetes 서비스도 삭제하지만 잠시 후에 자동으로 다시 생성된다. 
