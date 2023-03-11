@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zomboid-server
+spec:
+  selector:
+    matchLabels:
+      app: zomboid-server
+  template:
+    metadata:
+      labels:
+        app: zomboid-server
+    spec:
+      containers:
+        - name: zomboid-server
+          image: docker.io/afey/zomboid
+          ports:
+            - containerPort: 16261
+              name: game
+          volumeMounts:
+            - name: zomboid-data
+              mountPath: /home/steam/zomboid
+      volumes:
+        - name: zomboid-data
+          emptyDir: {}
