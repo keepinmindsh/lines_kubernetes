@@ -925,3 +925,49 @@ k scale job multi-completion-batch-job --replicas 3
 
 파드 스펙에 activeDeadlineSeconds 속성을 설정해 파드의 실행 시간을 제한할 수 있다. 파드가 이보다 오래 실행되면 시스템이 종료를 시도하고 
 잡을 실패한 것으로 표시한다. 
+
+### 잡을 주기적으로 또는 한 번 실행되도록 스케쥴링하기
+
+쿠버네티스에서의 크론작업은 크론잡 리소스를 만들어 구성한다. 잡 실행을 위한 스케쥴은 잘 알려진 크론 형식으로 지정하므로, 일반적인 크론 작업에 익숙하다면 
+금방 쿠버네티스의 크론 잡을 이해할 수 있을 것이다.  
+
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: hello
+              image: busybox:1.28
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure
+```
+
+스케쥴 설정하기  
+- 분
+- 시 
+- 일
+- 월
+- 요일
+
+예시) 0,15,30,45 * * * * : 이는 매시간, 매일, 매월, 모든 요일의 0, 15, 30, 45 분에 실행됨을 의미한다. 
+
+```shell
+k create -f ~/sources/02_linesgits/lines_kubernetes/007_kuberntes_in_action/p200_cron_jobs/cron_jobs_sample.yaml 
+
+k get cronjob
+
+k delete cronjob.batch/hello
+```
+
