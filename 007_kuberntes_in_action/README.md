@@ -678,3 +678,73 @@ spec:
 > - API 버전 ( v1beta2 )
 > core API 그룹에 속하는 어떤 쿠버네티스 리소스들은 apiVersion 필드를 지정할 필요가 없다는 것을 책 전체에 걸쳐서 보게 될 것이다. 
 > 최신 쿠버네티스 버전에서 도입된 다른 리소스는 여러 API 그룹으로 분류된다. 
+
+## 리플리카셋 생성, 검사 
+
+- replicaset 조회 
+
+```shell
+$ k get rs
+NAME                                       DESIRED   CURRENT   READY   AGE
+lines-admin-nextjs-deployment-5f85b84f87   0         0         0       58d
+lines-admin-nextjs-deployment-864f94fc8d   2         2         2       3d14h
+```
+
+- 상세 정보 확인하기 
+
+```shell
+$ k describe rs
+Name:           lines-admin-nextjs-deployment-5f85b84f87
+Namespace:      default
+Selector:       app=lines-admin-nextjs,pod-template-hash=5f85b84f87
+Labels:         app=lines-admin-nextjs
+                pod-template-hash=5f85b84f87
+Annotations:    deployment.kubernetes.io/desired-replicas: 2
+                deployment.kubernetes.io/max-replicas: 3
+                deployment.kubernetes.io/revision: 1
+                lines/admin-annotation: dream come true
+                lines/hello-annotation: dream come true
+Controlled By:  Deployment/lines-admin-nextjs-deployment
+Replicas:       0 current / 0 desired
+Pods Status:    0 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  app=lines-admin-nextjs
+           pod-template-hash=5f85b84f87
+  Containers:
+   lines-admin-nextjs:
+    Image:      gcr.io/lines-infra/lines_admin_front:v0.1.0
+    Port:       3000/TCP
+    Host Port:  0/TCP
+    Limits:
+      cpu:     1024m
+      memory:  1Gi
+    Requests:
+      cpu:        100m
+      memory:     32Mi
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:           <none>
+```
+
+### 레플리카셋의 표현적인 레이블 셀렉터 사용하기  
+
+```yaml
+selector: 
+  matchExpressions: 
+    - key: app 
+      operator: In 
+      values: 
+        - kubia 
+```
+
+- In은 레이블의 값이 지정된 값 중 하나와 일치해야 한다. 
+- NotIn은 레이블의 값이 지정된 값과 일치하지 않아야 한다. 
+- Exists는 파드는 지정된 키를 가진 레이블이 포함돼야한다. 이 연산자를 사용할 때는 값 필드를 지정하지 않아야 한다. 
+- DoesNotExist는 파다에 지정된 키를 가진 레이블이 포함돼 있지 않아야 한다. 값 필드를 지정하지 않아야 한다.  
+
+### 레플리카셋 정리 
+
+```yaml
+$ k delete rs kubia 
+```
