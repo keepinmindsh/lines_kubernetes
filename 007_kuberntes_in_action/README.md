@@ -634,7 +634,9 @@ k delete all -all
 
 # Section 5 
 
-## 리플리카셋과 리플리케이션 컨트롤러 비교 
+## 레플리카셋 
+
+### 레플리카셋과 리플리케이션 컨트롤러 비교 
 
 레플리카 셋은 레플리케이션 컨트롤러와 똑같이 동작하지만 좀 더 풍부한 표현식을 사용하는 파드 셀렉터를 갖고 있다. 레플리케이션컨터롤러의 레이블 셀렉터는 특정 레이블이 있는 파드만 
 매칭 시킬 수 있는 방면, 레플리카셋의 셀렉터는 특정 레이블이 없는 파드나 레이블의 값과 상관 없이 특정 레이블의 키를 갖는 파드를 매칭 시킬 수 있다.  
@@ -679,7 +681,7 @@ spec:
 > core API 그룹에 속하는 어떤 쿠버네티스 리소스들은 apiVersion 필드를 지정할 필요가 없다는 것을 책 전체에 걸쳐서 보게 될 것이다. 
 > 최신 쿠버네티스 버전에서 도입된 다른 리소스는 여러 API 그룹으로 분류된다. 
 
-## 리플리카셋 생성, 검사 
+### 리플리카셋 생성, 검사 
 
 - replicaset 조회 
 
@@ -748,3 +750,58 @@ selector:
 ```yaml
 $ k delete rs kubia 
 ```
+
+## 데몬셋 
+
+### 데몬셋을 사용해 각 노드에서 정확히 한개의 파드 실행 
+
+클러스터의 모든 노드에, 노드당 하나의 파드가 실행되길 원하는 경우가 있을 수 있다.    
+
+예) 로그수집기, 리소스 모니터, Kube-proxy 프로세스 등등 
+
+### 데몬셋으로 모든 노드에 파드 실행하기  
+
+레플리카셋이 클러스터에 원하는 수의 파드 복제본이 존재하는지 확인하는 반만, 데몬셋에는 원하는 복제본 수라는 개념이 없다. 
+파드 셀렉터와 일치하는 파드 하나가 각 노드에서 실행중인지 확인하는 것이 데몬셋이 수행해야하는 역할이기 때문에 복제본의 개념이 필요하지 않다. 
+
+### 예제를 사용한 데몬셋 설명 
+
+SSD를 갖는 모든 노드에서 실행돼애햐난 ssd-monitor 라는 데몬이 있다고 가정하자. SSD를 갖고 있다고 표시된 모든 노드에서 이 데몬을 실행하는 데몬셋을 만든다. 
+클러스터 관리자가 이런 모든 노드에 disk=ssd 레이블을 추가했으므로 해당 레이블이 있는 노드만 선택하는 노드 셀렉터를 사용해 데몬셋을 작성한다.  
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ssd-monitor
+spec:
+  selector:
+    matchLabels:
+      app: ssd-monitor
+  template:
+    metadata:
+      labels:
+        app: ssd-monitor
+    spec:
+      nodeSelector:
+        app: sdd-monitor
+      containers:
+        - name: main
+          image: luksa/ssd-monitor
+```
+
+```shell
+k create -f ~/sources/02_linesgits/lines_kubernetes/007_kuberntes_in_action/p191_deamonsets/deamon_sets_sample.yaml
+```
+
+### 필요한 레이블을 노드에 추가하기 
+
+```shell
+k get node 
+
+k lebel node {node name} disk=ssd
+
+k get po   
+```
+
+데몬셋을 삭제하거나 대상으로 타케팅된 레이블이 변경될 경우 daemonSet에 의해서 생성된 파드도 삭제된다. 
