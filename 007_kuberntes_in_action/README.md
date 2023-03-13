@@ -1133,6 +1133,50 @@ LINES_ADMIN_NEXTJS_SERVICE_PORT=tcp://10.124.3.83:3000
 HOME=/home/bloguser
 ```
 
+
+
 #### DNS를 통한 서비스 검색 
 
 파드가 내부 DNS 서버에서 DNS 항목을 가져오고 서비스 이름을 알고 있는 클라이언트 파드는 환경 변수 대신 FQDN으로 액세스 할 수 있다. 
+
+#### FQDN을 통한 서비스 연결
+
+```
+backend-database.default.svc.cluster.local 
+```
+
+backend-database는 서비스 이름이고 default는 서비스가 정의된 네임스페이스를 나타내며, svc.cluster.local은 모든 클러스터의 로컬 서비스 이름에 사용되면 클러스터의 도메인 접미사이다. 
+
+> 클라이언트는 여전히 서비스의 포트 번호를 알아야 한다. 서비스가 표준 포트( 80, 5432 )를 사용하는 경우 문제가 되지 않는다.  
+> 그렇지 않은 경우 크라리언트는 환경 변수에서 포트 번호를 얻을 수 있어야 한다. 
+
+서비스에 연결하는 것은 훨씬 간단한다. 프론트엔드 파드가 데이터베이스 파드와 동일한 네임스페이스에 있을 경우 svc.cluster.local 접시마와 테임스페이스는 생략할 수 있다. 
+따라서 서비스를 단순히 backend-database라고 할수 있다. 
+
+#### 파드 컨테이너 내에서 셸 실행 
+
+> 이 작업을 수행하려면 컨테이너 이미지에서 셸 바이너리 실행 파일이 사용 가능해야 한다. 
+
+```shell
+$ k exec -it {pod name} bash 
+
+$ curl http://kubia.default.svc.cluster.local 
+
+$ curl http://kubia.default 
+
+$ curl http://kubia 
+
+# 위처럼 요청 url에서 서비스 이름을 사용해 서비스에 엑세스 할 수 있다. 각 파드 컨테이너 내부의 DNS Resolver가 구성돼 있기 때문에 네임스페이스와 svc.cluster.local 접미사를 생략할 수 있다. 
+# 컨테이너에서 /ect/resolv.conf 파일을 보면 이해할 수 있다. 
+
+$ cat /etc/resolv.conf
+```
+
+#### 서비스에 핑을 할수 없는 이유 
+
+```shell
+$ ping kubia 
+```
+
+서비스로 curl은 동작하지만 핑은 응답이 없다. 이는 서비스의 클러스터 IP가 가장 IP이므로 서비스 포트와 결합된 경우에만 의미가 있기 때문이다. 
+
