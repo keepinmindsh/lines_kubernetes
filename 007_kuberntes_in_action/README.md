@@ -1180,3 +1180,77 @@ $ ping kubia
 
 서비스로 curl은 동작하지만 핑은 응답이 없다. 이는 서비스의 클러스터 IP가 가장 IP이므로 서비스 포트와 결합된 경우에만 의미가 있기 때문이다. 
 
+### 클러스터 외부에 있는 서비스 연결 
+
+쿠버네티스 서비스 기능으로 외부 서비스를 노출하려는 경우가 있을 수 있다. 서비스가 클러스터내에 있는 파드로 연결을 전달하는 게 아니라, 외부 IP와 포트로 연결을 전달하는 것이다. 
+
+#### 서비스 엔드포인트 
+
+서비스는 파드이 직접 연결되지 않는다. 대신 엔드포인트 리소스가 그 사이에 있다. 
+
+```shell
+$  k describe svc lines-admin-nextjs-service
+Name:                     lines-admin-nextjs-service
+Namespace:                default
+Labels:                   <none>
+Annotations:              cloud.google.com/neg: {"ingress":true}
+Selector:                 app=lines-admin-nextjs  # 서비스의 파드 셀렉터는 엔드포인트 목록을 만드는 데 사용한다. 
+Type:                     LoadBalancer
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.124.3.83
+IPs:                      10.124.3.83
+LoadBalancer Ingress:     34.27.67.137
+Port:                     <unset>  3000/TCP
+TargetPort:               3000/TCP
+NodePort:                 <unset>  30765/TCP
+Endpoints:                10.120.0.11:3000,10.120.3.17:3000   # 이 서비스의 엔드 포인트를 나타내는 파드 IP와 포트 목록 
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:                   <none>
+```
+
+엔드포인트 리소스는 서비스로 노출되는 파드의 IP 주소와 포트 목록이다. 엔드 포인트 리소스는 다른 쿠버네티스 리소스와 유사하므로 kubectl get을 사용해 기본 정보를 표시할 수 있다. 
+
+```shell
+$ k get endpoints lines-admin-nextjs-service
+NAME                         ENDPOINTS                           AGE
+lines-admin-nextjs-service   10.120.0.11:3000,10.120.3.17:3000   60d
+```
+
+#### 서비스 엔드 포인트 수동 구성 
+
+파드 셀렉터 없이 서비스를 만들변 쿠버네티스는 엔드포인트 리소스를 만들지 못한다. 파드 셀렉터가 없어, 서비스에 포함된 파드가 무엇인지 알 수 없다. 
+
+##### 셀렉터 없이 서비스 생성 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: external-service # 서비스 이름은 엔드포인트 오브젝트 이름과 일치해야 한다.  
+spec:   # 이 서비스에는 셀렉터가 정의되어 있지 않다. 
+  ports:
+    - port: 80 
+```
+
+##### 셀렉터가 없는 서비스에 관한 엔드포인트 리소스 생성 
+
+엔드 포인트는 별도의 리소스 이며, 서비스 속성은 아니다. 셀렉터가 없는 서비스를 생성했기 때문에 엔드포인트 리소스가 자동으로 생성되지 않는다. 
+
+```yaml
+apiVersion: v1 
+kind: Endpoints 
+metadata: 
+  name: external-service # 엔드포인트 오브젝트의 이름은 서비스 이름과 일치해야 한다. 
+subsets: 
+  - addresses: 
+    - ip: 11.11.11.11 # 서비스가 연결을 전달할 엔드 포인트의 IP 
+    - ip: 22.22.22.22
+    ports:
+    - port: 80 # 엔드 포인트의 대상 포트  
+      
+```
+
+엔드 포인트 오브젝트는 서비스와 이름이 같아야 하고 서비스를 제공하는 대상 IP 주소와 포트 목록을 가져야 한다. 서비스와 엔드 포인트 리소스가 모두 서버에 게시되면 파드 셀렉터가 있는 
+일반 서비스 처럼 서비스를 사용할 수 있다. 서비스가 만들어진 후 만들어진 컨테이너에는 서비스의 환경 변수가 포함되며 IP:포트 쌍에 대한 모든 연결은 서비스 엔드 포인트 간에 로드 밸런싱 한다. 
