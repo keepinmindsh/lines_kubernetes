@@ -971,3 +971,168 @@ k get cronjob
 k delete cronjob.batch/hello
 ```
 
+# Section 6 
+
+## 서비스
+
+쿠버네티스의 서비스는 동일한 서비스를 제공하는 파드 그룹에 지속적인 단일 접점을 만들려고 할 때 생성하는 리소스다. 각 서비스는 서비스가 존재하는 동안 절대 바뀌지 않는 IP 주소와 포트가 있다. 
+
+### Service 구성
+
+서비스는 다수 파드 앞에서 로드 밸런서 역할을 한다. 파드가 하나가 있으면 서비스는 이 파드 하나에 정적주소를 제공한다.
+서비스를 지원하는 파드가 하나든지 그룹이든지에 관계없이 해당 파드가 클러스터 내에서 이동하면서 생성되고 삭제되며 IP가
+변경되지만, 서비스는 항당 동일한 주소를 가진다.
+
+```shell
+
+$ kubectl apply -f helloworld.service.yaml
+
+# 변경 
+$ kubectl expose pod lines-cluster --type=LoadBalancer --name lines-admin-front-http
+
+```
+
+- 서비스 조회하기
+
+```shell
+kubectl get services
+```
+
+### yaml 디스크립터 
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: lines-admin-nextjs-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: lines-admin-nextjs
+  ports:
+    - port: 3000
+      targetPort: 3000
+```
+
+이 서비스는 포트 3000의 연결을 허용하고 각 연결을 app=lines-admin-nextjs 와 일치하는 파드의 포트 8080으로 라우팅한다. 
+
+- 서비스 확인하기 
+
+```shell
+$ k get svc
+kubernetes                   ClusterIP      10.124.0.1    <none>         443/TCP          100d
+lines-admin-nextjs-service   LoadBalancer   10.124.3.83   34.27.67.137   3000:30765/TCP   60d
+```
+
+- 실행 중인 컨테이너에 원격으로 명령어 실행 
+
+```shell
+$ k exec kubia-7nog1 -- curl -s http://10.111.249.153 
+```
+
+> 더블 대시를 사용하는 이유  
+> 명령어의 더블 대시(--)는 kubectl 명령줄 옵션의 끝을 의미한다. 더블 대시 뒤의 모든 것은 파드 내에서 실행돼야 하는 명령이다.  
+> 명령 줄에 대시로 시작하는 인수가 없는 경우 더블 대시를 사용할 필요가 없다. 
+
+#### 서비스의 세션 어피니티 구성 
+
+특정 클라이언트의 모든 요청을 매번 같은 파드로 리디렉션하려면 서비스의 세션 어피니티 속성을 기본값 None 대신 ClientIP로 설정한다.  
+서비스 프롲ㄱ시는 동일한 클라이언트 IP의 모든 요청을 동일한 파드로 전달한다. 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+spec: 
+  sessionAffinity: ClientIP 
+  ...
+```
+
+#### 동일한 서비스에서 여러 개의 포트 노출 
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata:
+    name: kubia 
+spec: 
+  ports:
+    - name: http 
+      port: 80 
+      targetPort: 8080
+    - name: https
+      port: 443 
+      targetPort: 8443
+```
+
+#### 이름이 지정된 포트 사용 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lines-sample
+  labels:
+    creation_method: manual
+    env: prod
+spec:
+  containers:
+  - name: kubia
+    image: luksa/kubia
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "128m"
+    ports:
+      - name: http 
+        containerPort: 8080
+      - name: https
+        containerPort: 8443
+```
+
+#### 서비스에 이름이 지정된 포트 참조하기 
+
+- 포트 80은 http라는 컨테이너 포트에 매핑된다. 
+- 포트 443은 컨테이너 포트의 이름이 https인 것에 매핑된다. 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+spec: 
+  ports:
+    - name: http 
+      port: 80 
+      targetPort: http
+    - name: https
+      port: 443 
+      targetPort: https
+```
+
+#### 환경 변수를 통한 서비스 검색 
+
+```yaml
+$ k exec lines-admin-nextjs-deployment-864f94fc8d-j4bkj env
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+HOSTNAME=lines-admin-nextjs-deployment-864f94fc8d-j4bkj
+NODE_VERSION=19.3.0
+YARN_VERSION=1.22.19
+NODE_ENV=production
+PORT=3000
+KUBERNETES_SERVICE_HOST=10.124.0.1
+KUBERNETES_SERVICE_PORT=443
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+LINES_ADMIN_NEXTJS_SERVICE_SERVICE_HOST=10.124.3.83
+LINES_ADMIN_NEXTJS_SERVICE_PORT_3000_TCP_PROTO=tcp
+KUBERNETES_PORT=tcp://10.124.0.1:443
+KUBERNETES_PORT_443_TCP_PORT=443
+LINES_ADMIN_NEXTJS_SERVICE_PORT_3000_TCP=tcp://10.124.3.83:3000
+LINES_ADMIN_NEXTJS_SERVICE_PORT_3000_TCP_PORT=3000
+LINES_ADMIN_NEXTJS_SERVICE_PORT_3000_TCP_ADDR=10.124.3.83
+KUBERNETES_SERVICE_PORT_HTTPS=443
+KUBERNETES_PORT_443_TCP=tcp://10.124.0.1:443
+KUBERNETES_PORT_443_TCP_ADDR=10.124.0.1
+LINES_ADMIN_NEXTJS_SERVICE_SERVICE_PORT=3000
+LINES_ADMIN_NEXTJS_SERVICE_PORT=tcp://10.124.3.83:3000
+HOME=/home/bloguser
+```
+
+#### DNS를 통한 서비스 검색 
+
+파드가 내부 DNS 서버에서 DNS 항목을 가져오고 서비스 이름을 알고 있는 클라이언트 파드는 환경 변수 대신 FQDN으로 액세스 할 수 있다. 
