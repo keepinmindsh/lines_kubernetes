@@ -1254,3 +1254,85 @@ subsets:
 
 엔드 포인트 오브젝트는 서비스와 이름이 같아야 하고 서비스를 제공하는 대상 IP 주소와 포트 목록을 가져야 한다. 서비스와 엔드 포인트 리소스가 모두 서버에 게시되면 파드 셀렉터가 있는 
 일반 서비스 처럼 서비스를 사용할 수 있다. 서비스가 만들어진 후 만들어진 컨테이너에는 서비스의 환경 변수가 포함되며 IP:포트 쌍에 대한 모든 연결은 서비스 엔드 포인트 간에 로드 밸런싱 한다. 
+
+
+#### 외부 서비스를 위한 별칭 생성 
+
+##### External 별칭 생성 
+
+서비스를 사용하는 파드에섯 ㅣㄹ제 서비스 이름과 위치가 숨겨져 나중에 externalName 속성을 변경하거나 유형을 다시 ClusterIP로 변경하고 서비스 스펙을 만들어 
+서비스 스펙을 수정하면 다중에 다른 서비스를 가리킬 수 있다. 
+
+ExternalName 서비스는 DNS 레벨에서만 구현된다. 서비스에 관한 간단한 CNAME DNS 레코드가 생성된다. 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: external-service
+spec:
+  type: ExternalName 
+  externalName: someapi.somecompany.com
+  ports:  
+  - port: 80
+```
+
+### 외부 클라이언트에 서비스 노출 
+
+- 노드 포트로 서비스 유형 설정 
+- 서비스 유형을 노드 포트로 유형의 확장인 로드밸런서로 설정 
+- 단일 IP 주소로 여러 서비스를 노출하는 인그레스 리소스 만들기 
+
+#### 노드 포트 서비스 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata:
+  name: kubia-nodeport 
+spec: 
+  type: NodePort 
+  ports:
+    - port: 80 
+      targetPort: 8080 
+      nodePort: 30123 
+  selector:
+    app: kubi 
+```
+
+```shell
+$ k get svc kubia-nodeport
+```
+
+##### 노드포트 서비스에 액세스 할 수 있도록 방화벽 규칙 변경 
+
+```shell
+gcloud copute firewall-rules create kubia-svc --allow=tcp:30123 
+```
+
+#### 로드밸런서 서비스 생성 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: kubia-loadbalancer 
+spec:
+  type: LoadBalancer 
+  ports:
+  - port: 80
+    targetPort: 8080 
+  selector:
+    app: kubia
+```
+
+```shell
+$ k get svc kubia-loadbalancer 
+```
+
+#### 외부 연결 특성의 이해 
+
+```yaml
+sepc:
+  externalTrafficPolicy: Local
+```
