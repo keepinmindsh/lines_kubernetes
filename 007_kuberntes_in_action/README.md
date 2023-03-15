@@ -1336,3 +1336,55 @@ $ k get svc kubia-loadbalancer
 sepc:
   externalTrafficPolicy: Local
 ```
+
+### 인그레스 리소스로 서비스 외부 노출  
+
+인그레스 : 들어가거나 들어가는 행위, 들어갈 권리, 틀어갈 수단이나 장소, 진입로 
+
+#### 인그레스가 필요한 이유 
+
+로드밸런서 서비스는 자신의 공용 IP 주소를 가진 로드 밸런서가 필요하지만, 인그레스는 한 IP 주소로 수십 개의 서비스에 접근이 가능하도록 지원해준다. 
+클라이언트가 HTTP 요청을 인그레스에 보낼 때, 요청한 호스트와 경로에 따라 요청을 전달할 서비스가 결정된다.  
+
+인그레스는 네트워크 스택의 어플리케이션 계층에서 작동하며 서비스가 할 수 없는 쿠키 기반 세션 어피니티 등과 같은 기능을 제공할 수 있다. 
+
+#### 인그레스 컨트롤러가 필요한 경우  
+
+인그레스 오브젝트가 제공하는 기능을 살펴보기 전에 인그레스 리소스를 작동시키려면 클러스터에 인그레스 컨트롤러를 실행해야 한다. 쿠버네티스 환경마다 다른 컨트롤러 구현을 
+사용할 수 있지만 일부는 기본 컨트롤러를 전혀 제공하지 않는다. 
+
+##### Minikube에서 인그레스 애드온 활성화 
+
+```shell
+$ minikube addons list 
+
+$ minikube addons enable ingress 
+
+$ k get po --all-namespaces 
+```
+
+#### 인그레스 리소스 생성  
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress 
+metadata: 
+  name: kubia 
+spec: 
+  rules: 
+  - host: kubia.example.com 
+    http: 
+    paths:
+      - path: / 
+        backend: 
+          serviceName: kubia-nodeport 
+          servicePort: 80
+``` 
+
+> 클라우드 공급자의 인그레스 컨트롤러는 인그레스가 노드포트 서비스를 가리킬 것을 요구한다. 하지만 그것이 쿠버네티스 자체의 요구사항은 아니다 
+
+##### 인그레스로 서비스 액세스  
+
+```shell
+$ k get ingresses
+```
