@@ -1388,3 +1388,14 @@ spec:
 ```shell
 $ k get ingresses
 ```
+
+##### 인그레스 컨트롤러가 구성된 호스트의 IP를 인그레스 엔드포인트로 지정 
+
+IP를 알고나면 kubia.example.com을 해당 IP로 확인하도록 DNS 서버를 구성하거나, 다음 줄을 /etc/hosts에 추가할 수 있다. 
+
+##### 인그레스로 파드 액세스 
+
+```shell
+$ curl http://kubia.example.com 
+You've hit kubia-ke823
+```
