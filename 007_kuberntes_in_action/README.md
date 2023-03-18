@@ -1596,3 +1596,63 @@ $ k get po kubia-2r1qb
 ##### 레디니스 프로브에 파드의 종료 코드를 포함하지 마라. 
 
 쿠버네티스는 파드를 삭제하자마자 모든 서비스에서 파드를 제거하기 때문에 파드 종료 코드를 포함해서는 안된다.!  
+
+### 헤드리스 서비스로 개별 파드 찾기  
+
+#### 헤드리스 서비스 생성 
+
+서비스 스펙의 ClusterIP 필드를 None으로 설정하면 쿠버네티스는 클라이언트가 서비스의 파드에 연결할 수 있는 클러스터 IP를 할당하지 않기 때문에 서비스가 헤드리스 상태가 된다. 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: kubia-headless 
+spec:
+  clusterIp: None 
+  ports: 
+  - port: 80 
+    targetPort: 8080 
+  selector: 
+    app: kubia 
+```
+
+#### DNS로 파드 찾기 
+
+##### YAML 매니페스트를 쓰지 않고 파드 실행 
+
+```shell
+$ k run dnsutils --image=tutum/dnsutils --generator=run-pod/v1 --command --sleep infinity
+```
+
+##### 헤드리스 서비스를 위해 반한된 DNS A 레코드 
+
+```shell
+$ k exec dnsutils nslookup kubia-headless 
+```
+
+```shell
+$ k exec dnsutils nslookup kubia 
+```
+
+#### 모든 파드 검색 - 준비 되지 않은 파드도 포함 
+
+```yaml
+kind: Service 
+metadata:
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+```
+
+### 서비스 문제 해결 
+
+- 먼저 외부가 아닌 클러스터 내에서 서비스의 클러스터 IP에 연결되는지 확인한다. 
+- 서비스에 액세스할 수 있는지 확인하려고 서비스 IP로 핑을 할 필요 없다. 
+- 레디니스 프로브를 정으했다면 정의했다면 성공했즞니 확인하라. 그렇지 않으면 파드는 서비스에 포함되지 않는다. 
+- 파드가 서비스의 일부인지 확인하려면 k get endpoints 를 사용해 해당 엔드 포인트 오브젝트를 확인한다. 
+- FQDN이나 그 일부  서비스에 액세스 하려고 하는데 동작하지 않는 경우, FQDN 대신 클러스터 IP를 사용해 액세스 할 수 있는지 확인한다. 
+- 대상 포트가 아닌 서비스로 노출된 포트에 연결하고 있는지 확인한다. 
+- 파드 IP에 직접 연결해 파드가 올바른 포트에 연결돼 있는지 확인한다. 
+- 파드 IP로 애플리케이션에 액세스 할 수 없는 경우 애플리케이션이 로컬 호스트에만 바인딩하고 있는지 확인한다.  
+
+# Section 7 
