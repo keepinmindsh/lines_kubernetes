@@ -1454,4 +1454,145 @@ spec:
           servicePort: 80
 ```
 
- 
+#### TLS 트래핑을 처리하도록 인그레스 구성 
+
+##### 인그레스를 위한 TLS 인증서 생성  
+
+클라이언트가 인그레스 컨트롤러에 대한 TLS 연결을 하면 컨트롤러는 TLS 연결을 종료한다. 클라이언트와 컨트롤러 간의 통신은 암호화 되지만 컨트롤러와 벡엔드 파드 간의 
+통신은 암호화 되지 않는다. 파드에서 실행 중인 애플리케이션은 TLS를 지원할 필요가 없다. 예를 들어 파드가 웹 서버를 실행할 경우 HTTP 트래픽만 허용하고 인그레스 컨트롤러가 TLS와 
+관련된 모든 것을 처리하도록 할 수 있다. 컨트롤러가 그렇게 하려면 인증서와 개인 키를 인그레스에 첨부해야 한다. 
+
+```shell
+$ openssl genrsa -out tls.key 2048 
+$ openssl req -new -x509 -key tls.key -out tls.cert -day 360 -subj 
+
+# 만들어진 파일로 시크릿을 만든다. 
+$ kubectl create secret tls tls-secret --cert=tls.cert --key=tls.key 
+```
+
+> CertificateSigningRequest 리소스로 인증서 서명
+> 인증서를 직업 서명하는 대신 CSR 리소스를 만들어 인증서에 서명할 수 있다. 사용자 또는 해당 애플리케이션이 인반 인증서 요청을 생성할 수 있고 CSR에 넣으면
+> 그 다음 운영자나 자동화된 프로세스가 다음과 같이 요청을 승인할 수 있다.
+> kubectl certificate approve <name of the CSR>
+
+```yaml
+  apiVersion: extension/v1beta1
+kind: Ingress
+
+metadata:
+  name: kubia
+spec:
+  tls:
+  - hosts: 
+  - kubia.example.com 
+  secretName: tls-secret 
+  rules:
+  - host: kubia.exampele.com 
+  http:
+  paths:
+  - path: / 
+  backend:
+  serviceName: kubia-nodeport 
+  servicePort: 80  
+```
+
+- 전체 TLS 구성이 이 속성 아래에 있다. 
+- kubia.example.com 호스트 이름의 TLS 연결이 허용된다. 
+- 개인키와 인증서는 이전에 작성한 tls-secret을 참조한다. 
+
+```shell
+$ curl -k -v https://kubia.example.com/kubia 
+# 명령어의 출력에는 애플리케이션의 응답과 인그레스에 구성한 서버 인증서가 표시된다. 
+```
+
+### 파드가 연결을 수락할 준비가 됐을 때 신호 보내기  
+
+#### Readiness Prove  
+
+레디니스 프로브는 주기적으로 호출되며 특정 파드가 클라이언트 요청을 수신할 수 있는지 결정한다. 컨테이너의 레디니스 프로브가 성공을 반환하면 컨테이너가 요청을 수락할 
+준비가 됐다는 신호다. 준비가 됐다라는 표시는 분명히 각 컨테이너 마다 다르다. 쿠버네티스는 컨테이너에서 실행되는 애플리케이션이 간단한 GET / 요청에 응답하는지 또는 
+특정 URL 경로를 호출 할 수 있는지 확인하거나 필요에 따라 애플리케이션이 준비됐는지 확인하기 위해 전체적인 항목을 검사하기도 한다.  
+
+##### Types 
+
+- 프로세스를 실행하는 Exec 프로브는 컨테이너의 상태를 프로세스의 종료 상태 코드로 결정한다. 
+- HTTP GET 프로브는 HTTP GET 요청을 컨테이너로 보내고 응답의 HTTP 상태 코드를 보고 컨테이너가 준비됐는지 여부를 결정한다. 
+- TCP 소켓 프로브는 컨테이너의 지정된 포트로 TCP 연결을 연다. 소켓이 연결되면 컨테이너가 준비된 것으로 간주한다.  
+
+라이브니스 프로브와 달리 컨테이너가 준비 상태 점검에 실패하더라도 컨테이너가 종료되거나 다시 시작되지 않는다. 이는 라이브니스 프로브와 레디니스 프로브 사이의 중요한 차이다. 
+라이브 프로브는 상태가 좋지 않은 컨테이너를 제거하고 새롭고 건강한 컨테이너로 교체해 파드의 상태를 정상으로 유지하는 반면, 레디니스 프로브는 요청을 처리할 준비가 된 파드의 컨테이너만 요청을 수진하도록 한다. 
+이건은 컨테이너를 시작할 때 주로 필요하지만 컨테이너가 작동한 후에도 유용하다. 
+
+###### 레디니스 프로브가 중요한 이유 
+
+파드 그룹이 다른 파드에서 제공하는 서비스에 의존한다고 가정해보자. 프론트엔드 파드 중 하나에 연결 문제가 발생해 더 이상 데이터베이스에 연결할 수 없는 경우, 
+해당 시점에 파드가 해당 요청을 처리할 준비가 되지 않았다는 신호를 레디니스 프로브가 쿠버네티스에게 알리는 것이 현명할 수 있다.  
+다른 파드 인스턴스에 동일한 유형의 연결 문제가 발생하지 않는다면 정상적으로 요청을 처리할 수 있다. 레디니스를 사용하면 클라이언트가 정상 상태인 파드하고만 동신하고 시스템에 문제가 있다는 것을 절대 알아차리지 못한다. 
+
+#### 파드에 레디니스 프로브 추가  
+
+##### 파드 템플릿에 레디니스 프로브 추가 
+
+```shell
+# 기존 레플리케이션 컨트롤러의 파드 템플릿의 프로브를 추가한다. 
+$ kubectl edit rc kubia 
+```
+
+```yaml
+apiVersion: v1 
+kind: ReplicationController 
+```
+
+실제 샘플 
+
+> [Readiness & Liveness Prove](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: goproxy
+  labels:
+    app: goproxy
+spec:
+  containers:
+    - name: goproxy
+      image: registry.k8s.io/goproxy:0.1
+      ports:
+        - containerPort: 8080
+      readinessProbe:
+        tcpSocket:
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+      livenessProbe:
+        tcpSocket:
+          port: 8080
+        initialDelaySeconds: 15
+        periodSeconds: 20
+```
+
+```shell
+$ k get po 햐
+# k exec 명령어로 파드의 컨테이너 내에 touch 명령어가 실행되게 되면 해당 시점에 Pod가 준비상태로 표시된다. 
+$ k exec kubia-2r1qp -- touch /var/ready 
+
+$ k get po kubia-2r1qb 
+```
+
+#### 실제 환경에서 레디니스 프로브가 수행해야 하는 기능 
+
+> 서비스에서 파드를 수동으로 추가하거나 제거하려면 파드와 서비스의 레이블 셀렉터에 enabled=true 레이블을 추가한다. 
+> 서비스에서 파드를 제거하려면 레이블을 제거하라.  
+
+##### 레디니스 프로브를 항상 정의 하라 
+
+파드에 레디니스 프로브를 추가하지 않으면 파드가 시작하는 즉시 서비스 엔드 포인트가 된다. 
+애플리케이션 수신 연결을 시작하는데 너무 오래 걸리는 경우 클라이언트의 서비스 요청은 여전히 시작단계로 수신연결은 수락할 준비가 되지 않은 상태에서 
+파드로 전달된다. 따라서 클라이언트는 Connnection Refuxed 유형의 에러를 보게 된다. 
+
+> 기본 URL에 HTTP 요청을 보내더라도 항상 레디니스 프로브를 정의해야 한다. 
+
+##### 레디니스 프로브에 파드의 종료 코드를 포함하지 마라. 
+
+쿠버네티스는 파드를 삭제하자마자 모든 서비스에서 파드를 제거하기 때문에 파드 종료 코드를 포함해서는 안된다.!  
