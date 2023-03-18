@@ -1399,3 +1399,59 @@ IP를 알고나면 kubia.example.com을 해당 IP로 확인하도록 DNS 서버�
 $ curl http://kubia.example.com 
 You've hit kubia-ke823
 ```
+
+##### 인그레스 동작 방식 
+
+- 클라인트가 kubia.example.com 을 찾는다. 
+- 클라이언트는 헤더 Host:kubia.example.com 과 함께 HTTP GET 요청을 보낸다. 
+- 컨트롤러가 파드에 요청을 보낸다. 
+
+> 인그레스 컨트롤러는 요청을 서비스로 전달하지 않는다. 파드를 선택하는 데만 사용한다. 모두는 아니지만 대부분의 컨트롤러는 이와 같이 동작한다.  
+
+#### 하나의 인그레스로 여러 서비스 노출 
+
+인그레스 스펙을 보면 규칙과 경로가 모두 배열이므로 여러 항목을 가질 수 있다.   
+
+##### 동일한 호스트의 다른 경로로 여러 서비스 매핑  
+
+- kubia.example.com/kubia 으로의 요청은 kubia 서비스로 라우팅된다.
+
+```yaml
+... 
+  - host: kubia.example.com 
+    http: 
+      paths: 
+      - path: /kubia 
+        backend: 
+          serviceName: kubia 
+          servicePort: 80 
+      - path: /bar 
+        backend: 
+          serviceName: bar 
+          servicePort: 80 
+```
+
+위의 경우 요청은 URL의 경로에 따라 두 개의 다른 서비스로 전송된다. 따라서 클라이언트는 단일 IP 로 두 개의 서비스에 도달할 수 있다. 
+
+##### 서로 다른 호스트로 서로 다른 서비스에 매핑하기 
+
+```yaml
+spec:
+  rules:
+  - host: foo.example.com 
+    http: 
+      paths:
+      - path: /
+        backend:
+          serviceName: foo 
+          servicePort: 80 
+  - host: bar.example.com 
+    http: 
+      paths:
+      - path: / 
+        backend: 
+          serviceName: bar 
+          servicePort: 80
+```
+
+ 
