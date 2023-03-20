@@ -1662,4 +1662,17 @@ metadata:
 쿠버네티스 볼륨은 파드의 구성 요소로 컨테이너와 동일하게 파드 스펙에서 정의된다. 볼륨은 독립적인 쿠버네티스 오브젝트가 아니므로 자체적으로 생성, 삭제될 수 앖다. 
 볼륨은 파드의 모든 컨테이너에서 사용 가능하지만 접근하려면 컨테이너에서 각각 마운트돼야 한다. 각 컨테이너에서 파일시스템의 어느 경로에나 불륨을 마운트할 수 있다. 
 
+### 사용 가능한 볼륨 유형 소개 
 
+- emptyDir : 일시적인 데이터를 저장하는데 사용되는 간단한 빈 디렉터리다. 
+- hostPath : 워커 노드의 파일 시스템을 파드의 디렉터리로 마운트 하는 데 사용한다. 
+- gitRepo : 깃 리포지터리의 컨텐츠를 체크아웃해 초기화한 볼륨이다. 
+- nfs : NFS 공유를 파드에 마운트 한다. 
+- gcePersistenceDisk, aswElasticBlockStore, azureDisk : 클라우드 제공자의 전용 스토리지를 마운트 하는데 사용한다. 
+- cinder, cephfs, iscsi, flocker, glusterfs, quobyte, rbd, flexVolume, vsphere Volume, photonPersistentDis, scaleIO : 다른 유형의 네트워크 스토리지를 마운트 하는데 사용한다. 
+- configMap, secret, downwardAPI : 쿠버네티스 리소스나 클러스터 정보를 파드에 노출하는데 사용되는 특별한 유형의 볼륨이다. 
+- persistentVolumeClaim: 사전에 혹은 동적으로 프로비저닝된 퍼시스턴스 스토리지를 사용하는 방법이다.
+
+### 볼륨을 사용한 컨테이너 간 데이터 공유 
+
+### emptyDir 볼륨 사용 
