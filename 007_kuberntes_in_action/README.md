@@ -1682,3 +1682,35 @@ metadata:
 
 emptyDir 볼륨은 동일 파드에서 실행 중인 컨테이너 간 파일을 공유할 때 유용하다. 그러나 단일 컨테이너에서도 가용한 메모리에 넣기에 큰 데이터 세트의 정렬 작업을 수행하는 것과 같이 
 임시 데이터를 디스크에 쓰는 목적인 경우 사용할 수 있다. 
+
+#### Sample 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: registry.k8s.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+    ports:
+    - containerPort: 80 
+      protocol: TCP 
+  volumes:
+  - name: cache-volume
+    emptyDir:
+      sizeLimit: 500Mi
+```
+
+실행중인 파드를 통해서 점검하기 
+
+```shell
+$ k port-forward fortune test-pd
+```
+
+#### 깃 리포지터리를 볼륨으로 사용하기 
+
