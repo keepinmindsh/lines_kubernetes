@@ -1784,13 +1784,93 @@ spec:
 
 ## 퍼시스턴트 스토리지 사용 
 
+파드에서 실행 중인 애플리케이션이 디스크에 데이터를 유지해야하고 파드가 다른 노드로 재스케쥴링 된 경우에도 동일한 데이터를 
+사용해야 한다면 지금까지 언급한 볼륨 유형은 사용할 수 없다. 이러한 데이터는 어떤 클러스터 노드에서 접근이 필요하기 때문에 
+NAS 유형에 저장돼야 한다.
+
 ### GCE 퍼시스턴트 디스크를 파드 볼륨으로 사용하기 
+
+![](https://keepinmindsh.github.io/lines/assets/img/k8s-gcepersistencedisk.png){: .align-center}
+
+동일 location 에 퍼시스턴트 디스크를 만들기 위해서 gke clusters의 생성 위치를 확인한다. 
+
+```shell
+$ gcloud container clusters list 
+NAME           LOCATION       MASTER_VERSION   MASTER_IP      MACHINE_TYPE  NODE_VERSION     NUM_NODES  STATUS
+lines-cluster  us-central1-c  1.24.9-gke.3200  104.197.11.14  e2-medium     1.24.9-gke.3200  3          RUNNING
+
+```
+
+>[GCE Persistence Volume 사용하기](https://cloud.google.com/compute/docs/disks/add-persistent-disk#gcloud)
+
+#### GCE 퍼시스턴트 디스크 생성하기 
+
+- 퍼시스턴트 디스크 생성하기 
+
+```shell
+$ gcloud compute disks create --size=10GB --zone=us-central1-c mongodb 
+NAME     ZONE           SIZE_GB  TYPE         STATUS
+mongodb  us-central1-c  10       pd-standard  READY
+
+```
+
+- 생성된 퍼시스턴트 디스크에 대해서 파드 생성하기 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongodb
+  labels:
+    name: mongodb
+spec:
+  volumes:
+    - name: mongodb-data
+      gcePersistentDisk:
+        pdName: mongodb
+        fsType: ext4
+  containers:
+  - name: mongodb
+    image: mongo
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 8080
+        protocol: TCP
+    volumeMounts:
+      - mountPath: /data/db
+        name: mongodb-data
+```
+
+```shell
+$ k create -f 007_kuberntes_in_action/p277_pod_with_gce_persistence_disk/mongodb-pod-gcepd.yaml
+pod/mongodb created
+```
+
+- 생성된 DISK 삭제하기
+
+```shell
+$ gcloud compute disks delete my-disk --zone=us-east1-a
+```
+
+```shell
+gcloud compute disks delete mongodb --zone=us-central1-c
+The following disks will be deleted:
+ - [mongodb] in [us-central1-c]
+
+Do you want to continue (Y/n)?  Y
+Deleted [https://www.googleapis.com/compute/v1/projects/lines-infra/zones/us-central1-c/disks/mongodb].
+```
 
 ### 다른 유형의 볼륨 사용하기 
 
 ## 기반 스토리지 기술과 파드 분리 
 
 ### 퍼시스턴트 볼륨과 퍼시스턴트 볼륨 클레임
+
+> [Use persistent disks with multiple readers](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/readonlymany-disks)
 
 ## 퍼시스턴트 볼륨의 동적 프로비저닝 
 
