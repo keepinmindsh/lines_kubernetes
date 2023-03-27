@@ -1866,9 +1866,49 @@ Deleted [https://www.googleapis.com/compute/v1/projects/lines-infra/zones/us-cen
 
 ### 다른 유형의 볼륨 사용하기 
 
+GCE 퍼시스턴트 디스크 볼륨은 쿠버네티스 클러스터를 구글 쿠버네티스 에진에서 실행 중이기 때문이었다. 다른 곳에서 실행 중이라면 기반 인프라 스트럭처에 따라 
+다른 유형의 볼륨을 사용해야 한다. 
+
+- AWS Elastic Block Store 볼륨 사용하기 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: mongodb 
+spec: 
+  volumes: 
+    - name: mongodb-data 
+      awsElasticBlockStore: 
+        volumeId: my-volume 
+        fsType: ext4 
+  containers: 
+    - ... 
+```
+
+- nfs 볼륨을 사용하는 파드 
+
+```yaml
+volumes: 
+  - name: mongodb-data 
+    nfs: 
+      server: 1.2.3.4 
+      path: /some/path 
+```
+
 ## 기반 스토리지 기술과 파드 분리 
 
+지금까지 살펴본 모든 퍼시스턴트 볼륨 유형은 파드 개발자가 실제 네트워크 스토리지 인프라스트럭처에 관한 지식을 갖추고 있어야 한다.
+NFS 기반의 볼륨을 생성하려면 개발자는 NFS 익스포트가 위치하는 실제서버를 알아야한다. 
+이는 인프라스트럭처의 세부사항에 대한 걱정을 없애고, 클라우드 공급자나 온프레미스 데이터센터를 걸쳐 이식 가능한 애플리케이션을 만들고,
+애플리케이션과 개발자로부터 실제 인프라스트럭처를 숨긴다는 쿠버네티스의 기본 아이디어에 반한다.
+
 ### 퍼시스턴트 볼륨과 퍼시스턴트 볼륨 클레임
+
+인프라스트럭처의 세부 사항을 처리하지 않고 애플리케이션이 쿠버네티스 클러스터에 스토리지를 요청할 수 있도록 하기위해 새로운 리소스 두 개가 도입됐다. 
+
+- 퍼시스턴트 볼륨
+- 퍼시스턴트 볼륨 클레임
 
 > [Use persistent disks with multiple readers](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/readonlymany-disks)
 
