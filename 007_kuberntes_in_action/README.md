@@ -1,4 +1,4 @@
-# Section 1
+g# Section 1
 
 ## 쿠버네티스 어원 
 
@@ -1915,3 +1915,7 @@ NFS 기반의 볼륨을 생성하려면 개발자는 NFS 익스포트가 위치�
 ## 퍼시스턴트 볼륨의 동적 프로비저닝 
 
 ### 컨피그 맵의 활용 이유를 위한 사전 분석 
+
+# Tips
+
+- [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
