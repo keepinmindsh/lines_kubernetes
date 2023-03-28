@@ -1918,6 +1918,45 @@ NFS 기반의 볼륨을 생성하려면 개발자는 NFS 익스포트가 위치�
 클러스터 사용자가 파드에 퍼시스턴트 스토리지를 사용해야 하면 먼저 최소 크기와 필요한 접근 모드를 명시한 퍼시스턴트볼륨클레임 매니페스트를 생성한다.  
 그런 다음 사용자는 퍼시스턴트볼륨클레임 매니페스트를 쿠버네티스 API 서버에 게시하고 쿠버네티스는 적절한 퍼시스턴트볼륨을 찾아 클레임에 볼륨을 바인딩한다. 
 
+#### 퍼시스턴트 볼륨
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0003
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /tmp
+    server: 172.17.0.2
+```
+
+#### 퍼시스턴트 볼륨 클레임
+
+```yaml
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: example-vol-default
+provisioner: vendor-name.example/magicstorage
+parameters:
+  resturl: "http://192.168.10.100:8080"
+  restuser: ""
+  secretNamespace: ""
+  secretName: ""
+allowVolumeExpansion: true
+```
+
 ## 퍼시스턴트 볼륨의 동적 프로비저닝 
 
 ### 컨피그 맵의 활용 이유를 위한 사전 분석 
