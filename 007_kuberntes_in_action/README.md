@@ -2025,7 +2025,71 @@ $ docker push docker.io/fortune:args
 $ docker run -it docker.io/luksa/fortune:args 
 
 $ docker run -it docker.io/luksa/fortune:args 15 
+``` 
+
+### 쿠버네티스에서 명령과 인자 재정의 
+
+쿠버네티스에서 컨테이너를 정의할 때, ENTRYPOINT와 CMD 둘 다 재정의할 수 있다. 
+
+```yaml
+kind: Pod 
+spec: 
+  containers: 
+  - image: some/image
+    command: ["/bin/command"]
+    args: ["arg1","arg2","arg3"]
 ```
+
+- command : [ENTRYPOINT] 컨테이너 안에서 실행되는 실행 파일 
+- args : [CMD] 실행 파일에 전달되는 인자  
+
+사용자 정의 주기에 따른 fortune 파드 실행
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: fortune2s 
+spec: 
+  containers: 
+  - images: luksa/fortune:args 
+    args: ["2"]
+    name: html-generator 
+    volumeMounts: 
+    - name: html 
+      mountPath: /var/htdocs 
+```
+
+- 스크립트가 2초마다 새로운 fortune 메세지를 생성하도록 인자 지정  
+
+
+여러 인자를 가질 경우 아래와 같은 배열 표기법이 가능하다. 
+
+```yaml
+args: 
+  - foo
+  - bar 
+  - "15" 
+```
+
+> command 와 args 필드는 파드 생성 이후 업데이트 할 수 없다.
+
+### 컨테이너의 환경 변수 설정 
+
+> 컨테이너 명령이나 인자와 마차가지로 환경변수 목록도 파드 생성 후에는 업데이트 할 수 없다. 
+
+애플리케이션 구성의 요점은 환겨엥 따라 다르거나 자주 변경되는 설정 옵션을 애플리케이션 소스 코드와 별도로 유지하는 것이다. 
+만약에 파드 정의를 애플리케이션의 소스 코드로 생각한다면, 설정을 파드 정의에서 밖으로 이동시켜야 한다는 것은 명확하다.  
+
+#### 컨피그맵 
+
+쿠버네티스에서는 설정 옵션을 컨피그 맵이라 부르는 별도 오브젝트로 분리할 수 있다. 컨피그맵은 짧은 문자열에서 전체 설정 파일에 이르는 값을 가지는 키/값    
+쌍으로 구성된 맵이다. 애플리케이션은 컨피그맵을 직접 읽거나 심지어 존재하는 것도 몰라도 된다. 대신 맵의 내용은 컨테이너의 환경변수 또는 볼륨 파일로 전달된다.   
+
+애플리케이션은 컨피그맵을 직접 읽거나 심지어 존재하는 것은 몰라도 된다. 대신 맵의 내용은 컨테이너의 환경변수 또는 볼륨 파일로 전달 된다. 또한 환경 변수는 $(ENV_VAR)  
+구문을 사용해 명령줄 인수에서 참조할 수 있기 때문에, 컨피그맵 항목을 프로세스의 명령줄 인자로 전달할 수도 있다.  
+
+![](https://keepinmindsh.github.io/lines/assets/img/configmap001.png)
 
 # Tips
 
