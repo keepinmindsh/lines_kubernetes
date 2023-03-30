@@ -2091,6 +2091,105 @@ args:
 
 ![](https://keepinmindsh.github.io/lines/assets/img/configmap001.png)
 
+- 서로 다른 환경에서 사용하는 동일한 이름을 가진 두 개의 컨피그맵
+
+##### 컨피그맵 생성 
+
+- kubectl create configmap 명령 사용 
+
+```shell
+$ k create configmap fortune-config --from-literal=sleep-interval=25 
+``` 
+
+> 컨피그맵 키는 유효한 DNS 서브 도메인이어야 한다(영숫자, 대시, 밑줄, 점만 포함 가능). 필요한 경우 점이 먼저 나올 수 있다.  
+
+```shell
+$ k create configmap myconfigmap --from-literal=foo=bar --from-literal=bar=baz --from-literal=one=two 
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo
+data:
+  # property-like keys; each key maps to a simple value
+  player_initial_lives: "3"
+  ui_properties_file_name: "user-interface.properties"
+  # file-like keys
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximum-lives=5    
+  user-interface.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true  
+```
+
+- configmap를 별도로 쿠버네티스 오브젝트로 정의하고 Mapping 정의하는 방식 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    configMap:
+      name: game-demo
+```
+
+- configmap 을 직접 선언하는 방식 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-demo-pod
+spec:
+  containers:
+    - name: demo
+      image: alpine
+      command: ["sleep", "3600"]
+      env:
+        # Define the environment variable
+        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
+                                     # from the key name in the ConfigMap.
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo           # The ConfigMap this value comes from.
+              key: player_initial_lives # The key to fetch.
+        - name: UI_PROPERTIES_FILE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo
+              key: ui_properties_file_name
+      volumeMounts:
+      - name: config
+        mountPath: "/config"
+        readOnly: true
+  volumes:
+  # You set volumes at the Pod level, then mount them into containers inside that Pod
+  - name: config
+    configMap:
+      # Provide the name of the ConfigMap you want to mount.
+      name: game-demo
+      # An array of keys from the ConfigMap to create as files
+      items:
+      - key: "game.properties"
+        path: "game.properties"
+      - key: "user-interface.properties"
+        path: "user-interface.properties"
+```
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
