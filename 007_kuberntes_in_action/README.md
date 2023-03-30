@@ -1972,6 +1972,61 @@ allowVolumeExpansion: true
 - 각 퍼시스턴트 볼륨 클레임을 위해 퍼시스턴트 볼륨을 원하는 스토리지 클래스로 동적 프로비저닝 한다. 
 - 퍼시스턴트 볼륨 클레임을 미리 프로비저닝된 퍼시스턴트 볼륨과 바인딩하고자 할 때 동적 프로지저너가 간섭하는 것을 막는다. 
 
+# Section 8  
+
+## 컨피그맵과 시크릿 : 애플리케이션 설정 
+
+컨피그 맵을 사용해 설정 데이터를 저장할지 여부에 관계없이 다음 방법을 통해 애플리케이션을 구성할 수 있다. 
+
+- 컨테이너에 명령줄 인수 전달 
+- 각 컨테이너를 위한 사용자 정의 환경변수 전달 
+- 특수한 유형의 볼륨을 통해 설정 파일을 컨테이너에 마운트 
+
+## 컨테이너에 명령줄 인자 전달 
+
+##### ENTRYPOINT 와 CMD 이해 
+
+- ENTRYPOINT는 컨테이너가 시작될 때 호출될 명령어를 정의한다. 
+- CMD는 ENTRYPOINT에 전달하는 인자를 정의한다. 
+
+```shell
+$ docker run <image>
+```
+
+추가 인자를 지정해 Dockerfile 안의 CMD에 정의된 값을 제공한다. 
+
+```shell
+$ docker run <image> <argument> 
+```
+
+##### shell과 exec 형식 간의 차이점 
+
+- shell 형식 - 예: ENTRYPOINT node app.js 
+
+위와 같이 하면 컨테이너 내부에서 node 프로세스를 직접 실행한다. 컨테이너 내부에서 실행중인 프로세스 목록을 나열해 직접 실행된 것을 볼 수 있다. 
+
+- exec 형식 - 예: ENTRYPOINT ["node", "app.js"]
+
+차이점은 내부에서 정의된 명령을 셸로 호출하는지 여부이다.  
+shell 프로세스는 불필요하므로 ENTRYPOINT 명령에서 exec 형식을 사용해 실행한다.  
+
+```dockerfile
+FROM ubuntu:lastest 
+RUN apt-get udpate; apt-get -y install fortune 
+ADD fortuneloop.sh /bin/fortuneloop.sh 
+ENTRYPOINT ["/bin/fortuneloop.sh"]
+CMD ["10"]
+```
+
+```shell
+$ docker build -t docker.io/luksa/fortune:args . 
+$ docker push docker.io/fortune:args 
+
+$ docker run -it docker.io/luksa/fortune:args 
+
+$ docker run -it docker.io/luksa/fortune:args 15 
+```
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
