@@ -2190,6 +2190,34 @@ spec:
         path: "user-interface.properties"
 ```
 
+##### 파일로 컨피그맵 생성 
+
+컨피그 맵에서는 전체 설정 파일 같은 데이터를 통째로 저장하는 것도 가능하다. 
+
+```shell
+$ kubectl create configmap my-config --from-file=config-file.conf
+```
+
+위의 명령을 실행하면, kubectl을 실행한 디렉터리에서 config-file.conf 파일을 찾는다. 그리고 
+파일 내용을 컨피그 맵의 config-file.conf 키 값으로 저장한다. 물론 키 이름을 직접 지정할 수도 있다/ 
+
+```shell
+$ kubectl create configmap my-config --from-file=customkey=config-file.conf 
+```
+
+이 명령은 파일 내용을 customkey라는 키 값으로 저장한다.  
+
+##### 디렉터리에 있는 파일로 컨피그 맵 생성 
+
+각 파일을 개별적으로 추가하는 대신, 디렉터리 안에 있는 모든 파일을 가져올 수도 있다. 
+
+```shell
+$ kubectl create configmap my-config --from-file=/path/to/dir 
+```
+
+이 명령에서 kubectl은 지정한 디렉터리 안에 있는 각 파일을 개별 항목으로 작성한다. 
+이때 파일 이름이 컨피그맵 키로 사용하기 유효한 파일만 추가한다. 
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
