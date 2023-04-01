@@ -2218,6 +2218,36 @@ $ kubectl create configmap my-config --from-file=/path/to/dir
 이 명령에서 kubectl은 지정한 디렉터리 안에 있는 각 파일을 개별 항목으로 작성한다. 
 이때 파일 이름이 컨피그맵 키로 사용하기 유효한 파일만 추가한다. 
 
+##### 다양한 옵션 결합 
+
+아래와 같은 다양한 옵션으로 config map 을 생성할 수 있다. 
+
+```shell
+$ kubectl create configmap my-configmap 
+> --from-file=foo.json 
+> --from-file=bar=foobar.conf 
+> --from-file=config-opts/ 
+> --from-literal=some=thing 
+```
+
+실제 환경변수를 컨피그맵에서 가져오는 파드 선언  
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: registry.k8s.io/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      envFrom:
+      - configMapRef:
+          name: special-config
+  restartPolicy: Never
+```
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
