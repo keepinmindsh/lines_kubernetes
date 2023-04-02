@@ -2248,6 +2248,28 @@ spec:
   restartPolicy: Never
 ```
 
+##### 파드에 존재하지 않는 컨피그맵 참조 
+
+파드를 생성할 때 존재하지 않는 컨피그 맵을 지정하면 어떻게 되는지 궁금할 것이다. 쿠버네티스는 파드를 
+스케줄링하고 그 안에 있는 컨테이너를 실행하려고 시도한다. 컨테이너가 존재하지 않는 컨피그맵을 참조하려고 
+하면 컨테이너는 시작하는 데 실패 한다. 하지만 참조하지 않는 다른 컨테이너는 정상적으로 시작된다. 그런 다음 
+컨피그맵을 생성하면 실패했던 컨테이너는 파드를 만들지 않아도 시작된다.  
+
+#### 컨피그맵의 모든 항목을 한 번에 환경변수로 전달 
+
+컨피그맵에 여러 항목이 포함돼 있을 때 각 항목을 일일이 환경변수로 생성하는 일은 지루하고 오류가 발생하기 쉽다.  
+다행시 쿠버네티스 버전 1.6 부터는 컨피그 매의 모든 항목을 환경변수로 노출하는 방법을 제공한다.   
+
+```yaml
+spec: 
+  containers: 
+  - image: some-image 
+  envFrom: 
+  - prefix: CONFIG_ 
+  configMapRef: 
+    name: my-config-map 
+```
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
