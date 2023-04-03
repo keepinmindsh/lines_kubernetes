@@ -2270,6 +2270,182 @@ spec:
     name: my-config-map 
 ```
 
+####  컨피그맵 항목을 명령줄 인자로 전달 
+
+이제 컨피그맵 값을 컨테이너 안에서 실행되는 프로세스의 인자로 전달하는 방법을 살펴보자.  
+pod.spec.containers.args 필드에서 직접 컨피그맵 항목을 참조할 수는 없지만 컨피그맵 항목을 환경변수로 먼저 초기화 하고 
+이 변수를 인자로 참조하도록 지정할 수 있다. 
+
+```yaml
+apiVersion: v1
+kind: Pod 
+metadata: 
+  name: fortune-args-from-configmap 
+spec: 
+  containers:
+  - image: luksa/fortune:args 
+    env: 
+    - name: INTERVAL
+      valueFrom: 
+        configMapKeyRef: 
+          name: fortune-config 
+          key: sleep-interval 
+    args: ["$(INTERVAL)"]
+```
+
+#### 컨피그 볼륨을 사용해 컨피그 맵 항목을 파일로 노출 
+
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: special-config
+  namespace: default
+data:
+  SPECIAL_LEVEL: very
+  SPECIAL_TYPE: charm
+```
+
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: registry.k8s.io/busybox
+      command: [ "/bin/sh", "-c", "ls /etc/config/" ]
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        # Provide the name of the ConfigMap containing the files you want
+        # to add to the container
+        name: special-config
+  restartPolicy: Never
+```
+
+#### 볼륨 안에 있는 컨피그 맵 항목 사용 
+
+mountPath : 컨피그 맵으로 정의한 볼륨을 특정 Mount Path 로 지정하는 방법이다. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dapi-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: registry.k8s.io/busybox
+      command: [ "/bin/sh","-c","cat /etc/config/keys" ]
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: special-config
+        items:
+        - key: SPECIAL_LEVEL
+          path: keys
+  restartPolicy: Never
+```
+
+일반적으로 리눅스에서 파일시스템을 비어 있지 않는 디렉터리에 마운트할 때 발생한다. 해당 디렉터리는 마운트한 파일 시스템에 있는 파일만 포함하고, 
+원래 있던 파일은 해당 파일 시스템이 마운트 돼 있는 동안 접근할 수 없게 된다. 일반적으로 중요한 파일을 포함하는 /etc 디렉터리에 볼륨을 마운트한다고 상상해보자. 
+/etc 디렉터리에 있어야 하는 모든 원본 파일이 더이상 존재하지 않기 때문에 전체 컨테이너가 손상될 수 있다. 만약 /etc 디렉터리와 같은 곳에 
+파일을 추가하는 것이 필요하다면, 이 방법을 사용할 수 없다. 
+
+##### 특정파일이 마운트된 컨피그맵 항목을 가진 파드 
+
+[SubPath의 활용](https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath-expanded-environment)
+
+subPath의 속성은 모든 종류의 볼륨을 마운트할 때 사용할 수 있다. 전체 볼륨을 마운트 하는 대신에 일부만을 마운트 할 수 있다. 
+하지만 개별 파일을 마운트 하는 이 방법은 파일 업데이트와 관련해서 상대적으로 큰 결함을 가지고 있다. 
+
+```yaml
+spec: 
+  containers: 
+  - image: some/image 
+    volumeMounts: 
+    - name: myvolume 
+      mountPath: /etc/someconfig.conf 
+      subPath: myconfig.conf 
+```
+
+#### 컨피그맵 볼륨 안에 있는 파일 권한 설정 
+
+기본적으로 컨피그맵 볼륨의 모든 파일 권한은 644로 설정된다. 파일 권한 설정을 변경하고자 한다면, 
+
+```yaml
+volumes: 
+- name: config 
+  configMap: 
+    name: fortune-config 
+    defaultMode: "6600"
+```
+
+### 애플리케이션을 재시작하지 않고 애플리케이션 설정 업데이트 
+
+> 컨피그 맵을 업데이트 한 후에 파일이 업데이트 되기 까지 놀라울 정도로 오랜 시간이 걸릴 수 있음을 다시 한 번 강조하고 싶다. 
+
+#### 컨피그맵 편집 
+
+컨피그 맵을 변경하고 파드 안에서 실행 중인 프로세스가 컨피그맵 볼륨에 노출된 파일을 다시 로드하는 방법을 살펴보자. 이전 Nginx 설정 파일을 편집해 
+파드 재시작 없이 Nginx가 새설정을 사용하도록 만들자. kubectl edit 명령으로 fortune-config 컨피그맵을 편집해 gzip 압축을 해제하자. 
+
+```shell
+$ kubectl edit configmap fortune-config 
+```
+
+위의 방법으로 파일이 업데이트 되려먼 시간이 걸린다. 결국에는 변경된 설정 파일을 볼 수 있지만, Nginx에는 아무런 영향이 없는 것을 알게 된다. 
+
+설정을 다시 로그하rl 위해서 Nginx에 신호 전달 
+
+```shell
+$ kubectl exec fortune-configmap-volume -c web-server -- nginx -s reload 
+```
+
+#### 파일이 한꺼번에 업데이트 되는 방법 이해하기 
+
+모든 파일이 한 번에 동시에 업데이트 된다. 쿠버네티스는 심볼릭 링크를 사용해 이를 수행한다. 만약 마운트된 컨피그맵 볼륨의 모든 파일을 
+조회하면 아래와 같은 내용을 확인할 수 있다. 아래의 shell 내용을 보면 마운트된 컨피그 맵 볼륨 안의 파일은 ..data 디렉터리의 파일을 가리키는 
+심볼릭 링크다. 
+
+```shell
+$ kubectl exec -it fortune-configmap-volume -c web-server --Is -1A
+/etc/nginx/conf.d
+total 4
+drw xr-xr-x . . . 12:15 . .4984_09_04_12_15_06.865837643
+lrwxrwxrwx ... 12:15 ..data -> . .4984_09_04_12_15_06.865837643
+lrwxrwxrwx ... 12:15 my-nginx-config.conf -> . .data/my-nginx-config.conf 
+lrwxrwxrwx ... 12:15 sleep-interval -> . .data/sleep-interval
+```
+
+#### 이미 존재하는 디렉터리에 파일만 마운트 했을 때 없데이트가 되지 않는 것 이해하기 
+
+한가지 주의 사항은 컨피그맵 볼륨 업데이트와 관련이 있다. 만약 전체 볼륨 대신 단일 파일을 컨테이너에 마운트한 경우 파일이 업데이트 되지 않는다. 
+만약 개별 파일을 추가하고 원본 컨피그 맵을 업데이트 할 때 파일을 업데이트 해야 하는 경우 한 가지 해결 방법은 전체 볼륨을 다른 디렉터리에 
+마운트한 다음 다음 해당 파일을 가리키는 심볼릭 링크를 생성하는 것이다. 
+
+
+#### 컨피그맵 업데이트의 결과 이해하기 
+
+이후에는 변경된 configmap에 따라서 동작하는 것을 확인할 수 있다. 
+
+컨피그맵 업데이트의 결과 이해하기
+컨테이너의 가장 중요한 기능은 불변성이다 . 즉, 동일한 이미지에서 생성된 여러 실행 컨테이너 간에 차이가 없는지 확인할 수 있으므로 컨테이너를 실행하는 데 사용되는 컨피그맵을 수정해 이 불변성을 우회하는 것이 잘못된 것일까?
+
+애플리케이션이 설정을 다시 읽는 기능을 지원하지 않는 경우에 심각한 문제가 발생한 다. 이로 인해 서로 다른 설정을 가진 인스턴스가 실행되는 결과를 초래한다. 컨피그맵을
+변경한 이후 생성된 파드는 새로운 설정을 사용하지만 예전 파드는 계속해서 예전 설정을 사용한다. 그리고 이것은 새로운 파드에만 국한되는 문제가 아니다. 파드 컨테이너가 어떠 한 이유로든 다시 시작되면 새로운 프로세스는 새로운 설정을 보게 된다. 따라서 애플리케 이션이 설정을 자동으로 다시 읽는 기능을 가지고 있지 않다면, 이미 존재하는 컨피그맵을 (파드가 A|용하는 동안) 수정하는 것은 좋은 방법이 아니다.
+애플리케이션이 다시 읽기@°^^를 지원한다면, 컨피그맵을 수정하는 것은 그리 큰 문제는 아니다. 하지만 컨피그맵 볼륨의 파일이 실행 중인 모든 인스턴스에 걸쳐 동기적으 로 업데이트되지 않기 때문에, 개별 파드의 파일이 최대 1분 동안 동기화되지 않은 상태로 있을 수 있음을 알고 있어야 한다.
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
