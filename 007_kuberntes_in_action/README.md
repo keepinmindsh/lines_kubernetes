@@ -2095,6 +2095,8 @@ args:
 
 ##### 컨피그맵 생성 
 
+> ![ConfigMap Data of Kubernetes](https://pwittrock.github.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
+
 - kubectl create configmap 명령 사용 
 
 ```shell
