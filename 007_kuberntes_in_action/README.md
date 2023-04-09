@@ -2741,6 +2741,51 @@ tmpfs를 사용하는 이유는 민감한 데이터를 노출시킬 수도 있�
 기록하거나 시작하면서 로그에 환경 변수를 남겨 의도치 않게 시크릿을 노출할 수 있다. 또한 자식 프로세스는 상위 프로세스의 모든 환경변수를 상속받는데, 만약 애플리케이션이 
 타사 바이너리를 실행할 경우 시크릿 데이터를 어떻게 사용하는지 알 수 있는 방법이 없다. 
 
+> 환경변수로 시크릿을 컨테이너에 전달하는 것은 의도지 않게 노출될 수 있기 때문에 심사숙4고 해서 사용해야 한다. 
+> 안전을 위해서는 시크릿을 노출할 때 항상 secret 볼륨을 사용한다.
+
+### 이미지를 가져올 때 사용하는 시크릿 이해 
+
+쿠버네티스에서 자격증명을 전달하는 것이 필요할 때가 있다. 이때에도 시크릿을 통해 이뤄진다.  
+
+지금까지 사용한 모든 이미지는 공개 이미지 레지스트리에 저장돼 있었기 때문에 이미지를 가져오는데 특별한 자격증명을 필요로 하지 않았다. 하지만 
+대부분의 조직은 자신들의 이미지를 모든 사람들이 사용하는 것을 원하지는 않기 때문에 프라이빗 이미지 레지스트리를 사용한다.  
+파드를 배포할 때 컨테이너 이미지가 프라이빗 레지스트리 안에 있다면, 쿠버네티스는 이미지를 가져오기 위해 필요한 자격증명을 알아야 한다. 
+
+#### 도커 허브에서 프라이빗 이미지 사용 
+
+- 도커 레지스트리 자격증명을 가진 시크릿 생성 
+- 파드 매니페스트 안에 imagePullSecrets 필드에 해당 시크릿 참조 
+
+```shell
+$ k create secret docker-registry mydockerhubsecret \
+  --docker-username=myusername --docker-password=mypassword \ 
+  --docker-email=my.email@provider.com 
+```
+
+generic 시크릿을 생성하는 것과 다르게, docker-registry 형식을 가진 mydockerhub secret 이라는 시크릿을 만든다.   
+여기에 사용할 도커 허브 사용자 이름, 패스워드, 이메일을 지정한다. k describe 명령으로 생성한 시크릿을 살펴보면 .dockercfg 항목을   
+갖고 있는 것을 볼 수 있다. 이는 홈 디렉터리에 docker login 명령을 실행할 때 생성된 .dockercfg 파일과 동일하다.  
+
+#### 파드 정의에서 도커레지스트리 시크릿 사용 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: private-pod 
+spec: 
+  imagePullSecrets:
+  - name: mydockerhubsecret 
+  containers: 
+  - image: username/private:tag 
+    name: main 
+```
+
+#### 모든 파드에서 이미지를 가져올 때 사용할 시크릿을 모두 지정할 필요는 없다. 
+
+이미지를 가져올 때 사용할 시크릿을 서비스어카운트에 추가해 모든 파드에 자동으로 추가될 수 있게 하는 방법을 배울 것이다. 
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
