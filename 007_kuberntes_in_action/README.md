@@ -2590,6 +2590,8 @@ data:
 
 ### 파드에서 시크릿 사용 
 
+기존의 시크릿을 수정하거나 신규 시크릿을 생성하고 파드에 연결해서 사용할 수 있다. 
+
 ```shell
 $ k edit configmap fortune-config 
 ```
@@ -2618,6 +2620,8 @@ spec:
 ```shell
 $ k create secret generic test-db-secret --from-literal=username=testuser --from-literal=password=iluvtests
 ```
+
+아래의 yaml 처럼 Secret을 생성하고 생성된 시크힛을 파드에 마운트 하는 방법에 대해서 가이드 되어 있다. 
 
 ```yaml
 apiVersion: v1
