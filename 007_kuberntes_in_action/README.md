@@ -1724,7 +1724,7 @@ $ k port-forward fortune test-pd
 
 ### hostPath 
 
-![](https://keepinmindsh.github.io/lines/assets/img/k8s-hostpath_structure.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/k8s-hostpath_structure.png)
 
 - hostPath 볼륨의 컨텐츠는 삭제되지 않는다.
   - 파드가 삭제되면 다음 파드가 호스트의 동일 경로를 가리키는 hostPath 볼륨을 사용하고, 이전 파드와 동일한 노드에 스케줄링된다는 조건에서 이전 파드가 남긴 모든 항목을 볼 수 있다. 
@@ -2095,7 +2095,7 @@ args:
 
 ##### 컨피그맵 생성 
 
-> ![ConfigMap Data of Kubernetes](https://pwittrock.github.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
+> [ConfigMap Data of Kubernetes](https://pwittrock.github.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
 - kubectl create configmap 명령 사용 
 
@@ -2785,6 +2785,18 @@ spec:
 #### 모든 파드에서 이미지를 가져올 때 사용할 시크릿을 모두 지정할 필요는 없다. 
 
 이미지를 가져올 때 사용할 시크릿을 서비스어카운트에 추가해 모든 파드에 자동으로 추가될 수 있게 하는 방법을 배울 것이다. 
+
+# Section 11 
+
+## 파드 메타데이터와 그외의 리소스에 액세스 하기  
+
+### Downward API 로 메타데이터 전달 
+
+사용자가 데이터를 직접 설정하거나 파드가 노드에 스케줄링돼 실행되기 이전에 이미 알고 있는 데이터에는 적합하다. 그러나 파드의 IP, 호스트 노드 이름 또는 파드 자체의 
+이름과 같이 실행 시점까지 알려지지 않은 데이터의 경우는 어떨까? 파드의 레이블이나 어노테이션과 같이 어딘가에 이미 설정된 데이터라면 어떨까?  
+아마도 동일한 정보를 여러 곳에 반복해서 설정하고 싶지 않을 것이다.  
+
+![](https://keepinmindsh.github.io/lines/assets/downward_flow.png)
 
 # Tips
 
