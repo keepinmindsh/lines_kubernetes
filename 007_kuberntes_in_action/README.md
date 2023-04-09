@@ -2526,8 +2526,67 @@ token:      ~~~
 이상적으로는 애플리케이션이 완전히 쿠버네티스를 인지하지 않도록 하고 싶지만, 쿠버네티스와 직접 대화하는 방법 외에 다른 대안이 없으면 secret 볼륨을 통해  
 제공된 파일을 사용한다.  
 
-> 기본적으로 default-token 시크릿은 모든 컨테이너에 마운트되지만, 파드 스펙 안에 auto mountService-AccountToken 필드 값을 false로 지정하거나 
-> 파드가 사용하는 서비스 어카운트를 false로 지정해 비활성화 할 수 있다. 
+> 기본적으로 default-token 시크릿은 모든 컨테이너에 마운트되지만, 파드 스펙 안에 auto mountService-AccountToken 필드 값을 false 로 지정하거나 
+> 파드가 사용하는 서비스 어카운트를 false 로 지정해 비활성화 할 수 있다. 
+
+#### 시크릿 생성 
+
+fortune-serving Nginx 컨테이너가 HTTPS 트래픽을 제공 할 수 있도록 개선해보자. 이를 위해 인증서와 개인 키를 만들어야 한다. 
+개인 키는 안전하게 유지해야 하므로 개인 키와 인증서를 시크릿에 넣자. 
+
+```shell
+$ openssl genrsa -out https.key 2048 
+$ openssl req -new -x509 -key https.key  -out https.cert -days 3650 -subj /CN=www.kubia-example.com 
+$ echo bar > foo 
+$ kuectl create secret generic fortune-https --from-file=https.key --from-file-https.cert --from-file=foo 
+```
+
+> 여기에서는 일반적인(generic) 시크릿을 작성하지만, kubectl create secret tls 명령을 이용해 tls 시크릿을 생성할 수도 있다.   
+> 이렇게 하면 다른 항목 이름으로 시크릿을 생성할 수 있다.  
+
+#### 컨피그맵과 시크릿 비교 
+
+```shell
+$ k get secret fortune-https -o yaml 
+```
+
+```shell
+$ k get configmap fortune-config -o yaml 
+```
+
+> 민감하지 않은 데이터도 시크릿을 사용할 수 있지만, 시크릿의 최대 크기는 1MB로 제한된다. 
+
+Base64 인코딩을 사용하는 까닭은 간단하다. 시크릿 항목에 일반 텍스트뿐만 아니라 바이너리 값도 당믕ㄹ 수 있기 때문이다. 
+Base64 인코딩은 바이너리 데이터를 일반 텍스트 형식인 YAML 이나 JSON 안에 넣을 수 있다. 
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin      # required field for kubernetes.io/basic-auth
+  password: t0p-Secret # required field for kubernetes.io/basic-auth
+```
+
+stringData 필드는 쓰기 전용이다. 값을 설정할 때만 사용 할 수 있다. kubectl get -o yaml 명령으로 시크릿의 YAML 정의를 가져올 때, 
+stringData 필드는 표시되지 않는다. 대신 stringData 필드로 지정한 모든 항목은 data 항목 아래에 다른 모든 항목처럼 Base64로 인코딩돼  
+표시된다. 
+
+##### SSH authentication secrets
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-ssh-auth
+type: kubernetes.io/ssh-auth
+data:
+  # the data is abbreviated in this example
+  ssh-privatekey: |
+          MIIEpQIBAAKCAQEAulqb/Y ...
+```
 
 # Tips
 
