@@ -2464,7 +2464,70 @@ lrwxrwxrwx ... 12:15 sleep-interval -> . .data/sleep-interval
 - 민감하지 않고, 일반 설정 데이터는 컨피그맵을 사용한다. 
 - 본질적으로 민감한 데이터는 시크릿을 사용해 키 아래에 보관하는 것이 필요하다. 만약 설정 파일이 민감한 데이터와 그렇지 않는 데이터를 모두 가지고 있다면 해당 파일을 시크릿 안에 저장해야 한다. 
 
+### Secret 
 
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    secret:
+      secretName: mysecret
+      optional: true
+```
+
+#### 기본 토큰 시크릿 소개 
+
+모든 파드에는 secret 볼흄이 자동으로 연결돼 있다. 이전 kubectl describe 명령어의 출력은 설정되어 있는 시크릿을 참조한다. 시크릿은 리소스 이기 때문에 k get secrets 명령어로 목록을 조회하고  
+거기서 default-token 시크릿을 찾을 수 있다. 
+
+```shell
+k get secrets
+W0409 17:54:22.142216   13003 gcp.go:120] WARNING: the gcp auth plugin is deprecated in v1.22+, unavailable in v1.25+; use gcloud instead.
+To learn more, consult https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+NAME                  TYPE                                  DATA   AGE
+default-token-shkhd   kubernetes.io/service-account-token   3      126d
+```
+
+위의 명령어는 secrets를 조회하는 명령어다.  
+
+이후 secrets 에서 k describe secrets를 통해서 세부 정보를 확인할 수 있다. 
+
+```shell
+$ k describe secrets default-token-shkhd
+W0409 18:01:26.316320   13101 gcp.go:120] WARNING: the gcp auth plugin is deprecated in v1.22+, unavailable in v1.25+; use gcloud instead.
+To learn more, consult https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+Name:         default-token-shkhd
+Namespace:    default
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: default
+              kubernetes.io/service-account.uid: 61a3fe51-d59f-4017-9c2c-9b38ca7c8678
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+ca.crt:     1509 bytes
+namespace:  7 bytes
+token:      ~~~ 
+```
+
+시크릿이 갖고 있는 세 가지 항목(ca.crt, namespace, token)은 파드 안에서 쿠버네티스 API 서버와 통신할 때 필요한 모든 것을 나타낸다.  
+이상적으로는 애플리케이션이 완전히 쿠버네티스를 인지하지 않도록 하고 싶지만, 쿠버네티스와 직접 대화하는 방법 외에 다른 대안이 없으면 secret 볼륨을 통해  
+제공된 파일을 사용한다.  
+
+> 기본적으로 default-token 시크릿은 모든 컨테이너에 마운트되지만, 파드 스펙 안에 auto mountService-AccountToken 필드 값을 false로 지정하거나 
+> 파드가 사용하는 서비스 어카운트를 false로 지정해 비활성화 할 수 있다. 
 
 # Tips
 
