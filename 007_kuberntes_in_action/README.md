@@ -2653,6 +2653,94 @@ spec:
       mountPath: "/etc/secret-volume"
 ```
 
+또 다른 Pod Yaml 샘플 정의 ( 참고용 )
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metaData: 
+  name: fortune-https
+spec: 
+  containers: 
+  - image: luksa/fortune:env 
+    name: html-generator 
+    env: 
+    - name: INTERVAL 
+      valueFrom: 
+       configMapKeyRef: 
+         name: fortune-config 
+         key: sleep-interval 
+    volumeMounts: 
+    - name: html 
+      mountPath: /var/htdocs 
+  - image: nginx:alpine 
+    name: web-server 
+    volumeMounts: 
+    - name: html 
+      mountPath: /usr/share/nginx/html 
+      readOnly: true 
+    - name: config 
+      mountPath: /etc/nginx/conf.d 
+      readOnly: true 
+    - name: certs 
+      mountPath: /etc/nginx/certs/ 
+      readOnly: true 
+    ports: 
+    - containerPort: 80 
+    - containerPort: 443 
+  volumes: 
+  - name: html 
+    emptyDir: {} 
+  - name: config 
+    configMap: 
+      name: fortune-config 
+      items: 
+      - key: my-nginx-config.conf 
+        path: https.conf 
+  - name: certs 
+    secret: 
+      secretName: fortune-https
+```
+
+#### Secret 사용 여부 점검 
+
+```shell
+$ kubectl port-forward fortune-https  8443:443 & 
+$ curl http://localhost:8443 -k 
+```
+
+#### 시크릿 볼륨을 메모리에 저장하는 이유 
+
+secret 볼륨은 시크릿 파일을 저장하는 데 인메모리 파일 시스템을 사용한다. 컨테이너에 마운트된 볼륨을 조회하면 이를 볼 수 있다. 
+
+```shell
+$ k exec fortune-https -c web-server -- mount | grep certs 
+```
+
+tmpfs를 사용하는 이유는 민감한 데이터를 노출시킬 수도 있는 디스크에 저장하지 않기 위해서다. 
+
+#### 환경 변수로 시크릿 항목 노출 
+
+
+```yaml
+...
+ env: 
+ - name: FOO_SECRET 
+   valueFrom: 
+     secretKeyRef: 
+       name: fortune-https
+       key: foo 
+...
+```
+
+- 변수는 시크릿 항목에서 설정된다. 
+- 키를 갖고 있는 시크릿의 이름 
+- 노출할 시크릿의 키 이름 
+
+쿠버네티스에서 시크릿을 환경변수로 노출할 수 있게 해주지만, 이 기능을 사용하는 것이 가장 좋은 방법은 아니다. 애플리케이션은 일반적으로 오류 보고서에 환경변수를  
+기록하거나 시작하면서 로그에 환경 변수를 남겨 의도치 않게 시크릿을 노출할 수 있다. 또한 자식 프로세스는 상위 프로세스의 모든 환경변수를 상속받는데, 만약 애플리케이션이 
+타사 바이너리를 실행할 경우 시크릿 데이터를 어떻게 사용하는지 알 수 있는 방법이 없다. 
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
