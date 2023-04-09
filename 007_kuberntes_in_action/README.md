@@ -2796,7 +2796,21 @@ spec:
 이름과 같이 실행 시점까지 알려지지 않은 데이터의 경우는 어떨까? 파드의 레이블이나 어노테이션과 같이 어딘가에 이미 설정된 데이터라면 어떨까?  
 아마도 동일한 정보를 여러 곳에 반복해서 설정하고 싶지 않을 것이다.  
 
-![](https://keepinmindsh.github.io/lines/assets/downward_flow.png)
+### 사용 가능한 메타데이터 이해 
+
+아래의 정보를 컨테이너에 전달할 수 있다. 
+
+- 파드의 이름 
+- 파드의 IP 주소 
+- 파드가 속한 네임스페이스 
+- 파드가 실행중인 노드의 이름 
+- 파드가 실행중인 서비스 어카운트 이름 
+- 각 컨테이너의 CPU와 메모리 요청 
+- 각 컨테이너의 CPU와 메모리 제한 
+- 파드의 레이블 
+- 파드의 어노테이션 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/downward_flow.png)
 
 # Tips
 
