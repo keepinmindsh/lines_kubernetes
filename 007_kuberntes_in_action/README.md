@@ -2903,6 +2903,232 @@ spec:
       ...  
 ```
 
+환경 변수로 메타데이터를 전달하는 대신 downward 라는 볼륨을 정의하고 컨테이너의 /etc/downward 아래에 마운트 한다.  
+이 볼륨에 포함된 파일들은 볼륨 스펙의 downwardAPI.items 속성 아래에 설정된다.  
+
+- 실제 내부 마운트된 정보를 확인해보면, 
+
+```shell 
+$ kubectl exec downward -- ls -1L /etc/downward  
+
+$ kubectl exec downward cat /etc/downward/lables
+
+$ kubectl exec downward cat /etc/downward/annotations
+```
+
+#### 레이블과 어노테이션 업데이트 
+
+레이블이나 어노테이션이 변경될 때 쿠버네티스가 이 값을 가지고 있는 파일을 업데이트 해서 파드가 항상 최신 데이터를 볼 수 있도록 한다.  
+
+
+> 컨피그 맵과 시크릿 볼륨과 마찬가지로 파드 스펙에서 downwardAPI 볼륨의 defaultMode 속성으로 파일 권한을 변경할 수 있다. 
+
+#### 볼륨 스펙에서 컨테이너 수준의 메타데이터 참조 
+
+```yaml
+spec: 
+  volumes: 
+  - name: downward
+    downwardAPI: 
+      items: 
+      - path: "containerCpuRequestMilliCores"
+        resourceFieldRef: 
+          containerName: main 
+          resource: requests.cpu
+          divisor: 1m
+```
+
+볼륨이 컨테이너가 아니라 파드 수준에서 정의되었다고 하면 그 이유가 분명해진다. 
+볼륨 스펙 내에서 컨테이너의 리소스 필드를 참조할 때는 참조하는 컨테이너의 이름을 명시적으로 지정해야 한다. 
+컨테이너가 하나인 파드에서 마찬가지다.  
+볼륨을 사용해 컨테이너의 리소스 요청이나 제한을 노출하는 것은 환경변수를 사용하는 것보다 약간 더 복잡하지만 필요할 경우 
+한 컨테이너의 리소스 필드를 다른 컨테이너에 전달할 수 있는 장점이 있다. 환경변수로는 컨테이너 자신의 리소스 제한과 
+요청만 전달할 할 수 있다. 
+
+## 쿠버네티스 API 서버와 통신하기 
+
+다른 API 오브젝트에 관한 정보를 얻기 위해서 파드 내부에서 API 서버와 통신한다. 
+
+```shell
+$ kubectl cluster-info
+
+$ kubectl proxy 
+W0423 15:43:35.866535    3606 gcp.go:120] WARNING: the gcp auth plugin is deprecated in v1.22+, unavailable in v1.25+; use gcloud instead.
+To learn more, consult https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke
+Starting to serve on 127.0.0.1:8001
+
+$ curl http://localhost:8001
+{
+  "paths": [
+    "/.well-known/openid-configuration",
+    "/api",
+    "/api/v1",
+    "/apis",
+    "/apis/",
+    "/apis/admissionregistration.k8s.io",
+    "/apis/admissionregistration.k8s.io/v1",
+    "/apis/apiextensions.k8s.io",
+    "/apis/apiextensions.k8s.io/v1",
+    "/apis/apiregistration.k8s.io",
+    "/apis/apiregistration.k8s.io/v1",
+    "/apis/apps",
+    "/apis/apps/v1",
+    "/apis/argoproj.io",
+    "/apis/argoproj.io/v1alpha1",
+    "/apis/authentication.k8s.io",
+    "/apis/authentication.k8s.io/v1",
+    "/apis/authorization.k8s.io",
+    "/apis/authorization.k8s.io/v1",
+    "/apis/auto.gke.io",
+    "/apis/auto.gke.io/v1",
+    "/apis/auto.gke.io/v1alpha1",
+    "/apis/autoscaling",
+    "/apis/autoscaling/v1",
+    "/apis/autoscaling/v2",
+    "/apis/autoscaling/v2beta1",
+    "/apis/autoscaling/v2beta2",
+    "/apis/batch",
+    "/apis/batch/v1",
+    "/apis/batch/v1beta1",
+    "/apis/certificates.k8s.io",
+    "/apis/certificates.k8s.io/v1",
+    "/apis/cloud.google.com",
+    "/apis/cloud.google.com/v1",
+    "/apis/cloud.google.com/v1beta1",
+    "/apis/coordination.k8s.io",
+    "/apis/coordination.k8s.io/v1",
+    "/apis/discovery.k8s.io",
+    "/apis/discovery.k8s.io/v1",
+    "/apis/discovery.k8s.io/v1beta1",
+    "/apis/events.k8s.io",
+    "/apis/events.k8s.io/v1",
+    "/apis/flowcontrol.apiserver.k8s.io",
+    "/apis/flowcontrol.apiserver.k8s.io/v1beta1",
+    "/apis/flowcontrol.apiserver.k8s.io/v1beta2",
+    "/apis/hub.gke.io",
+    "/apis/hub.gke.io/v1",
+    "/apis/internal.autoscaling.gke.io",
+    "/apis/internal.autoscaling.gke.io/v1alpha1",
+    "/apis/metrics.k8s.io",
+    "/apis/metrics.k8s.io/v1beta1",
+    "/apis/migration.k8s.io",
+    "/apis/migration.k8s.io/v1alpha1",
+    "/apis/networking.gke.io",
+    "/apis/networking.gke.io/v1",
+    "/apis/networking.gke.io/v1beta1",
+    "/apis/networking.gke.io/v1beta2",
+    "/apis/networking.k8s.io",
+    "/apis/networking.k8s.io/v1",
+    "/apis/node.k8s.io",
+    "/apis/node.k8s.io/v1",
+    "/apis/node.k8s.io/v1beta1",
+    "/apis/nodemanagement.gke.io",
+    "/apis/nodemanagement.gke.io/v1alpha1",
+    "/apis/policy",
+    "/apis/policy/v1",
+    "/apis/policy/v1beta1",
+    "/apis/rbac.authorization.k8s.io",
+    "/apis/rbac.authorization.k8s.io/v1",
+    "/apis/resolution.tekton.dev",
+    "/apis/resolution.tekton.dev/v1alpha1",
+    "/apis/resolution.tekton.dev/v1beta1",
+    "/apis/scheduling.k8s.io",
+    "/apis/scheduling.k8s.io/v1",
+    "/apis/snapshot.storage.k8s.io",
+    "/apis/snapshot.storage.k8s.io/v1",
+    "/apis/snapshot.storage.k8s.io/v1beta1",
+    "/apis/storage.k8s.io",
+    "/apis/storage.k8s.io/v1",
+    "/apis/storage.k8s.io/v1beta1",
+    "/apis/tekton.dev",
+    "/apis/tekton.dev/v1",
+    "/apis/tekton.dev/v1alpha1",
+    "/apis/tekton.dev/v1beta1",
+    "/healthz",
+    "/healthz/autoregister-completion",
+    "/healthz/etcd",
+    "/healthz/log",
+    "/healthz/ping",
+    "/healthz/poststarthook/aggregator-reload-proxy-client-cert",
+    "/healthz/poststarthook/apiservice-openapi-controller",
+    "/healthz/poststarthook/apiservice-openapiv3-controller",
+    "/healthz/poststarthook/apiservice-registration-controller",
+    "/healthz/poststarthook/apiservice-status-available-controller",
+    "/healthz/poststarthook/bootstrap-controller",
+    "/healthz/poststarthook/crd-informer-synced",
+    "/healthz/poststarthook/generic-apiserver-start-informers",
+    "/healthz/poststarthook/kube-apiserver-autoregistration",
+    "/healthz/poststarthook/priority-and-fairness-config-consumer",
+    "/healthz/poststarthook/priority-and-fairness-config-producer",
+    "/healthz/poststarthook/priority-and-fairness-filter",
+    "/healthz/poststarthook/rbac/bootstrap-roles",
+    "/healthz/poststarthook/scheduling/bootstrap-system-priority-classes",
+    "/healthz/poststarthook/start-apiextensions-controllers",
+    "/healthz/poststarthook/start-apiextensions-informers",
+    "/healthz/poststarthook/start-cluster-authentication-info-controller",
+    "/healthz/poststarthook/start-kube-aggregator-informers",
+    "/healthz/poststarthook/start-kube-apiserver-admission-initializer",
+    "/livez",
+    "/livez/autoregister-completion",
+    "/livez/etcd",
+    "/livez/log",
+    "/livez/ping",
+    "/livez/poststarthook/aggregator-reload-proxy-client-cert",
+    "/livez/poststarthook/apiservice-openapi-controller",
+    "/livez/poststarthook/apiservice-openapiv3-controller",
+    "/livez/poststarthook/apiservice-registration-controller",
+    "/livez/poststarthook/apiservice-status-available-controller",
+    "/livez/poststarthook/bootstrap-controller",
+    "/livez/poststarthook/crd-informer-synced",
+    "/livez/poststarthook/generic-apiserver-start-informers",
+    "/livez/poststarthook/kube-apiserver-autoregistration",
+    "/livez/poststarthook/priority-and-fairness-config-consumer",
+    "/livez/poststarthook/priority-and-fairness-config-producer",
+    "/livez/poststarthook/priority-and-fairness-filter",
+    "/livez/poststarthook/rbac/bootstrap-roles",
+    "/livez/poststarthook/scheduling/bootstrap-system-priority-classes",
+    "/livez/poststarthook/start-apiextensions-controllers",
+    "/livez/poststarthook/start-apiextensions-informers",
+    "/livez/poststarthook/start-cluster-authentication-info-controller",
+    "/livez/poststarthook/start-kube-aggregator-informers",
+    "/livez/poststarthook/start-kube-apiserver-admission-initializer",
+    "/logs",
+    "/metrics",
+    "/openapi/v2",
+    "/openapi/v3",
+    "/openapi/v3/",
+    "/openid/v1/jwks",
+    "/readyz",
+    "/readyz/autoregister-completion",
+    "/readyz/etcd",
+    "/readyz/informer-sync",
+    "/readyz/log",
+    "/readyz/ping",
+    "/readyz/poststarthook/aggregator-reload-proxy-client-cert",
+    "/readyz/poststarthook/apiservice-openapi-controller",
+    "/readyz/poststarthook/apiservice-openapiv3-controller",
+    "/readyz/poststarthook/apiservice-registration-controller",
+    "/readyz/poststarthook/apiservice-status-available-controller",
+    "/readyz/poststarthook/bootstrap-controller",
+    "/readyz/poststarthook/crd-informer-synced",
+    "/readyz/poststarthook/generic-apiserver-start-informers",
+    "/readyz/poststarthook/kube-apiserver-autoregistration",
+    "/readyz/poststarthook/priority-and-fairness-config-consumer",
+    "/readyz/poststarthook/priority-and-fairness-config-producer",
+    "/readyz/poststarthook/priority-and-fairness-filter",
+    "/readyz/poststarthook/rbac/bootstrap-roles",
+    "/readyz/poststarthook/scheduling/bootstrap-system-priority-classes",
+    "/readyz/poststarthook/start-apiextensions-controllers",
+    "/readyz/poststarthook/start-apiextensions-informers",
+    "/readyz/poststarthook/start-cluster-authentication-info-controller",
+    "/readyz/poststarthook/start-kube-aggregator-informers",
+    "/readyz/poststarthook/start-kube-apiserver-admission-initializer",
+    "/readyz/shutdown",
+    "/version"
+  ]
+}%
+```
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
