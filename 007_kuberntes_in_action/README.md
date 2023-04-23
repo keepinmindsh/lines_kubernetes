@@ -2812,6 +2812,97 @@ spec:
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/downward_flow.png)
 
+#### 환경변수를 활용한 메타데이터 노출하기 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: downward
+spec: 
+  containers: 
+  - name: main
+    image: busybox
+    command: ["sleep","9999999"]
+    resources: 
+      requests: 
+        cpu: 15m 
+        memory: 100ki 
+      limits: 
+        cpu: 100m 
+        memory: 4Mi 
+    env: 
+    - name: POD_NAME
+      valueFrom: 
+        fieldRef: 
+          fieldPath: metadata.name 
+    - name: POD_NAMESPACE  
+      valueFrom: 
+        fieldRef: 
+          fieldPath: metadata.namespace 
+    - name: POD_IP 
+      valueFrom: 
+        fieldRef: 
+          fieldPath: metadata.namespace 
+    - name: NODE_NAME 
+      valueFrom: 
+        fieldRef: 
+          fieldPath: spec.nodeName
+    ... 
+```
+
+프로세스가 실행되면 파드 스펙에 정의한 모든 환경 변수를 조회할 수 있다. 
+
+```shell
+$ kubectl exec downward env 
+```
+
+#### 파일로 메타데이터 전달 
+
+```yaml
+apiVersion: v1 
+kind: Pod
+metadata: 
+  name: downward 
+  labels: 
+    foo: bar 
+  annotations: 
+    key1: value1 
+    key2: |
+      multi 
+      line 
+      value
+spec: 
+  containers: 
+  - name: main  
+    image: busybox 
+    command: ["sleep", "9999999"]
+    resources: 
+      requests: 
+        cpu: 15m 
+        memory: 100Ki 
+      limits:
+        cpu: 100m 
+        memory: 4Mi 
+    volumeMounts: 
+    - name: downward 
+      mountPath: /etc/downward 
+  volumes: 
+  - name: downward 
+    downwardAPI: 
+      items: 
+      - path: "podName"
+        fieldRef: 
+          fieldPath: metadata.name 
+      - path: "podNamespace"
+        fieldRef: 
+          fieldPath: metadata.namespace 
+      - path: "labels"
+        fieldRef: 
+          fieldPath: matadata.labels
+      ...  
+```
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
