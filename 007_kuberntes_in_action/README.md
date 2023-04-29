@@ -3129,6 +3129,150 @@ $ curl http://localhost:8001
 }%
 ```
 
+### kubectl proxy로 쿠버네티스 API 살펴보기 
+
+```shell
+curl http://localhost:8001/apis/batch
+{
+  "kind": "APIGroup",
+  "apiVersion": "v1",
+  "name": "batch",
+  "versions": [  ## 두가지 버전을 갖는 batch API 그룹 
+    {
+      "groupVersion": "batch/v1", 
+      "version": "v1"
+    },
+    {
+      "groupVersion": "batch/v1beta1",
+      "version": "v1beta1"
+    }
+  ],
+  "preferredVersion": {
+    "groupVersion": "batch/v1",
+    "version": "v1"
+  }
+}%      
+```
+
+- 사용 가능한 버전에 대해서 명시하여 조회하면 해당 버전에서 사용할 수 있는 resources를 보여준다. 
+
+```shell
+curl http://localhost:8001/apis/batch/v1 
+{
+  "kind": "APIResourceList",
+  "apiVersion": "v1",
+  "groupVersion": "batch/v1",
+  "resources": [
+    {
+      "name": "cronjobs",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "CronJob",
+      "verbs": [
+        "create",
+        "delete",
+        "deletecollection",
+        "get",
+        "list",
+        "patch",
+        "update",
+        "watch"
+      ],
+      "shortNames": [
+        "cj"
+      ],
+      "categories": [
+        "all"
+      ],
+      "storageVersionHash": "sd5LIXh4Fjs="
+    },
+    {
+      "name": "cronjobs/status",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "CronJob",
+      "verbs": [
+        "get",
+        "patch",
+        "update"
+      ]
+    },
+    {
+      "name": "jobs",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "Job",
+      "verbs": [
+        "create",
+        "delete",
+        "deletecollection",
+        "get",
+        "list",
+        "patch",
+        "update",
+        "watch"
+      ],
+      "categories": [
+        "all"
+      ],
+      "storageVersionHash": "mudhfqk/qZY="
+    },
+    {
+      "name": "jobs/status",
+      "singularName": "",
+      "namespaced": true,
+      "kind": "Job",
+      "verbs": [
+        "get",
+        "patch",
+        "update"
+      ]
+    }
+  ]
+}% 
+```
+
+- 이후 실제 존재하는 Jobs를 조회하고 싶다면, 
+
+아래의 결과는 현재 Kubernetes Object로 생성된 Jobs이 없기 때문에 Items에 배열이 빈값으로 표기된다.
+
+```shell
+curl http://localhost:8001/apis/batch/v1/jobs
+{
+  "kind": "JobList",
+  "apiVersion": "batch/v1",
+  "metadata": {
+    "resourceVersion": "100856844"
+  },
+  "items": []
+}% 
+```
+
+실제 Job을 생성후에 위의 명령어를 호출하면 Items에 Jobs가 포함되어 목록이 나오게 된다. 
+
+- 이름별로 특정 값 인스턴스 검색하기 
+
+명확하게 이름을 특정하여 아래와 같이 api 를 통해서 정의된 object 를 조회해올 수 있다. 
+
+```shell
+curl http://localhost:8001/apis/apps/v1/namespaces/default/deployments/lines-admin-nextjs-deployment
+{
+  "kind": "Deployment",
+  "apiVersion": "apps/v1",
+  "metadata": {
+    "name": "lines-admin-nextjs-deployment",
+    "namespace": "default",
+    "uid": "a8dcd5bf-0aed-4175-8fd3-c68c456034a4",
+    "resourceVersion": "94685604",
+    "generation": 6,
+    "creationTimestamp": "2023-01-12T13:11:58Z",
+    "annotations": {
+      "deployment.kubernetes.io/revision": "2",
+....
+```
+
+
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
