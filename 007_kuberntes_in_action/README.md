@@ -3271,6 +3271,11 @@ curl http://localhost:8001/apis/apps/v1/namespaces/default/deployments/lines-adm
 ....
 ```
 
+위의 호출 방식과 똑같은 방식으로 아래와 같이 조회도 가능하다. 
+
+```shell
+$ k get deployment lines-admin-nextjs-deployment -o json
+```
 
 
 # Tips
