@@ -3277,6 +3277,115 @@ curl http://localhost:8001/apis/apps/v1/namespaces/default/deployments/lines-adm
 $ k get deployment lines-admin-nextjs-deployment -o json
 ```
 
+- [API 주소 찾기]
+
+> 해당 부분 정상 동작되지 않음, 추후 재검토 필요! 
+
+쿠버네티스 API 서버의 IP와 포트를 찾아야 한다. kubernetes라는 서비스가 디폴트 네임스페이스에 자동으로 노출되고 API 서버를 가리키도록 구성되기 때문에 쉽다. 
+
+```shell
+$ k get svc 
+
+
+$ root@curl:/# env | grep KUBERNETES_SERVICE 
+
+$ root@curl:/# curl https://kubernetes 
+```
+
+- 역할 기반 액세스 제어 비활성화 
+
+RBAC가 활성화된 쿠버네티스 클러스터를 사용하는 경우 서비스 어카운트가 API 서버에 액세스할 권한이 없을 수 있다.  
+API 서버를 쿼리할 수 있는 가장 간단한 방법은 다음 명령을 실행해 RBAC를 우회하는 것이다.   
+
+```shell
+$ k create clusterrolebinging permissive-binding \
+          --clusterrole=cluster-admin \
+          --group=system:serviceaccounts 
+```
+
+이렇게 하면 모든 서비스 어카운트에 클러스터 관리자 권한이 부여돼 원하는 방식돌 사용할 수 있다. 
+
+- 서버의 아이덴티티 검증 
+
+```shell
+$ root@curl:/# ls /var/run/secrets/kubernetes.io/serviceaccout/
+
+$ root@curl:/# curl --cacert /var/run/secrets/kubernets.io/serviceaccount
+
+$ root@curl:/# export CURL_CA_BUNDLE=/var/run/secrets/kubernetes.io/ 
+
+$ root@curl:/# TOKEN=$(cat /var/run/secrets/kubernetes.io)
+``` 
+
+- 파드가 실행 중인 네임스페이스 얻기
+
+```shell
+$ root@curl:/# NS=$(cat /var/run/secrets/kubernetes.io /serviceaccount/namespace)
+
+$ root@curl:/# curl -H "Aurhorization: Bearer $TOKEN" https://kubernetes/api/v1/namespaces/$NS/pods 
+```
+
+- 파드가 쿠버네티스와 통신하는 방법 정리 
+
+파드 내에서 실행 중인 애플리케이션이 쿠버네티스 API  에 적절히 액세스할 수 있는 방법을 정리해보자 
+
+- 애플리케이션은 API 서버의 인증서가 인증 기관으로부터 서명됐는지를 검증해야하며, 인증 기관의 인증서는 ca.cert 파일에 있다. 
+- 애플리케이션은 token 파일의 내용을 Authorization HTTP 헤더에 Bearer 토큰으로 넣어 전송해서 자신을 인증해야 한다. 
+- namespace 파일은 파드의 네임스페이스 안에 있는 API 오브젝트의 CRUD 작업을 수행할 때 네임스페이스를 API 서버로 전달하는 데 사용해야 한다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/default-token.png)
+
+### 앰배서더 컨테이너를 이용한 API 서버 통신 간소화  
+
+HTTPS, 인증서, 인증 토큰을 다루는 일은 때때로 개발자에게 너무 복잡할 때가 있다. 
+보안을 유지하면서 통신을 훨씬 가단하게 만들 수 있는 방법이 있다. 
+
+- 앰배서더 컨테이너 소개  
+
+API 서버를 쿼리해야 하는 애플리케이션이 있다고 상상해보자. API 서버와 직접 통신하는 대신 메인 컨테이너 옆의 앰배서더 컨테이너에서 kubectl proxy를  
+실행하고 이를 통해 API 서버와 통신할 수 있다.  
+API 서버와 직접 통신하는 대신 메인 컨테이너의 애플리케이션은 HTTPS 대신 HTTP로 앰배서더에 연결하고 앰배서더 프록시가 API 서버에 대한 HTTPS 연결을  
+처리하도록 해 보안을 투명하게 관리할 수 있다. 시크릿 볼륨에 있는 default-token v파일을 사용해 이를 수행한다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/ambassador_container.png)
+
+파드의 모든 컨테이너는 동일한 루프백 네트워크 인터페이스를 공유하므로 애플리케이션은 localhost 의 포트로 프록시에 액세스할 수 있다. 
+
+- 추가적인 앰배서더 컨테이너를 사용한 curl 파드 실행 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: curl-with-ambassador 
+spec: 
+  containers: 
+  - name: main 
+    image: tutum/curl 
+    command: ["sleep", "9999999"]
+  - name: ambassador 
+    image: luksa/kubectl-proxy:1.6.2 
+```
+
+```shell
+$ kubectl exec -it curl-with-ambassador -c main bash 
+```
+
+- ambassador를 통함 API 서버와의 통신 
+
+> 파드 내부의 실행 권한이 정상적으로 동작하지 않아서 추후 검토 예정 
+
+## 클라이언트 라이브러리를 사용해 API 서버와의 통신 
+
+### 기본 요약 
+
+- 파드의 이름, 네임스페이스 및 기타 메타데이터가 환경변수 또는 downward API 볼륨의 파일로 컨테이너 내부의 프로세스에 노출되는 방법 
+- CPU와 메모리의 요청 및 제한이 필요한 단위로 애플리케이션에 전달되는 방법 
+- 파드에서 downward API 볼륨을 사용해 파드가 살아있는 동안 변경 될 수 있는 최신 메타데이터 얻는 방법 
+- kubectl proxy로 쿠버네티스 REST API를 탐색하는 방법 
+- 쿠버네티스에 정의된 다른 서비스와 같은 방식으로 파드가 환경변수 또는 DNS 로 API 서버의 위치를 찾는 방법 
+- 파드에서 실행되는 애플리케이션이 API 서버와 통신하는지 검증하고, 자신을 인증하는 방법 
+- 클라이언트 라이브러리로 쉽게 쿠버네티스와 상호작용할 수 있는 방법 
 
 # Tips
 
