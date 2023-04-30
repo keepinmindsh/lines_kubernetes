@@ -3437,6 +3437,8 @@ v2로 태그가 지정된 새 이미지를 이미지 저장소에 푸시한다. 
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/rolling_update.png)
 
+> p394
+
 
 ## 레플리케이션 컨트롤러 자동 롤링 업데이트 수행 
 ### v1 버전의 애플리케이션 생성 
