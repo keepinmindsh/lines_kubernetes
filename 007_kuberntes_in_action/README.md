@@ -3387,6 +3387,12 @@ $ kubectl exec -it curl-with-ambassador -c main bash
 - 파드에서 실행되는 애플리케이션이 API 서버와 통신하는지 검증하고, 자신을 인증하는 방법 
 - 클라이언트 라이브러리로 쉽게 쿠버네티스와 상호작용할 수 있는 방법 
 
+# Section 12 
+
+## 파드에서 실행 중인 애플리케이션 업데이트 
+
+
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
