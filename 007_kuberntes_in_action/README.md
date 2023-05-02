@@ -3441,7 +3441,80 @@ v2로 태그가 지정된 새 이미지를 이미지 저장소에 푸시한다. 
 
 
 ## 레플리케이션 컨트롤러 자동 롤링 업데이트 수행 
-### v1 버전의 애플리케이션 생성 
+
+-  v1 버전의 애플리케이션 생성 
+
+```javascript
+const http = require('http')
+const os = require('os')
+console.log("Kubia server starting....")
+var handler = function(request, response) {
+    console.log("Received request from " + request.connection.remoteAddress);
+    response.writeHead(200);
+    response.end("This is v1 running in pod " + os.hostname() + "\n");
+}
+var www = http.createServer(handler);
+www.listen(8080);
+```
+
+```yaml
+apiVersion: v1 
+kind: ReplicationController 
+metadata: 
+  name: kubia-v1 
+spec: 
+  replicas: 3
+  template: 
+    metadata: 
+      name: kubia 
+      labels: 
+        app: kubia 
+    spec: 
+      containers: 
+        - image: luksa/kubia:v1 
+          name: nodejs 
+--- 
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: kubia 
+spec: 
+  type: LoadBalancer 
+  selector: 
+    app: kubia 
+  ports: 
+  - port: 80 
+    targetPort: 8080 
+```
+
+> 현재는 Replication Controller는 ReplicaSet에 의해서 대체 되었는데, 
+> ReplicaSet의 차이점은 복제할 수를 관리하기 위한 Selector를 필수적으로 정의해야 한다. 
+
+```yaml
+apiVersion: apps/v1 
+kind: ReplicaSet
+metadata: 
+  name: nginx 
+spec: 
+  replicas: 3 
+  selector: 
+    matchExpressions:
+      { key: app, operator: In, values: [nginx, frontend]}
+      {key : environment, operator: NotIn, values: [production] }
+  template: 
+    metadata: 
+      labels:
+        app: nginx 
+        environment: dev 
+    spec: 
+      containers: 
+        name: nginx 
+        image: nginx 
+        ports: 
+          containerPort: 80
+```
+
+
 ### kubectl을 이용한 롤링 업데이트  
 ## 애플리케이션을 선언적으로 업데이트하기 위한 디플로이먼트 사용하기 
 ### 디플로이먼트 생성  
