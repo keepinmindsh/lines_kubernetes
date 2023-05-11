@@ -3586,11 +3586,104 @@ spec:
 
 ```
 
+```shell 
+$ kubectl delete rc --all 
+
+$ kubectl create -f kubia-deployment-v1.yaml --record 
+
+# 디플로이먼트 롤아웃 상태 출력 
+$ kubectl rollout status deployment kubia 
+
+$ kubectl get po
+
+```
+
+기본적으로 디플로이먼트는 선언을 하고 내부적으로 replicaset 오브젝트가 파드를 생성하는 역항를 수행한다. 
+
 ### 디플로이먼트 업데이트  
+
+```shell 
+
+$ kubectl set image deployment kubia nodejs=luksa/kubia:v2
+
+# kubectl edit = 변경후 파일 저장하면 오브젝트 업데이트 
+# kubectl patch = 오브젝트의 개별 속성을 수정한다. 
+# kubectl apply = yaml/json 값을 수정해 오브젝트 수정한다. 
+# kubectl replace = yaml/json 파일로 오브젝트를 새것으로 교체한다. 이명령은 오브젝트가 존재해야 한다. 
+# kubectl set image = 컨테이너 이미지를 변경한다.  
+
+```
+
+
 ### 디플로이먼트 롤백 
+
+```shell 
+## 이전 버전으로 롤백 
+$ kubectl rollout undo deployment kubia 
+
+## 디플로이먼트 롤아웃 이력 표시 
+$ kubectl rollout history deployment kubia 
+
+## 특정 디플로이먼트 버전으로 롤백 
+$ kubectl rollout und deployment kubia --to-revision=1 
+
+```
+
 ### 롤아웃 속도 제어 
+
+아래의 속성에 따라서 롤링 업데이트 중에 몇개의 파드를 교체할지를 결정한다. 
+
+```yaml 
+spec: 
+  staregy: 
+    rollingUpdate: 
+      macSurge: 1 
+      maxUnavailable: 0
+    type : RollingUpdate 
+```
+
+- maxSurge 
+디플로이먼트가 의도하는 레플라키수보다 얼마나 많은 파드 인스턴스 수를 허용할지를 결정한다. 기본적으로 25%로 설정되고 의도한 개수보다 최대 25% 더 많은 파드 인스턴스가 있을 수 있다. 
+
+- maxUnavailable 
+
+업데이트 중에 의도하는 레플리카 수를 기준으로 사용할 수 없는 파드 인스턴스 수를 결정한다. 또한 기본적으로 25%로 설정되고 사용 가능한 파드 인스턴스 수는 의도하는 레플리카 수의 75% 이하로 떨어지지 않아야 한다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/replicas_setting.png)
+
+
 ### 롤아웃 프로세스 일시 중지 
+
+```shell 
+
+$ kubectl set image deployment kubia nodejs=luksa/kubia:v4
+
+# 롤아웃 시작한 즉시 중시 
+$ kubectl rollout pause deployment kubia 
+
+```
+
+새 파드 하나를 생성했지만 모든 원본 파드도 계속 실행중이어야 한다. 새 파드가 가동되면 서비스에 관한 모든 요청의 일부가 새파드로 전달된다. 
+
+이렇게 하면 카라니 릴리스를 효과적으로 실행할 수 있다.  
+카나리 릴리스는 잘못된 버전의 애플리케이션이 롤아웃돼 모든 사용자에게 영향을 주는 위험을 최소화 하는 기술이다. 
+
+- 롤 아웃 재개 
+
+```shell 
+$ kubectl rollout resume deployment kubia 
+```
+
 ### 잘못된 버전의 롤아웃 방지  
+
+새 파드가 시작되지 아마 레디니스 프로브가 매초마다 시작된다. 애플리케이션이 트정 요청 수부터 HTTP 상태 코드를 반환하기 때문에 특정 수 이후부터 레디니스 프로스가 실패하기 시작한다. 
+
+
+> minReadySeconds를 올바르게 설정하지 않고 레디니스 프로브만 정의하는 경우 레디니스
+> 프로브의 첫 번째 호출이 성공하면 즉시 새 파드가 사용 가능한 것으로 간주된다. 레디니스 프로브가
+> 곧 실패하면 모든 파드에서 잘못된 버전이 롤아웃된다. 따라서 minReadySeconds를 적절하게 설정해야 한다.
+
+기본적으로 롤아웃이 10분 동안 진행되지 않으면 실패한 것으로 간주한다. 
 
 # Section 13 
 
