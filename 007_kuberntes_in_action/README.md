@@ -3721,8 +3721,149 @@ default라는 네임스페이스에 속하는 foo라는 이름의 거버닝 서�
 FQDN을 통해 접근할 수 있다. 레플리카 셋으로 관리되는 파드에서는 불가능하다.  
 또한 foo.default.svc.cluster.local 도메인의 SRV 레코드를 조회해 모든 스테이트 풀셋의 파드이름을 찾는 목적으로 DNS를 사용할 수 있다. 
 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/statefulset_001.png)
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/statefulset_002.png)
+
 ## 스테이트풀셋 사용하기 
 
+- StatefulSet의 기본적인 사용 방식 
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  serviceName: "nginx"
+  replicas: 3 # by default is 1
+  minReadySeconds: 10 # by default is 0
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: nginx
+        image: registry.k8s.io/nginx-slim:0.8
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "my-storage-class"
+      resources:
+        requests:
+          storage: 1Gi
+```
+
+> [https://kubernetes.io/docs/concepts/storage/persistent-volumes/](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)  
+> [https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+
+- Persistence Volume을 연동하는 StatefulSet 
+
+
+```shell
+$ gcloud compute disks create --size=lGiB --zone=europe -westl-b pv-a
+$ gcloud compute disks create --size=lGiB --zone=europe -westl-b pv-b
+$ gcloud compute disks create --size=lGiB --zone=europe -westl-b pv-c
+```
+
+```yaml 
+kind: List 
+apiVersion: v1 
+items: 
+- apiVersion: v1 
+  kind: PersistenceVolume 
+  metadata: 
+    name: pv-a 
+  spec: 
+    capacity:
+      storage: 1Mi 
+    accessModes: 
+      - ReadWriteOnce
+    persistentVolumeReclaimPolicy: Recycle 
+    gcePersistentDisk: 
+      pdName: pv-a 
+      fsType: nfs4
+```
+
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: kubia 
+spec: 
+  clusterIP: None 
+selector: 
+  app: kubia 
+ports: 
+  - name: http 
+    port: 80 
+```
+
+```yaml
+apiVersion: apps/v1beta1 
+kind: StatefulSet 
+metadata: 
+  name: kubia 
+spec: 
+  serviceName: kubia 
+  replicas: 2 
+  template: 
+    metadata: 
+      labels: 
+        app: kubia 
+    spec: 
+      containers: 
+      - name: kubia 
+        image: luksa/kubia-pet
+        ports: 
+        - name: http 
+          containerPort: 8080
+        volumeMounts: 
+        - name: data 
+          mountPath: /var/data 
+    volumeClaimTemplates:
+    - metadata: 
+        name: data 
+      spec: 
+        accessModes:
+        - ReadWriteOnce
+        resources: 
+          requests: 
+          storage: 1Mi
+```
+
+```shell
+$ kubectl create -f kubia-statefulset.yaml
+```
 
 
 ## 스테이트풀셋의 피어 디스커버리 
