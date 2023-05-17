@@ -3880,7 +3880,6 @@ $ kubectl get po kubia-0 -o yaml
 $ kubectl get pvc 
 ```
 
-
 ## 스테이트풀셋의 피어 디스커버리 
 ## 스테이트풀셋이 노드 실패를 처리하는 과정 이해하기 
 
