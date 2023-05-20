@@ -4079,7 +4079,7 @@ kube-proxy는 실제 프록시이기 때문에 그 이름을 얻었지만, 현�
 
 ### 쿠버네티스 애드온 소개
 
-- 애드오 배포 방식
+- 애드온 배포 방식
 
 ```shell
 $ kubectl get rc -n kube-system
@@ -4091,9 +4091,30 @@ $ kubectl get deploy -n kube-system
 - 인그레스 컨트롤러 동작 방식 
 - 다른 애드온 사용
 
-p504
-
 ## 컨트롤러가 협업하는 방법 
+
+전체 프로세스를 시작하기 전에도 컨트롤러와 스케줄러 그리고 Kubelet은 API 서버에서 각 리소스 유형이 변경되는 것을 감시한다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_006.png)
+
+### 이벤트 체인 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_007.png)
+
+- 디플로이먼트가 레플리카셋 생성 
+- 레플리카셋 컨트롤러가 파드 리소스 생성 
+- 스케줄러가 생성한 파드에 노드 할당 
+- Kubelet은 파드의 컨테이너를 실행한다. 
+
+### 클러스터 이벤트 관찰 
+
+kubectl describe 명령을 사용할 때 마다 특정 리소스와 관련된 이벤트를 봤지만, 
+kubectl get events 명령을 이용해 이벤트를 직접 검색할 수도 있다. 
+
+```shell
+$ kubectl get events --watch 
+```
+
 ## 실행중인 파드에 관한 이해 
 ## 파드간 네트워킹 
 ## 서비스 구현 방식 
