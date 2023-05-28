@@ -4369,6 +4369,8 @@ default 서비스 어카운트만 갖고 있다. 필요한 경우 서비스 어�
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_015.png)
 
+#### 서비스어카운트 
+
 ## 역할 기반 액세스 제어로 클러스터 보안 
 
 
