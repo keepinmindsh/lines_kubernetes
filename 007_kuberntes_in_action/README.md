@@ -4364,6 +4364,11 @@ API 서버는 설정된 인가 플러그인에 이 사용자 이름을 전달하
 $ kubectl get sa
 ```
 
+default 서비스 어카운트만 갖고 있다. 필요한 경우 서비스 어카운트를 추가할 수 있다. 각 파드는 딱 하나의 서비스와 연계돼 있지만 
+여러 파드가 같은 서비스 어카운트를 사용할 수 있다. 파드는 같은 네임스페이스의 서비스어카운트만 사용할 수 있다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_015.png)
+
 ## 역할 기반 액세스 제어로 클러스터 보안 
 
 
