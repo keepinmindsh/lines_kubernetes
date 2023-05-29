@@ -4369,9 +4369,258 @@ default 서비스 어카운트만 갖고 있다. 필요한 경우 서비스 어�
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_015.png)
 
-#### 서비스어카운트 
+#### 서비스 어카운트가 인가와 어떻게 밀접하게 연계돼 있는지 이해하기 
+
+파드 매니페스트에 서비스 어카운트의 이름을 지정해 파드에 서비스 어카운트 할당할 수 있다. 명시적으로 할당하지 않으면 파드는 네임스페이스에 있는 default 서비스 어카운트를 사용한다.  
+파드에 서로 다른 서비스 어카운트를 할당하면 각 파드가 액세스할 수 있는 리소스를 제어할 수 있다. API 서버가 인증 토큰이 있는 요청을 수신하면, API 서버는 토큰을 사용해  
+요청을 보낸 클라이언트를 인증한 다음 관련 서비스 어카운트가 요청된 작업을 수행할 수 있는지 여부를 결정한다. API 서버는 클러스터 관리자가 구성한 시스템 전체의 인가 플러그인에서 정보를 얻는다.   
+
+
+사용가능한 인가 플러그인 중 하나는 역할 기반 액세스 제어 플러그인이며 추후에 설정한다. 
+
+### 서비스 어카운트 생성  
+
+모든 네임스페이스에는 고유한 default 서비스 어카운트가 포함돼 있지만 필요한 경우 추가로 만들 수 있다. 하지만 왜 모든 파드에 default 서비스 어카운트를 사용하지 않고, 
+귀찮게 서비스 어카운트를 생성하는 것일까?  
+
+분명한 이유는 클러스터 보안 때문이다. 클러스터의 메타 데이터를 읽을 필요가 없는 파드는 클러스터에 배포된 리소스를 검색하거나 수정할 수 없는 제한된 계정으로 실행해야 한다.  
+리소스의 메타 데이터를 검색해야 하는 파드는 해당 오브젝트의 메타 데이터만 읽을 수 이ㅏㅆ는 서비스 어카운트로 실행해야 하며, 오브젝트를 수정해야 하는 파드는 API 오브젝트를  
+수정할 수 있는 고유한 서비스 어카운트로 실행해야 한다. 
+
+```shell
+$ kubectl create serviceaccount foo 
+
+$ kubectl describe sa goo 
+
+$ kubectl describe secret foo-token-qzq7j
+```
+
+#### 서비스 어카운트의 마운트 가능한 시크릿 이해 
+
+kubectl describe 를 사용해 서비스 어카운트를 검사하면 토큰이 Mountable secrets 목록에 표시된다.  
+기본적으로 파느는 원하는 모든 시크릿을 마운트 할 수 있다. 그러나 파드가 서비스어카운트를 설정할 수 있다. 이 기능을 사용하려면 서비스어카운트가 다음 어노테이션을 포함하고 있어야 한다. 
+
+
+``` 
+$ kubernetes.io/enforce-mountable-secrets="true" 
+```
+
+서비스 어카운트에 이 어노테이션이 달린 경우 이를 사용하는 모든 파드는 서비스 어카운트의 마운트 가능한 시크릿만 마운트 할 수 있다. 
+
+### 파드에 서비스어카운트 할당 
+
+추가 서비스어카운트를 만든 후에는 이를 파드에 할당해야 한다. 파드 정의의 spec.serviceAccountName 필드에서 서비스어카운트 이름을 설정하면 된다.
+
+#### 사용자 정의 서비스어카운트를 사용하는 파드 생성 
+
+tutum/curl 이미지 기반의 컨테이너와 함께 앰배서더 컨테이너를 실행하는 파드를 배포했다. 이 파드를 이용해 API 서버의 REST 인터페이스를 탐색했다. 
+앰배서더 컨테이너는 kubectl proxy 프로세스를 실행했으며, 파드의 서비스 어카운트 토큰을 사용해 API 서버를 인증했다 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: curl-custom-sa 
+spec: 
+  serviceAccountName: foo 
+  containers: 
+    - name: main 
+      image: tutum/curl 
+      command: ["sleep", "9999999"]
+    - name: ambassador 
+      image: luksa/kubectl-proxy:1.6.2 
+```
+
+```shell 
+$ kubectl exec -it curl-custom-sa -c main 
+```
+
+#### API 서버와 통신하기 위해 사용자 정의 서비스어카운트 토큰 사용 
+
+이 토큰을 사용해 API 서버와 통신할 수 있는지 살펴보자. 
+
+```shell
+$ kubectl exec -it curl-custom-sa -c main curl localhost:8001/api/v1/pods 
+```
+
+사용자 정의 서비스 어카운트 파드로 나열할 수 있다는 뜻이다. 이는 클러스터가 RBAC 인가 플러그인을 사용하지 않거나, 제시한 지침에 따라   
+모든 서비스 어카운트에 모든 권한을 부여했기 때문일 수 있다. 클러스터가 적절한 인가를 사용하지 않는 경우 default 서비스 어카운트만으로도 모든 작업을 수행할 수 있으므로  
+추가적인 서비스 어카운트를 생성하고 사용하는 것은 의미가 없다. 이 경우 서비스 어카운트를 사용하는 유일한 이유는 앞에서 설명한대로 마운트 가능한 시크릿을 적용하거나 서비스어카운트를 
+이미지 풀 시크릿을 제공하기 위한 것이다. 
 
 ## 역할 기반 액세스 제어로 클러스터 보안 
+
+RBAC 인가 플러그인이 GA로 승격됐으며 이제 많은 클러스터에서 기본적으로 할성화돼 있다. RBAC는 권한이 없는 사용자가 클러스터 상태를 보거나  
+수정하지 못하게 한다. 디폴트 서비스어카운트는 추가 권한 부여하지 않는한 클러스터 상태를 볼수 없으며 어떤식으로는 수정할수 없다. 
+
+### RBAC 인가 플러그인 소개  
+
+쿠버네티스 API 서버는 인가 플러그인을 사용해 액션을 요청하는 사용자가 액션을 수행할 수 있는지 점검하도록 설정할 수 있다.  
+API 서버가 REST 인터페이스를 제공하므로 사용자는 서버에 HTTP 요청을 보내 액션을 수행한다. 사용자는 요청에 자격증명을 표함시켜  
+자신을 인증한다. 
+
+#### 액션 이해하기
+
+REST 클라이언트는 GET, POST, PUT, DELETE 및 기타 유형의 HTTP 요청을 특정 REST 리소스를 나타내는 특정 URL 경로로 ㅂ ㅗ낸다. 
+쿠버네티스에서 이러한 리소스에는 파드, 서비스, 시크릿 등이 있다. 
+
+- 파드 가져오기 
+- 서비스 생성하기 
+- 시크릿 업데이트 
+- 기타 등등 
+
+이러한 예의 동사는 클라이언트가 수행한 HTTP 메서드에 매핑된다. 명사는 쿠버네티스 리소스와 정확하게 매핑된다. 
+API 서버 내에서 실행되는 RBAC와 같은 인가 플러그인은 클라이언트가 요청한 자원에서 요청한 동사를 수행할 수 있는지를 판별한다.  
+
+--- 
+
+전체 리소스 유형에 보안 권한을 적용하는 것 외에도 RBAC 규칙은 특정 리로스 인스턴스에도 적용할 수 있다.  
+그리고 리소스가 아닌 URL 경로에도 권한을 적용할 수 있다는 것을 알게 될텐데, 이는 API 서버가 노출하는 모든 경로가 리소스를 매핑한 것은 아니기 때문이다.  
+
+#### RBAC 플러그인 이해 
+
+이름에서 알 수 있듯이 RBAC 인가 플러그인은 사용자 액션을 수행할 수 있는지 여부를 결정하는 핵심 요소를 사용자 롤을 사용한다. 주체는 하나 이상의 롤과 연계돼 있으며 
+각 롤은 특정 리소스에 특정 동사를 수행할 수 있다.   
+ 사용자에게 여러 롤이 잇는 경우 롤에서 허용하는 모든 작업을 수행할 수 있다. 예를 들어 사용자 롤에 시크릿 정보를 업데이트하는 권한이 없으면 API 서버는 사용자가 
+시크릿 정보에 대해 PUT 또는 PATCH 요청을 수행하지 못하게 한다.  
+RBAC 플러그인으로 인가를 관리하는 것은 간단하다. 
+
+### RBAC 리소스 소개 
+
+- 롤과 클러스터롤 : 리소스에 수행할 수 있는 동사를 지정한다. 
+- 롤바인딩과 클러스터롤 바인딩 : 위의 롤을 특정 사용자, 그룹 또는 서비스 어카운트에 바인딩 한다.
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_016.png)
+
+롤과 클러스터롤 또는 롤바인딩과 클러스터롤바인딩의 차이점은 롤과 롤바인딩은 네임스페이스가 지정된 리소스이고 클러스터롤과 클러스터롤바인딩은 네임 스페이스를 지정하지 않는  
+클러스터 수준의 리소스라는 것이다. 하나의 네임스페이스에 여러 롤 바인딩이 존재할 수 있다. 또한 여러 클러스터롤 바인딩과 클러스터롤을 만들 수 있다.    
+롤 바인딩이 네임스페이스가 지정됐음에도 네임스페이스가 지정되지 않는 클러스터롤을 참조할 수 있다는 것이다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_017.png)
+
+#### 실습을 위한 설정  
+
+RBAC 리소스가 API 서버로 수행할 수 잇는 작업에 어떤 영향을 주는지 살펴보기 전에 클라스터에 RBAC가 활성화돼 있는지 확인해야 한다.  
+인가 플러그인으로 병렬로 활성화돼 있을 수 있으며 그중 하나라도 액션을 수행하도록 허용하는 경우 액션이 허용된다. 
+
+```shell
+$ kubectl delete clusterrolebinding permissive-binding 
+``` 
+
+#### 네임스페이스 생성과 파드 실행 
+
+```shell
+$ kubectl create ns foo 
+
+$ kubectl run test --image=luksa/kubectl-proxy -n foo 
+
+$ kubectl create ns bar 
+
+$ kubectl run test --image=luksa/kubectl-proxy -n bar 
+
+# 이제 터미널 두 개를 열고 kubectl exec를 사용해 각 파드 내에서 셸을 실행한다. 
+$ kubectl get po -n foo 
+
+$ kubectl exec -it text-123123434-ttq36 -n foo sh 
+
+# 파드에서 서비스 목록 나열하기 
+# RBAC가 활성화돼 있는 상태에서 파드가 클러스터 상태 정보를 읽을 수 없다는 것을 확인하기 위해 curl를 사용해 foo 네임스페이스의 서비스를 나열한다. 
+$ curl localhost:8001/api/v1/namespaces/foo/services 
+```
+
+### 롤과 롤바인딩 사용  
+
+롤 리소스는 이떤 리소스에 어떤 액션을 수행할 수 있는지 정의한다. 다음 예제는 사용자 foo 네임 스페이스에서 서비스를 가져오고 나열 할 수 있는 롤을 정의 한다. 
+
+```yaml
+apiVersion: rbac.authorization.k8s.io/v1 
+kind: Role 
+metadata: 
+  namespace: foo 
+  name: service-reader 
+rules: 
+  - apiGroups: [""] 
+    verbs: ["get", "list"]
+    resources: ["services"]
+```
+
+- 롤은 네임스페이스가 지정된다 ( 네임스페이스를 생략하면 현재 네임스페이스가 된다 )
+- 서비스는 이름이 없는 core apiGroup의 리소스다. 따라서 "" 이다. 
+- 개별 서비스의 이름을 가져오고 모든 항목의 나열이 허용된다. 
+- 이 규칙(rule)은 서비스와 관련이 있다. 
+
+이 롤 리소스는 foo 네임 스페이스에 생성된다. 각 리소스 유형이 리소스 매니페스트의 apiVersion 필드에 지정한 API 그룹에 속한다는 것을 배웠다. 
+롤 정의에서는 각 규칙내에 나열된 리소스의 apiGroup을 지정해야 한다. 여러 API 그룹에 속한 리소스에 관한 액세스를 허용하는 경우 여러 규칙을 사용한다. 
+
+#### 롤 생성하기 
+
+``` 
+$ kubectl create -f service-reader.yaml -n foo 
+```
+
+GKE를 사용하는 경우 클러스터 관리자 권한이 없기 때문에 위의 명령이 실패할 수 있다. 
+
+``` 
+$ kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=your.email@address.com 
+```
+
+YAML 파일을 이용해 service-reader 롤을 생성하는 대신 kubectl create role 명령을 사용해 롤을 생성할 수도 있다. 
+
+``` 
+$ kubectl create role service-reader --verb=get --verb=list --resource=services -n bar 
+``` 
+
+이 두 롤을 사용해 두 파드 내에서 foo와 bar 네임스페이스의 서비스를 나열할 수 있다. 그러나 두 롤을 만드는 것만으로는 충분하지 않다. 각 롤을 네임스페이스의 서비스 어카운트에 바인딩해야 한다. 
+
+#### 서비스어카운트에 롤을 바인딩하기  
+
+롤은 수행할 수 있는 액션을 정의하지만 누가 수행할 수 있는지는 지정하지 않는다. 그렇게 하려면 주체에 바인딩해야 한다. 여기서 주체란 사용자, 서비스 어카운트 혹은 그룹이 될 수 있다.  
+주체에 롤을 바인딩하는 것은 롤 바인딩 리소스를 만들어 주생한다. 롤을 default 서버스 어카운드에 바인딩하기 위해 다음 명령을 실행한다. 
+
+``` 
+$ kubectl create rolebinding test --role=service-reader --serviceaccount=foo:default -n foo 
+``` 
+
+명령은 그 자체로 설명이 가능해야 한다. foo 네임 스페이스의 default 서비스 어카운트에 service-reader  롤을 바인딩하는 롤 바인딩을 만들고 있다. 
+
+> 서비스 어카운트 대신 사용자에게 롤을 바인딩하려면 --user 인수를 사용해 사용자 이름을 지정해라. 그룹을 바인딩하려면 --group를 사용하라. 
+
+```shell
+$ kubectl get rolebinding test -n foo -o yaml 
+```
+
+보다시피 롤바인딩은 항상 하나의 롤을 참조하지만 여러 주체에 롤을 바인딩할 수 있다.  
+이 롤 바인딩은 네임스페이스 foo의 파드가 실행 중인 서비스어카운트에 바인딩하기 때문에 이제 해당 파드 내에서 서비스를 나열할 수 있다. 
+
+``` 
+$ curl localhost:8001/api/v1/namespaces/foo/services
+```
+
+#### 롤 바인딩에서 다른 네임스페이스의 서비스 어카운트 포함하기 
+
+``` 
+$ kubectl edit rolebiding test -n foo 
+```
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_018.png) 
+
+### 클러스터롤과 클러스터롤바인딩 사용하기 
+
+과 롤바인딩은 네임스페이스가 지정된 리소스로, 하나의 네임스페이스 상에 상주하며 해당 네임스페이스의 리소스에 적용된다는 것을 의미하지만 롤 바인딩은 다른 네임 스페이스의 서비스 어카운트도 참조할 수 있다.    
+이러한 네임 스페이스가 지정된 리소스 외에도 클러스터롤와 클러스터롤바인딩이라는 두 개의 클러스터 수준의 RBAC 리소스도 있다. 이것들은 네임스페이스를 지정하지 않는다.   
+
+
+일반 롤은 롤이 위치하고 있는 동일한 네임스페이스의 리소스에만 액세스할 수 있다. 다른 네임스페이스의 리소스에 누군가가 액세스할 수 있게 하려면 해당 네임스페이스마다 롤과 
+롤 바인딩을 만들어야 한다. 이를 모든 네임 스페이스로 확장하려면 각 네임스페이스에서 동일한 롤과 롤바인딩을 생성해야 한다. 네임스페이스를 추가로 만들 때마다 이 두 개의 리소스를 
+만들어야 한다는 것도 기억해야 한다. 
+
+#### 클러스터 수준 리소스에 액세스 적용 
+
+``` 
+$ kubectl create clusterrole pv-reader --verb=get,list --resource=persitenctvolumes 
+
+$ kubectl get clusterrole pv-reader -o yaml 
+```
 
 
 # Section 16 
