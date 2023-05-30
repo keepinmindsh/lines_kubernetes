@@ -4617,10 +4617,39 @@ $ kubectl edit rolebiding test -n foo
 #### 클러스터 수준 리소스에 액세스 적용 
 
 ``` 
+# pv-reader 클러스터롤 생성 
 $ kubectl create clusterrole pv-reader --verb=get,list --resource=persitenctvolumes 
 
-$ kubectl get clusterrole pv-reader -o yaml 
+# 정의된 clusterrole 확인 
+$ kubectl get clusterrole pv-reader -o yaml
+
+# 파드내 쉘의 실행 
+$ curl localhost:8001/api/v1/persistentvolumes  
+# 퍼시스턴트 볼륨은 네임스페이스에 연관되지 않기 때문에 URL에 네임스페이스가 없다. 
+
+# 롤 바인딩 생성 - 클러스터롤에 대한 권한을 받기 위해서 시도함. 
+$ kubectl create rolebinding pv-test --clusterrole=pv-reader --serviceaccount=foo:default -n foo 
+
+# 아래의 코드는 동작하지 않음
+$ curl localhost:8001/api/v1/persistentvolumes 
+
+# 실제 명세에서는 정상적으로 표기 된다. 
+$ kubectl get rolebindings pv-test -o yaml
+# 롤 바인딩을 생성하고 클러스터롤을 참조해서 네임스페이스가 지정된 리소스에 액세스 하게 할 수 있지만 클러스터 수준 리소스에는 동일한 방식을 사용할 수 없다. 
+# 클러스터 수준 리소스에 액세스 권한을 부여하려면 항상 클러스터 롤 바인딩을 사용해야 한다. 
+
+# 기존의 RoleBinding 삭제 
+$ kubectl delete rolebinding pv-test 
+
+# 클러스터 롤 바인딩 작성 
+$ kubectl create clusterrolebinding pv-test --clusterrole=pv-reader --serviceaccount=foo:default 
+
+# 퍼시스턴스 볼룸 나열 가능 여부 확인 
+$ curl localhost:8001/api/v1/persistentvolumes 
+   
 ```
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_security_001.png)
 
 
 # Section 16 
