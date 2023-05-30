@@ -4651,6 +4651,38 @@ $ curl localhost:8001/api/v1/persistentvolumes
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_security_001.png)
 
+> 롤 바인딩은 클러스터롤 바인딩을 참조하더라도 클러스터 수준 리소스에 액세스 권한을 부여할 수 없다.
+
+#### 리소스가 아닌 URL에 액세스 허용하기 
+
+```shell 
+$ kubectl get clusterrole system:discovery -o yaml 
+```
+
+위의 클러스터롤이 리소스 대신 URL을 참조하는 것을 볼 수 있다. verbs 필드는 이러한 URL에 HTTP 메소드를 정의해서 사용할 수 있도록 한다. 
+
+> 리소스가 아닌 URL의 경우 create나 update대신  post, put과 patch가 사용된다. 동사는 소문자로 지정해야 한다. 
+
+클러스터 수준 리소스와 마찬가지로 리소스가 아닌 URL의 클러스터롤은 클러스터롤 바인딩으로 바인딩해야 한다. 롤바인딩으로 바인딩 하면 아무런 효과가 없다. 
+
+```shell
+# 기본 system:discovery 클러스터롤 바인딩 
+$ kubectl get clusterrolebinding system:discovery -o yaml 
+```
+
+> 그룹은 인증 플러그인의 도메인에 있다. API 서버가 요청을 받으면 인증 플러그인을 호출해 사용자가 속한 그룹 목록을 얻는다. 이 정보는 인가에 사용된다. 
+
+파드 내부에서 /api URL 경로를 액세스 해보고, 로컬 컴퓨터에서 인증 토큰을 지정하지 않고 액세스 해봄으로써 이를 확인할 수 있다. 
+
+```shell
+$ curl https://$(minikube ip):8443/api -k 
+```
+
+이제 클러스터롤과 클러스터 롤 바인딩을 사용해 클러스터 수준 리소스와 리소스가 아닌 URL에 액세스 권한을 부여했다. 이제 네임스페이스가 
+지정된 롤 바인딩과 함께 클러스터롤을 사용해 롤바인딩의 네임스페이스에 있는 네임스페이스가 지정된 리소스에 액세스 권한을 부여하는 방법을 살펴보자 
+
+#### 특정 네임 스페이스의 리소스에 액세스 권한을 부여하기 위해서 클러스터롤 사용하기 
+
 
 # Section 16 
 
