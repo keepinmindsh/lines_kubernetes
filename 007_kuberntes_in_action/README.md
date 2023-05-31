@@ -4683,6 +4683,58 @@ $ curl https://$(minikube ip):8443/api -k
 
 #### 특정 네임 스페이스의 리소스에 액세스 권한을 부여하기 위해서 클러스터롤 사용하기 
 
+ ```shell 
+ $ kubectl get clusterrole view -o yaml 
+ ```
+
+이 규칙은 ConfigMaps, Endpoints, PersistentVolumeClaims 등과 같은 리소스를 가져오고 나열하고 볼 수 있게 허용된다.   
+이들은 네임스페이스가 지정된 리소스이지만, 독자 여러분은 클러스터롤을 보고 있다.  
+클러스터롤은 클러스터롤바인딩과 롤 바인딩 중 어디에 바인드되느냐에 따라 다르다. 클러스터 롤 바인딩과 롤 바인딩 중 어디에 바인드되느냐에 따라 다르다. 
+클러스터롤 바인딩을 생성하고 클러스터롤을 참조하면, 바인딩에 나열된 주체는 모든 네임 스페이스에 있는 지정된 리소스를 볼 수 있다.  
+반면 롤바인딩을 만들면 바인딩에 나열된 주체가 롤 바인딩의 네임스페이스에 있는 리소스만 볼 수 있다.  
+ 
+```shell 
+# 내부 pod 호출
+$ curl localhost: 8001/api/vl/pods
+ 
+$ curl localhost: 8001/api/vl/namespaces/foo/pods
+ 
+$ kubectl create clusterrolebinding view-test --clusterrole=view --serviceaccount=foo: default
+ 
+$ curl localhost: 8001/api/vl/namespaces/foo/pods
+ 
+$ curl localhost: 8001/api/vl/namespaces/bar/pods 
+ 
+$ curl localhost: 8001/api/vl/pods
+```
+ 
+```shell 
+$ kubectl delete clusterrolebinding view-test
+ 
+$ kubectl create rolebinding view-test --clusterrole=view  --serviceaccount=foo:default -n foo
+
+# 내부 pod 호출 
+$ curl localhost: 8001/api/vl/namespaces/foo/pods
+ 
+$ curl localhost: 8001/api/vl/namespaces/bar/pods
+ 
+$ curl localhost: 8001/api/vl/pods
+```
+
+#### 롤, 클러스터롤, 롤바인딩 과 클러스터롤 바인딩 조합에 관한 요약 
+ 
+#### 디폴트 클러스터롤과 클러스터바인딩의 이해 
+ 
+쿠버네티스는 API 서버가 시작될 때마다 업데이트 되는 클러스터롤과 클러스터롤바인딩의 디폴트 세트를 제공한다.  
+이렇게 하면 실수로 삭제하거나 최신 버전의 쿠버네티스가 클러스터 롤과 바인딩을 다르게 설정해 사용하더라도 모든 디폴트 롤과 바인딩을 다시 생성되게 한다.   
+ 
+```shell 
+$ kubectl get clusterrolebindings 
+ 
+$ kubectl get custerroles 
+```
+ 
+##### view 클러스터롤을 사용해 리소스에 읽기 전용 액세스 허용하기 
 
 # Section 16 
 
