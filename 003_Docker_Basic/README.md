@@ -24,7 +24,7 @@ $ docker pull ubuntu:latest
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_002.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_002.png)
 
 pull 명령으로 이미지 받기   
 docker pull {이미지 이름}:{태그}
@@ -37,9 +37,9 @@ docker pull {이미지 이름}:{태그}
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_003.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_003.png)
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_004.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_004.png)
 
 ### run 명령어로 컨테이너 생성하기
 
@@ -49,7 +49,7 @@ $ docker run -i -t --name hello ubuntu bin/bash
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_005.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_005.png)
 
 이미지를 컨테이너로 생성한 후에 Bash 셀로 ubuntu에 접근한다.
 
@@ -82,7 +82,7 @@ $ docker ps -a / docker container ls
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_006.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_006.png)
 
 ### start 명령으로 컨테이너 시작하기
 
@@ -184,7 +184,7 @@ $ docker run --name hello-flask -d -p 4000:80 hello-python:0.1
 - -it -i와 -t를 동시에 사용한 것으로 터미널 입력을 위한 옵션
 - –link 컨테이너 연결 [컨테이너명:별칭]
 
-![](https://keepinmindsh.github.io/lines/assets/img/dockerfile_run.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/dockerfile_run.png)
 
 ### History 명령으로 이미지의 히스토리를 살펴보기
 
@@ -208,7 +208,7 @@ $ docker cp hello-nginx:/etc/nginx/nginx.conf ./
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_007.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_007.png)
 
 ### Commit 명령으로 컨테이너의 변경사항을 이미지로 생성하기
 
@@ -217,7 +217,7 @@ docker commit <옵션> <컨테이너 이름> <이미지 이름>:<태그>
 -a "Foo Bar <foo@bar.com>"  
 -m "add hello.txt"
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_008.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_008.png)
 
 ### diff명령으로 컨테이너에서 변경된 파일 확인하기
 
@@ -233,7 +233,7 @@ $ docker diff hello
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_009.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_009.png)
 
 ### inspect 명령으로 세부 정보 확인하기
 
@@ -246,7 +246,7 @@ $ docker inspect hello
 
 ```
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_010.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_010.png)
 
 ### Docker Logs - 컨네이너에서 발생하는 다양한 로그 확인
 
