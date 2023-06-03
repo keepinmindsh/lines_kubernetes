@@ -3,7 +3,7 @@
 
 ### Docker 버전 체크
 
-![](https://keepinmindsh.github.io/lines/assets/img/docker_001.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/docker_001.png)
 
 Docker의 명령은 docker {명령} 형식이며, Root 권한으로 이용해야 한다.
 
