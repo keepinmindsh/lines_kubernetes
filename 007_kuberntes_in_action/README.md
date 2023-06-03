@@ -1,4 +1,4 @@
-# Section 6 
+# Section 6 - 서비스에 대하여
 
 ## 서비스
 
