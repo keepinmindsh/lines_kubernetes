@@ -9,7 +9,33 @@
 
 ### 파드에서 노드의 네트워크 네임스페이스 사용  
 
-특정 파드는 호스트의 기본 네임스페이스에서 작동해야 노드의 리소스와 장치를 읽고 조작할 수 있다. 
+특정 파드는 호스트의 기본 네임스페이스에서 작동해야 노드의 리소스와 장치를 읽고 조작할 수 있다. 예를 들어 파드는 가상 네트워크 어댑터 대신 노드의 실제 네트워크 어댑터를 사용해야 할 수도 있다.  
+이는 파드 스펙에서 hostNetwork 속성을 true로 설정하면 된다.  
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_network_001.png)
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+    name: pod-with-host-network 
+spec: 
+    hostNetwork: true 
+    containers:
+    - name: main 
+      image: alpine 
+      command: ["/bin/sleep", "999999"]
+```
+
+```shell 
+$ kubectl exec pod-with-host-network ifconfig 
+```
+
+### 호스트 네트워크 네임스페이스를 사용하지 않고 호스트 포트에 바인딩 
+
+파드는 hostNetwork 옵션으로 노드의 기본 네임스페이스의 포트에 바인딩할 수 있지만  
+여전히 고유한 네트워크 네임스페이스를 갖는다. 이는 컨테이너의 포트를 정의하는 spec.containers.ports 필드 안에 hostPort 속성을 사용해 할 수 있다. 
+
 
 ## 컨테이너의 보안 컨텍스트 구성
 ## 파드의 보안 관련 기능 사용 제한
