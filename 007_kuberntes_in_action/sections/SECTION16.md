@@ -34,8 +34,36 @@ $ kubectl exec pod-with-host-network ifconfig
 ### 호스트 네트워크 네임스페이스를 사용하지 않고 호스트 포트에 바인딩 
 
 파드는 hostNetwork 옵션으로 노드의 기본 네임스페이스의 포트에 바인딩할 수 있지만  
-여전히 고유한 네트워크 네임스페이스를 갖는다. 이는 컨테이너의 포트를 정의하는 spec.containers.ports 필드 안에 hostPort 속성을 사용해 할 수 있다. 
+여전히 고유한 네트워크 네임스페이스를 갖는다. 이는 컨테이너의 포트를 정의하는 spec.containers.ports 필드 안에 hostPort 속성을 사용해 할 수 있다.  
 
+hostPort를 사용하는 파드와 NodePort 서비스로 노출된 파드를 혼동하면 안된다.  
+파드가 hostPort를 사용하는 경우 노드포트에 대한 연결을 해당 노드에서 실행 중인 파드로 직접 전달되는 반면 NodePort 서비스의 경우 노드포트의 연결은 
+임의의 파드로 전달된다. 또 다른 차이점은 hostPort를 사용하는 파드의 경우 노드포트는 해당 파드를 실행하는 노드에만 바인딩되는 반면 NodePort 서비스는  
+이런 파드를 실행하지 않는 노드에서도 모든 노드의 포트를 바인딩한다는 것이다.  
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_network_002.png)  
+
+파드가 특정 호스트 포트를 사용하는 경우 두 프로세스가 동일한 호스트 포트에 바인딩될 수 없으므로 파드 인스턴스 하나만 노드에 스케줄링될 수 있다는 점을  
+이해해야 한다.  
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_network_003.png)
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: kubia-hostport 
+spec: 
+  containers: 
+  - image: luksa/kubia 
+    name: kubia 
+    ports: 
+    - containerPort: 8080 
+      hostPort: 9000 
+      protocol: TCP 
+```
+
+hostPort 기능은 기본적으로 데몬셋을 사용해 모든 노드에 배포되는 시스템 서비스를 노출하는데 사용된다.
 
 ## 컨테이너의 보안 컨텍스트 구성
 ## 파드의 보안 관련 기능 사용 제한
