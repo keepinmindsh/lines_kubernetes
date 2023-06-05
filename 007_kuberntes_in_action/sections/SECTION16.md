@@ -65,6 +65,151 @@ spec:
 
 hostPort 기능은 기본적으로 데몬셋을 사용해 모든 노드에 배포되는 시스템 서비스를 노출하는데 사용된다.
 
+### 노드의 PID와 IPC 네임스페이스 사용 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-with-host-pid-and-ipc 
+spec: 
+  hostPID: true 
+  hostIPC: true 
+  containers: 
+  - name: main 
+    image: alpine 
+    command: ["/bin/sleep", "999999"]
+```
+
+파드는 일반적으로 자체 프로세스만 표시하지만 이 파드를 실행한 후 컨테이너의 프로세스 조회하면 
+컨테이너에서 실행 중인 프로세스 뿐만 아니라 호스트 노드에서 실행 중인 모든 프로세스가 조회된다. 
+
+```shell
+$ kubectl exec pod-with-host-pid-and-ipc ps aux 
+```
+
 ## 컨테이너의 보안 컨텍스트 구성
+
+파드가 호스트의 리눅스 네임스페이스를 사용하도록 허용하는 것 외에도, 파드 컨텍스트 아래의 개별 컨테이너 스펙에서  
+직접 지정할 수 있는 securityContext 속성으로 다른 보안 관련 기능을 파드와 파드의 컨테이너에 구성할 수 있다.  
+
+### 보안 컨텍스트에서 설정할 수 있는 사항 
+
+- 컨테이너의 프로세스를 실행할 사용자 지정하기 
+- 컨테이너가 루트로 실행되는 것 방지하기 
+- 컨테이너를 특권 모드에서 실행해 노드의 커널에 관한 모든 접근 권한을 가짐 
+- 특권 모드에서 컨테이너를 실행해 컨테이너에 가능한 모든 권한을 부여하는 것과 달리 기능을 추가하거나 삭제해 세분화된 권한 구성하기 
+- 컨테이너의 권한 확인을 강력하게 하기 위해 SELinux 옵션 설정하기 
+- 프로세스가 컨테이너의 파일 시스템에 쓰기 방지하기 
+
+### 컨테이너를 특정 사용자로 실행 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-as-user-guest 
+spec: 
+  containers: 
+  - name: main 
+    image: alpine 
+    command: ["/bin/sleep", "999999"]
+    securityContext: 
+      runAsUse: 405 
+```
+
+```shell
+$ kubectl get po pod-run-as-non-root 
+```
+
+### 특권 모드에서 파드 실행 
+
+노드 커털의 모든 액세스 권한을 얻기 위해 파드의 컨테이너는 특권 모드로 실행된다. 컨테이너의 securityContext 속성에서 privileged 속성을 true로 설정하면 된다.  
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-privileged 
+spec:
+  containers: 
+  - name: main 
+    image: alpine 
+    command: ["bin/sleep", "999999"]
+    securityContext: 
+      privileged: true
+```
+
+```shell
+$ kubectl exec -it pod-with-defaults ls /dev
+```
+
+```shell
+$ kubectl exec -it pod-privileged ls /dev 
+```
+
+### 컨테이너에 개별 커널 기능 추가 
+
+권한 있는 컨테이너를 만들고 무제한 권한을 부여하는 대신 보안 관점에서 훨씬 안전한 방법은 실제로 필요한 커널 기능만 액세스하도록 하는 것이다.  
+쿠버네티스를 사용하면 각 컨테이너에 커널 기능을 추가하거나 일부를 삭제할 수 있으므로 컨테이너 권한을 미세조정하고 공격자의 잠재적인 침입의 영향을 제한할 수 있다.  
+예를 들어 컨테이너는 일반적으로 시스템 시간을 변경할 수 없다.  
+
+```shell
+$ kubectl exec -it pod-with-defaults -- date +%T -s "12:00:00"
+```
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-add-settime-capability 
+spec: 
+  containers: 
+  - name: main 
+    image: alpine 
+    command: ["/bin/sleep", "999999"]
+    securityContext: 
+      capabilities: 
+        add: 
+        - SYS_TIME 
+```
+
+```shell
+$ kubectl exec -it pod-add-settime-capability -- date +%T -s "12:00:00"
+
+$ kubectl exec -it pod-add-settime-capability -- date
+
+$ minikube ssh date 
+```
+
+이와 같은 기능을 추가하는 것이 컨테이너에 모든 권한을 부여하는 것보다 훨씬 좋은 방법이다. 
+
+### 컨테이너에서 기능 제거 
+### 프로세스가 컨테이너의 파일시스템에 쓰는 것 방지 
+### 컨테이너가 다른 사용자로 실행될 때 볼륨 공유 
+
+
 ## 파드의 보안 관련 기능 사용 제한
+
+### PodSecurityPolicy 리소스 소개 
+
+### runAsUser, fsGroup, supplementalGroups 정책 
+
+### allowed, default, disallowed 기능 구성 
+
+### 파드가 사용할 수 잇는 볼륨 우형 제한 
+
+### 각각의 사용자와 그룹에 다른 PodSecurityPolicies 할당 
+
 ## 파드 네트워크 격리  
+
+### 네임스페이스에서 네트워크 격리 사용 
+
+### 네임스페이스의 일부 클라이언트 파드만 서버 파드에 연결하도록 허용 
+
+### 쿠버네티스 네임스페이스 간 네트워크 격리 
+
+### CIDR 표기법으로 격리 
+
+### 파드의 아웃바운드 트래픽 제한 
+
