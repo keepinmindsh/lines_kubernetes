@@ -1,5 +1,37 @@
 # Section 15 - 쿠버네티스 인증의 이해
 
+## Cheat Sheet 
+
+- Cluster Role
+
+```shell 
+
+# "get", "list", "watch" 에 대한 실행에 대해서 pod-reader 클러터터롤에 권한 허용하기 
+$ kubectl create clusterrole pod-reader --verb=get,list,watch --resource=pods
+
+# 지정된 Resource Name을 활용하여 clusterrole 생성하기 
+$ kubectl create clusterrole pod-reader --verb=get --resource=pods --resource-name=readablepod --resource-name=anotherpod
+
+# API Group에 대해서 
+$ kubectl create clusterrole foo --verb=get,list,watch --resource=rs.extensions
+
+# Sub Resources에 대하여 
+$ kubectl create clusterrole foo --verb=get,list,watch --resource=pods,pods/status
+
+# Non Resources URL에 대하여 
+$ kubectl create clusterrole "foo" --verb=get --non-resource-url=/logs/*
+
+# AggregationRule에 대하여 
+$ kubectl create clusterrole monitoring --aggregation-rule="rbac.example.com/aggregate-to-monitoring=true"
+
+```
+
+- Cluster Role Binding 
+
+```shell
+$ kubectl create clusterrolebinding cluster-admin --clusterrole=cluster-admin --user=user1 --user=user2 --group=group1
+```
+
 ## 인증이해
 
 API 서버를 하나 이상의 인증 플러그인으로 구성할 수 있다고 했다. API 서버가 요청을 받으면 인증 플러그인 목록을 거치면서 요청이 전달되고,
