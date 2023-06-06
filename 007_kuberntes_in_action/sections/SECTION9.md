@@ -1,5 +1,28 @@
 # Section 9 - 컨피그 맵에 대하여 
 
+## Cheat Sheet 
+
+```shell 
+
+# config map 조회 
+$ kubectl get configmaps game-config -o yaml
+
+# bar 라는 폴더를 바탕으로 하는 my-config라는 컨피그 맵을 생성
+$ kubectl create configmap my-config --from-file=path/to/bar
+
+# disk 상의 파일명 대신이 특정 키를 사용해서 my-config라는 컨피그 맵을 생성 
+$ kubectl create configmap my-config --from-file=key1=/path/to/bar/file1.txt --from-file=key2=/path/to/bar/file2.txt
+
+# key1=config1, key2=config2 를 사용해서 my-config라는 컨피그 맵을 생성 
+$ kubectl create configmap my-config --from-literal=key1=config1 --from-literal=key2=config2
+
+# key=value 값 쌍을 가지는 파일로 부터 my-config라는 컨피그 맵을 생성
+$ kubectl create configmap my-config --from-file=path/to/bar
+
+# 환경 설정 파일 ( env.file )로 부터 새로운 config map을 생성하는 방법
+$ kubectl create configmap my-config --from-env-file=path/to/bar.env
+```
+
 ## 컨피그맵과 시크릿 : 애플리케이션 설정
 
 컨피그 맵을 사용해 설정 데이터를 저장할지 여부에 관계없이 다음 방법을 통해 애플리케이션을 구성할 수 있다.

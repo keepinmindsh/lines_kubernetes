@@ -1,4 +1,13 @@
-# Section 4 - 레이블과 셀렉터에 대해서
+# Section 4 - 레이블과 셀렉터, 네임스페이스에 대해서
+
+## Cheat Sheet 
+
+```shell 
+# 실행하는 모든 kubectl command 명령어가 실행되는 NameSpace 지정하는 방법 
+$ kubectl config set-context --current --namespace=<insert-namespace-name-here>
+# Validate it
+$ kubectl config view --minify | grep namespace:
+```
 
 ## 레이블과 셀렉터를 이용한 파드 스케쥴링 제한
 
@@ -234,3 +243,7 @@ k delete all -all
 컨테이너의 주 프로세스에 크래스가 발생ㅇ하면 Kubelet이 컨테이너를 다시 시작한다. 만약 여러분의 애플리케이션에 버그가 있어 가끔식 크래시가 발생하는 경우
 쿠버네티스가 애플리케이션을 자동으로 다시 시작하므로, 애플리케이션에서 특별한 작업을 하지 않더라도 쿠버네티스에서 애플리케이션을 다시 시행하는 것만으로도
 자동으로 치유할 수 있는 능력이 주어진다. 
+
+## 쿠버네티스 공식 문서를 통해 이해해야할 것 
+
+> [Namespace와 DNS](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/#namespaces-and-dns)
