@@ -209,7 +209,54 @@ $ minikube ssh date
 
 ### 쿠버네티스 네임스페이스 간 네트워크 격리 
 
+```yaml 
+apiVersion: networking.k8s.io/v1 
+kind: NetworkPolicy 
+metadata:
+  name: shoppingcard-netpolicy 
+spec:
+  podSelector: 
+    matchLables: 
+      app: shopping-card 
+  ingress: 
+  - from: 
+    - namespaceSelector: 
+        matchLabels: 
+          tenant: manning 
+      ports:
+      - port: 80
+
+```
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_network_004.png)
+
+
 ### CIDR 표기법으로 격리 
+
+NetworkPolicy에서 대상으로 지정된 파드에 액세스할 수 잇는 대상을 정의하려면 파드 또는 네임스페이스 셀렉터를 
+지정하는 대신 CIDR 표기법으로 IP 블록을 지정할 수도 있다. 
+
+```yaml 
+ingress:
+- from: 
+  - ipBlock:
+    cidr: 192.168.1.0/24 
+```
 
 ### 파드의 아웃바운드 트래픽 제한 
 
+```yaml 
+spec:
+  podSelector: 
+    macthLabels:
+      app: webserver 
+    egress: 
+    - to: 
+      - podSelector: 
+          machLabels:
+            app: database 
+```
+
+- 이 정책은 app=webserver 레이블이 있는 파드에 적용된다. 
+- egress : 파드의 아웃바운드 트래픽을 제한한다. 
+  - 웹 서버 파드는 app=database 레이블이 있는 파드만 연결할 수 있다. 
