@@ -175,5 +175,172 @@ spec:
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_qos_004.png)
 
+### 강제 리소스 제한 
+
+제한이 설정되면 이제 LimitRange에서 허용하는 것보다 더 많은 CPU를 요청하는 파드를 만들 수 있다. 
+
+```yaml 
+resources:
+  requests: 
+    cpu: 2 
+```
+
+파드의 컨테이너가 이전에 설정한 LimitRange의 최대보다 큰 두 개의 CPU를 요청한다. 
+
+```shell
+$ kubectl create -f limits-pod-too-big.yaml 
+Error from server (Forbidden): error when creating " limits - pod - too - big.yaml" :
+pods "too - big " is forbidden : [
+maximum cpu usage per Pod is 1, but request is 2 .,
+maximum cpu usage per Container is but request is 2. ]
+```
+
+- 컨테이너가 CPU 두 개를 요청했지만 컨테이너의 최대 CPU 제한은 하낟, 
+- 마찬가지로 파드가 CPU 두 개를 요청했지만 최대 CPU는 하나다. 
+
+### 기본 리소스 요청과 제한 적용 
+
+기본 리소스 요청과 제한이 리소스 요청과 제한을 지정하는 않은 컨테이너에 적용되는 방법을 살펴본다. 
+
+```shell 
+$ kubectl create -f ./kubia-manual.yaml 
+```
+
+```shell 
+$ kubectl describe po kubia-manual 
+```
+
+컨테이너의 요청과 제한이 Limit Range 오브젝트에서 지정한 것과 일치한다. 또 다른 네임 스페시으에 다른 Limit Range 스펙을 사용한다면 그 네임 스페이스의 파드는 분면 다른 요청과 제한으로 생성된다. 이는 관리자가 네임스페이스당 파드의 기본, 최소, 최대 리소스를 설정하도록 한다.   
+
+동일 쿠버네티스 클러스터에서 실행하는 개발, QA, 스테이징, 프로덕션 파드를 분리하는 경우 각 네임스페이스에 다른 LimitRange를 사용하면 큰 파드는 특정 네임스페이스에만 생성되는 반면 나머지 네임스페이스는 더 작은 파드로 제한되도록 보장한다.   
+
+그러나 LimitRange에 설정된 제한은 각 개별 파드/컨테이너에만 적용된다는 것을 기억하라. 많은 수의 파드를 만들어 클러스터에서 사용 가능한 모든 리소스를 써버릴 수 있다. 
+
 ## 네임스페이스의 사용 가능한 총 리소스 제한하기
+
+LimitRange는 개별 파드에만 적용되지만 클러스터 관리자는 네임스페이스에서 사용 가능한 총 리소스 양을 제한할 수 있는 방법이 필요하다. 
+
+### 리소스쿼터 오브젝트 
+
+- CPU 및 메모리에 관한 리소스 쿼터 생성 
+
+```yaml 
+apiVersion: v1 
+kind: ResourceQuota 
+metadata: 
+  name: cpu-and-mem
+spec: 
+  hard: 
+    requests.cpu: 400m 
+    requests.memory: 200Mi 
+    limits.cpu: 600m 
+    limits.memory: 500Mi 
+```
+
+이 리소스 쿼터는 네임스페이스에서 파드가 요청할 수 있는 최대 CPU를 400밀리코어로 설정한다. 네임스페이스의 최대 총 CPU 제한은 600 밀리코어로 설정된다. 메모리의 경우 최대 총 요청은 200MiB로 설정되고 제한은 500MiB로 설정된다. 
+
+- 쿼터와 쿼터 사용량 검사 
+
+```shell 
+$ kubectl describe quota 
+```
+
+- 리소스 쿼터와 함께 LimitRange 생성 
+
+리소스 쿼터를 생성할 때 주의할 점은 LimitRange 오브젝토도 함께 생성해야 한다는 것이다. 
+
+```shell 
+$ kubectl create -f kubia-manual.yaml 
+```
+
+> 특정 리소스에 대한 쿼터가 설정된 경우, 파드에는 동일한 리소스에 대한 요청 제한이 설정돼야 한다.  
+> 그렇지많으면 API 서버가 파드를 허용하지 않는다. 
+
+### 퍼시스턴스 스토리지에 관한 쿼터 지정하기 
+
+```yaml 
+apiVersion: v1 
+kind: ResourceQuota 
+metadata:
+  name: storage 
+spec:
+  hard:
+    requests.storage: 500Gi 
+    ssd.storageclass.storage.k8s.io/requests.storage: 300Gi 
+    standard.storageclass.storage.k8s.io/requests.storage: 1Ti 
+```
+
+### 생성 가능한 오브젝트 수 제한 
+
+리소스 쿼터는 네임스패에스내의 파드, 레플리케이션 컨트롤러, 서비스 및 그 외의 오브젝트 수를 제한하도록 구성할수 있다.  
+이를 통해 클러스터 관리자는 예를 들어 사용자의 결재 플랜에 따라 생성할 수 있는 오브젝트 수를 제한할 수 있으며, 서비스가 사용할 수 있는 퍼블릭 IP 또는 노드포트 수를 제한할 수 있다.  
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_qos_005.png)
+
+위의 예제의 리소스 쿼터를 사용하면 사용자가 직접 또는 레플리케이션 컨트롤러, 레플리카셋, 데몬세스 잡 등으로 생성되는지 여부에 관계없이 네임스페이스에서 최대 열개의 파드를 생성할 수 있다. 
+
+오브젝트 수의 쿼터는 아래의 오브젝트 설정 가능 
+
+- 파드 
+- 레플리케이션 컨트롤러 
+- 시크릿 
+- 컨피그맵 
+- 퍼시스턴스볼륨클레임 
+- 서비스, 로드 밸런서 서비스와 노드포트 서비스와 같은 두가지 유형의 서비스 
+
+### 특정 파드나 QoS 클래스에 대한 쿼터 지정 
+
+지금까지 생성한 쿼터는 파드의 현재 상태 및 QoS 클래스에 관계없이 모든 파드에 적용된다. 그러나 쿼터는 쿼터 범위로 제한될 수도 있다.  
+현재 BestEffort, NotBestEffort, Terminating, NotTerminating의 네가지 범위를 사용할 수 있다. 
+
+```yaml 
+apiVersion: v1 
+kind: ResourceQuata 
+metadata:
+  name: besteffort-notterminating-pods 
+spec:
+  scopes:
+  - BestEffort 
+  - NotTerminating 
+  hard:
+    pods: 4
+```
+
+위의 쿼터는 유효 데드라인이 없는 BestEffort QoS 클래스가 갖는 파드가 최대 4개 존재하도록 보장한다. 그 대신 쿼터가 NotBestEffort 파드를 대상으로 하는 경우 request.cpu, reuqest.memory limit.cpu 및 limit.memory도 지정할 수 있다. 
+
 ## 파드 리소스 사용량 모니터링 
+
+### 실제 리소스 사용량 수집과 검색 
+
+Kubelet 자체에는 이미 cAdvisor 라는 에이전트가 포함돼 있는데 이 에이전트는 노드에서 실행되는 개별 컨테이너와 노드 전체 리소스 사용데이터를 수집한다. 전체 클러스터를 이러한 통계를 중앙에서 수집하려면 힙스터라는 추가 구성요소를 실행해야 한다.  
+
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_qos_006.png)
+
+그림의 화살표는 메트릭 데이터 흐름을 보여준다.  
+
+- 힙스터 활성화 
+
+```shell 
+$ minikube addos enable heapster
+```
+
+- 클러스터 노드의 CPU 및 메모리 사용량 표시 
+
+```shell
+$ kubectl top node 
+```
+
+- 개별 파드의 CPU와 메모리 사용량 표시 
+
+
+```shell 
+$ kubectl top pod --all-namesapces
+```
+
+### 기간별 리소스 사용량 통계 저장 및 분석 
+
+인플럭스 DB는 애플리케이션 메트릭과 기타 모니터링 데이터를 저장하는데 이상적인 오픈 소스 시계열 데이터 베이스이다. 오픈 소스인 그라파나는 인플럭스 DB에 저장된 데이터를 시작화 하고 시간이 지남에 따라 애플리케이션의 리소스 사용량이 어떻게 변하는지 확인할수 있다. 
+
+- 인플럭스 DB 
+- 그라파나 
