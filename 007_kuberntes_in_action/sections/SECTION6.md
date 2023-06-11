@@ -1,5 +1,50 @@
 # Section 6 - 서비스에 대하여
 
+## Cheat Sheet 
+
+```shell
+kubectl create ingress simple --rule="foo.com/bar=svc1:8080,tls=my-cert"
+```
+
+```shell
+kubectl create ingress catch-all --class=otheringress --rule="/path=svc:port"
+```
+
+```shell
+kubectl create ingress annotated --class=default --rule="foo.com/bar=svc:port" \
+--annotation ingress.annotation1=foo \
+--annotation ingress.annotation2=bla
+```
+
+```shell
+kubectl create ingress multipath --class=default \
+--rule="foo.com/=svc:port" \
+--rule="foo.com/admin/=svcadmin:portadmin"
+```
+
+```shell
+kubectl create ingress ingress1 --class=default \
+--rule="foo.com/path*=svc:8080" \
+--rule="bar.com/admin*=svc2:http"
+```
+
+```shell
+kubectl create ingress ingtls --class=default \
+--rule="foo.com/=svc:https,tls" \
+--rule="foo.com/path/subpath*=othersvc:8080"
+```
+
+```shell
+kubectl create ingress ingsecret --class=default \
+--rule="foo.com/*=svc:8080,tls=secret1"
+```
+
+```shell
+kubectl create ingress ingdefault --class=default \
+--default-backend=defaultsvc:http \
+--rule="foo.com/*=svc:8080,tls=secret1"
+```
+
 ## 서비스
 
 쿠버네티스의 서비스는 동일한 서비스를 제공하는 파드 그룹에 지속적인 단일 접점을 만들려고 할 때 생성하는 리소스다. 각 서비스는 서비스가 존재하는 동안 절대 바뀌지 않는 IP 주소와 포트가 있다.

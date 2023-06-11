@@ -1,5 +1,23 @@
 # Section 12 - 배포에 대하여 
 
+## Cheat Sheet 
+
+```shell
+$ kubectl create deployment my-dep --image=busybox
+```
+
+```shell
+$ kubectl create deployment my-dep --image=busybox -- date
+```
+
+```shell
+$ kubectl create deployment my-dep --image=nginx --replicas=3
+```
+
+```shell
+$ kubectl create deployment my-dep --image=busybox --port=5701
+```
+
 ## 파드에서 실행 중인 애플리케이션 업데이트
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/pod_application_update.png)
