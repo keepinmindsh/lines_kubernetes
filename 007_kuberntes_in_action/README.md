@@ -21,6 +21,7 @@
 ## [Section 19 - 쿠버네티스 어피니티 이해](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION19.md)
 ## [Section 20 - 쿠버네티스의 다양한 사례](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION20.md)
 ### [Section 21 - Cron Job](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION21.md)
+### [Section 99 - Certificated Kubernetes Architecture](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION99.md)
 
 # Tips
 
