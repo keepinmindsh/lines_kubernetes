@@ -175,5 +175,60 @@ spec:
       targetAverageUtilization: 60 # 이 값을 30에서 60으로 변경한다. 
 ```
 
+대부분의 다른 리소스와 마찬가지로 리소스를 수정한 후에 변경 사항은 오토스케일러 컨트롤러에 의해 감지돼 동작한다.  
+그리고 HPA 리소스를 삭제하고 다른 목표 값으로 다시 생성하는 것도 할 수 있다. HPA 리소스를 삭제하는 것은 대상 리소스의  
+오토 스케일링을 비활성화하는 것이기 때문에 그 때 크기로 계속 유지된다. 
+
+#### 메모리 소비량에 기반을 둔 스케일링 
+
+메모리 기반 오토스케일링은 CPU 기반 오토스케일링에 비해 훨씬 문제가 많다.  
+가장 큰 이유는 스케일 업 후에 오래된 파드는 어떻게는 메모리를 해제하는 것이 필요하기 때문이다. 해제하는 작업은 애플리케이션이 직접해야하며 시스템이  
+할 수 있는 것이 아니다. 시스템이 할 수 있는 것은 이전보다 작음 메모리를 사용하기를 기대하면서 애플리케이션을 
+종료하고 다시 시작하는 것뿐이다. 
+
+#### 오브젝트 메트릭 유형 이해 
+
+Object 메트릭 유형은 오토 스케일러가 파드를 확장할 때 파드에 직접 관리되지 않는 메트릭을 기반으로 하도록 만든다. 
+예를 들어 파드를 확장할 때 인그레스 오브젝트 같은 클러스터 오브젝트 메트릭을 이용할 수 있다. 
+
+```yaml
+... 
+spec:
+  metrics: # 특정 오브젝트 메트릭 사용 
+  - type: Object 
+    resource: 
+      metricName: latencyMillis # 메트릭 이름 
+      target: # 오토 스케일러가 메트릭을 얻어올 오브젝트 정리 
+        apiVersion: extentions/v1beta1 
+        kind: Ingress 
+        name: frontend
+      targetValue: 20 # 오토스케일러는 메트릭이 이 값에 가까이 유지되도록 확장한다. 
+      scaleTargetRef: 
+        apiVersion: extensions/v1bet1 
+        kind: Deployment 
+        name: kubia 
+... 
+```
+
+#### 레플리카를 0으로 감소 
+
+- 유휴, 유해제 
+  - 
+  - 이는 특정 서비스를 제공하는 파드를 0으로 축소 할 수 있게 해준다. 새로운 요청이 들어오면 파드가 깨어나 요청을 처리할 수 있을 때까지 차단돼 있다가 이후에 요청이 파드로 전달 된다. 
+
 ## 수직적 파드 오토스케일링
+
+수평적 파드 확장은 훌륭하지만 모든 애플리케이션이 수평적으로 확장 가능한 것은 아니다. 수평적 확장이 불가능한 애플리케이션의 경우 유일한 옵션은 수직적으로 확장하는 것이다. 
+노드는 일반적으로 하나의 파드 요청 보다는 많은 리소스를 갖고 있기 때문에 거의 대부분은 파드를 수직적으로 확장할 수 있어야 한다. 
+
+#### 리소스 요청 자동 설정 
+
+InitialResources 라는 어드미션 컨트롤 플러그인에 의해 제공된다. 새로운 파드가 리소스 요청 없이 생성되면 플러그인은 파드 컨테이너의 과거 리소스 사용량 데이터를 살펴보고 요청 값을 적잘하게 설정한다. 
+리소스 요청 값을 지정하지 않고 파드를 배포한 뒤 쿠버네티스에 의존해 컨테이너의 리소스 요구 사항을 파악할 수도 있다. 쿠버네티스는 효과적으로 파드의 수직적 확장을 수행한다.
+
+#### 참고 할만한 Tips 
+
+> [https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler](https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler)  
+> [https://cloud.google.com/kubernetes-engine/docs/concepts/verticalpodautoscaler?hl=ko](https://cloud.google.com/kubernetes-engine/docs/concepts/verticalpodautoscaler?hl=ko)
+
 ## 수평적 클러스터 노드 확장 
