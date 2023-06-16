@@ -131,11 +131,52 @@ spec:
 
 위와 달리 노드 어피니티 규칙을 사용하는 경우 
 
-#### 노드 어피니티와 노드 셀렉터 비교 
-#### 디폴트 노드 레이블 검사  
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata:
+  name: kubia-gpu 
+spec: 
+  affinity: 
+    nodeAffinity:
+      requireDuringSchedulingIgnoredDuringExecution: 
+        nodeSelectorTerms:
+        - matchExpressions: 
+          - key: gpu
+            operator: In 
+            values: 
+            - "true"
+```
+##### 긴 nodeAffinity 속성 이름 이해 
 
-### 하드 노드 어피니티 규칙 지정 
+파드의 스펙 섹션에는 nodeAffinity 필드가 포함된 affinity 필드가 포함돼 있다. 이 필드에는 이름이 아주 긴 필드가 포함돼 있으므로, 먼저 그것에 초점을 맞추겠다. 
 
-#### 긴 nodeAffinity 속성 이름 이해 
+- requireDuringScheduling ... 이 필드 아래에 정의된 규칙은 파드가 노드로 스케줄링되고자 가져야 하는 레이블을 지정한다. 
+- ... IngoredDuringExecution 이 필드 아래에 정의된 규칙은 노드에서 이미 실행중인 파드에는 영향을 미치지 않는다.  
+
+현재 시점에는 어피니티가 파드 스케줄링에만 영향을 미치며, 파드가 노드에서 제거되지 않음을 알려주고 싶다. 이것이 모든 규칙이 항상 IgnoredDuringExecution으로 
+끝나는 이유다. 결국 향후에는 쿠버네티스에서 RequiredDuringExecution 도 지원할 것이다. 즉, 노드에서 레이블을 제거하면 해당 레이블을 가지고 있는 노드에서 실행되던 파드가 해당 노드에서 
+제거된다. 
+
+##### nodeSelectorTerm 이해 
+
+nodeSelectorTerms 필드와 matchExpressions 필드가 파드를 노드에 스케줄링하고자 노드의 레이블이 일치하도록 표현식을 정의하는 데 사용된다는 것을 쉽게 이해할 수 있을 것이다.  
+예제에는 표현식이 하나만 있기 때문에 이해하기 쉽다. 노드에는 값이 true로 설정된 gpu 레이블이 있어야 한다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_affinity_001.png)
+
+노드 어피니티를 사용하면 스케쥴링 중에 노드의 우선순위를 지정할 수 있다.
+
+### 파드의 스케줄링 시점에 노드 우선순위 지정 
+
+새로 도입된 노드 어피니티 기능의 가장 큰 장점은 특정 파드를 스케줄링할 때 스케줄러가 선호할 노드를 지정할 수 있다는 것이다. 이는 
+preferredDuringSchedulingIgnoredDuringExecution 필드를 통해 수행된다.  
+여러 국가에 여러 데이터 센터를 갖고 있다고 상상해보자. 각 데이터 센터는 별도의 가용 영역을 나타낸다. 각 영역에는 자사용으로만 사용되는 특정 머신과 파트너 회사가 사용할 수 있는 
+별도의 머신이 있다. 이제 여려분이 파드 몇 개를 배포하고자 하며, zone1 영역과 자사용으로 예약된 머신에 스케줄링되기를 원한다. 만약 해당 머신에 파드를 위한 공간이 충분하지 않거나 
+머신을 스케줄링할 수 없는 다른 중요한 이유가 있는 경우 다른 영역과 파드너가 사용하는 머신에 스케줄링 돼도 상관 없다. 노드 어피니티 덕에 이것이 가능하다.  
+
+#### 노드 레이블링  
+
+먼저 노드에 적절한 레이블을 지정해야 한다. 각 노드에는 노드가 속한 가용 영역을 지정하는 레이블과 이를 전용 또는 공유 노드로 표시하는 레이블이 있어야 한다. 
 
 ## 파드 어피니티와 안티-어피니티를 이용해 함께 배치하기 
