@@ -177,6 +177,117 @@ preferredDuringSchedulingIgnoredDuringExecution 필드를 통해 수행된다.
 
 #### 노드 레이블링  
 
-먼저 노드에 적절한 레이블을 지정해야 한다. 각 노드에는 노드가 속한 가용 영역을 지정하는 레이블과 이를 전용 또는 공유 노드로 표시하는 레이블이 있어야 한다. 
+먼저 노드에 적절한 레이블을 지정해야 한다. 각 노드에는 노드가 속한 가용 영역을 지정하는 레이블과 이를 전용 또는 공유 노드로 표시하는 레이블이 있어야 한다.
+
+- 선호하는 선호도 디플로이먼트 구성하기 
+
+```shell
+$ kubectl label node node1.k8s availability-zone=zone1 
+
+$ kubectl label node node1.k8s share-type=dedicated 
+
+$ kubectl label node node2.k8s availability-zone=zone2 
+
+$ kubectl lable node node2.k8s share-type=shared 
+
+$ kubectl get node -L availability-zone -L share-type 
+```
+
+#### 선호하는 노드 어피니티 규칙 지정 
+
+노드레이블을 설정하면, 이제 zone1의 dedicated 노드를 선호하는 디플로이먼트를 생성할 수 있다. 
+
+```yaml
+apiVersion: extensions/v1beta1 
+kind: Deployment 
+metadata: 
+  name: pref
+spec:
+  template: 
+    spec: 
+      affinity:
+        nodeAffinity: 
+        preferredDuringSchedulingIgnoredDuringExecution: # 필수 요구 사항이 아닌, 선호도를 명시하고 있다. 
+        - weight: 80 
+          preference: 
+            matchExpressions: 
+            - key: availability-zone 
+              operator: In 
+              values: 
+              - zone1
+        - weight: 20 
+          preference: 
+            matchExpressions: 
+            - key: share-type 
+              operator: In 
+              values: 
+              - dedicated 
+```
+
+#### 노드 선호도 작동 방법 이해하기 
+
+Availability-zone 과 share-type 레이블이 파드의 노드 어피니티와 일치하는 노드에 가장 높은 순위가 매겨진다. 파드의 노드 어피니티 규칙에 설정된 가중치에 따라 
+zone1의 dedicated 노드가 최상위 우선순위를 갖고, 다음으로 zone1의 shared 노드가 우선순위를 가지며, 다른 영역의 dedicated 노드가 다음에 오며, 그외의 다른 모든 노드가 낮은 
+우선 순위를 갖는다. 
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_affinity_002.png)
+
+#### 노드가 두 개인 클러스터에 파드 배포하기 
+
+노드가 두 개인 클러스터에서 이 디플로이먼트를 생성하면 대부분의 파드가 node1에 배포되는 것을 볼 수 있다. 
+
+```shell
+$ kubectl get po -o wide  
+```
+
+생성된 다섯 개의 파드 중 네 개는 node1에 배포됐으나 하나는 node2에 배포됐다. 왜 파드 중 하나가 node1 대신 node2에 배포됐을가? 그 이유는 스케줄러가 파드를 스케줄링할 위치를 결정하는데  
+노드의 어피니티 우선 순위 지정 기능 외에도 다른 우선순위 지정 기능을 사용하기 때문이다. 그중 하나가 Selector-SpreadPriority 기능이다. 이 기능은 동일한 레플리카셋 또는 서비스에 속하는 파드를 여러 
+노드에 분산시켜 노드 장애로 인해 전체 서비스가 중단되지 않도록 한다, 이는 파드 중 하나가 node2에 스케줄링된 원인일 가능성이 높다.
 
 ## 파드 어피니티와 안티-어피니티를 이용해 함께 배치하기 
+
+### 파드간 어피니티를 사용해 같은 노드에 파드 배포하기  
+
+```shell
+$ kubectl run backend -l app=backend --image busybox -- sleep 9999999 
+```
+
+위의 shell 명령어에서 중요한 부분은 -l 옵션을 사용해 파드에 추가한 app=backend 레이블이다. 이 레이블은 프론트엔드 파드의 podAffinity 설정에 사용된다.  
+
+#### 파드 정의에 파드 어피니티 지정 
+
+```yaml 
+apiVersion: extensions/v1beta1 
+kind: Deployment 
+metadata: 
+  name: frontend 
+spec: 
+  replicas: 5 
+  template: 
+    spec: 
+      affinity: 
+        podAffinity: # podAffinity 규칙을 정의한다. 
+          requireDuringSchedulingIgnoredDuringExecution: # 선호도가 아닌, 필수 요구 사항을 정의한다. 
+          - topologyKey: kubernetes.io/hostname # 이 디플로이먼트의 파드는 셀렉터와 일치하는 노드에 배포돼야 한다.  
+            labelSelector: 
+              matchLabels: 
+                app: backend 
+```
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_affinity_003.png)
+
+#### 파드 어피니티를 갖는 파드 배포하기 
+
+```shell
+$ kubectl get po -o wide 
+
+# 프론트엔드 파드를 배포하고, 어느 노드에 스케줄링 됐는지 확인하기 
+$ kubectl create -f frontend-podaffinity-host.yaml 
+
+$ kubectl get po -o wide 
+```
+
+#### 스케줄러가 파드 어피니티 규칙을 사용하는 방법 이해 
+
+이제 파드 어피니티 규칙을 정의하지 않은 백엔드 파드를 삭제하더라도 스케줄러가 벡엔드 파드를 node2에 스케줄링 한다는 것이다. 
+벡엔드 파드가 실수로 삭제돼서 다른 노드로 다시 스케줄링 된다면, 프론트엔드 파드의 어피니티 규칙이 깨지기 때문에 같은 노드에 스케줄링 되는 것이다. 
