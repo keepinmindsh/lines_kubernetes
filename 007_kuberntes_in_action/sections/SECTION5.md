@@ -165,7 +165,7 @@ k create -f ~/sources/02_linesgits/lines_kubernetes/007_kuberntes_in_action/p191
 ```shell
 k get node 
 
-k lebel node {node name} disk=ssd
+k label node {node name} disk=ssd
 
 k get po   
 ```
