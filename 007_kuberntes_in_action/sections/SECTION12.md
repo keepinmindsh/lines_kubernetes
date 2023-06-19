@@ -254,7 +254,7 @@ $ kubectl rollout undo deployment kubia
 $ kubectl rollout history deployment kubia 
 
 ## 특정 디플로이먼트 버전으로 롤백 
-$ kubectl rollout und deployment kubia --to-revision=1 
+$ kubectl rollout undo deployment kubia --to-revision=1 
 
 ```
 
