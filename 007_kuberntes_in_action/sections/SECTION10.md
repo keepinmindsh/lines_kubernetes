@@ -171,7 +171,7 @@ spec:
 $ k create secret generic test-db-secret --from-literal=username=testuser --from-literal=password=iluvtests
 ```
 
-아래의 yaml 처럼 Secret을 생성하고 생성된 시크힛을 파드에 마운트 하는 방법에 대해서 가이드 되어 있다.
+아래의 yaml 처럼 Secret을 생성하고 생성된 시크릿을 파드에 마운트 하는 방법에 대해서 가이드 되어 있다.
 
 ```yaml
 apiVersion: v1
