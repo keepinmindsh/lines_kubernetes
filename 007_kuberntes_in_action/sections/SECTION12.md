@@ -169,7 +169,7 @@ $ kubectl rolling-update kubia-v1 kubia-v2 --image=luksa/kubia:v2
 Replication Controller는 기존 버전의 파드 Scale Out을 모두 0으로 만들고 신규 버전으로 Scale Out을 3으로 변경하기 때문에
 레플리케이션 컨트롤러가 프로덕션 클라이언트가 제공하는 모든 파드를 종료할 수도 있다!
 
-위의 방식을 해결학 위해서 레플리케이션 컨트롤러 두 개를 스케일업해 새 파드로 교체 한다.
+위의 방식을 해결하기 위해서 레플리케이션 컨트롤러 두 개를 스케일업해 새 파드로 교체 한다.
 
 이를 통해서 단계적으로 Pod 종료 및 재기동을 실행할 수 있다.
 
