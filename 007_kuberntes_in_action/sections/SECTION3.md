@@ -1,5 +1,13 @@
 # Section 3 - 파드의 기본 
 
+## Cheat Sheet 
+
+```shell
+kubectl create poddisruptionbudget my-pdb --selector=app=rails --min-available=1
+
+kubectl create pdb my-pdb --selector=app=nginx --min-available=50%
+```
+
 ## 파드에 대하여
 
 파드 안에 있는 모든 컨테이너는 같은 노드에서 실행된다. 절대로 두 노드에 걸쳐 배포되지 않는다.

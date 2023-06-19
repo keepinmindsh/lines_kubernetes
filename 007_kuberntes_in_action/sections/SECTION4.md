@@ -2,11 +2,17 @@
 
 ## Cheat Sheet 
 
+- namespace 
+
 ```shell 
 # 실행하는 모든 kubectl command 명령어가 실행되는 NameSpace 지정하는 방법 
 $ kubectl config set-context --current --namespace=<insert-namespace-name-here>
 # Validate it
 $ kubectl config view --minify | grep namespace:
+```
+
+```shell
+kubectl create namespace my-namespace
 ```
 
 ## 레이블과 셀렉터를 이용한 파드 스케쥴링 제한
