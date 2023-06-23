@@ -320,10 +320,36 @@ $ kubectl get po -o wide
 topologyKey가 작동하는 방법은 간단하다. 지금까지 언급한 세가지 키는 특별하지 않다. 원하는 경우 예를 들어 랙과 같이, 자체적으로 정의한 topologyKey를 사용해 파드를  
 동일한 서버 랙에 쉽게 스케줄링 할 수 있다. 유일한 준비사항은 노드에 랙 레이블을 추가하는 것이다. 
 
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_advanced_scheduling_001.png)
+
 > 기본적으로 레이블 셀렉터는 스케줄링 돼 있는 파드와 동일한 네임스페이스의 파드만 일치시킨다. 그러나 label-selector와 동일한 레벨에 namespace 필드를 추가하면 
 > 다른 네임스페이스에 있는 파드도 선택할 수 있다.  
 
 ### 필수 요구사항 대신 파드 어피니티 선호도 표현하기 
+
+nodeAffinity를 사용해 필수 요구 사항을 표현할 수 있음을 배웠다. 다시 말해 파드는 노드 어피니티 규칙과 일치하는 노드에만 스케줄링된다는 의미다.  
+또한 노드 선호도를 지정해 스케줄러가 특정 노드에 파드를 스케줄링하도록 지시하되 해당 노드가 어떤 이유로든 파드에 맞지 않을 경우 다른 곳으로 스케줄링되게 
+할 수 있다. 
+
+```yaml
+apiVersion: extension/v1beta1 
+kind: Deployment 
+metadata:
+  name: frontend 
+spec: 
+  replicas: 5 
+  template: 
+    spec: 
+      affinity: 
+        podAffinity: 
+          preferredDuringSchedulingIgnoredDuringExecution: # 필수 대신 선호 
+          - weight: 80  # 가중치와 podAffinityTerm을 이전 예제와 동일하게 설정한다. 
+            podAffinityTerm: 
+              topologyKey: kubernetes.io/hostname 
+              labelSelector: 
+                matchLabels: 
+                  app: backend 
+```
 
 ### 파드 안티-어피니티를 통해 파드들이 서로 떨어지게 스케줄링 하기 
 
