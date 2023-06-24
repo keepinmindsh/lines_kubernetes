@@ -351,8 +351,40 @@ spec:
                   app: backend 
 ```
 
-### 파드 안티-어피니티를 통해 파드들이 서로 떨어지게 스케줄링 하기 
+### 파드 안티-어피니티를 통해 파드들이 서로 떨어지게 스케줄링 하기  
+
+스케줄러에게 파드들을 함께 배포하도록 지시하는 방법을 봤지만, 때로는 정반대의 경우가 필요할 수도 있다. 파드를 서로 멀리 떨어뜨려 놓고 싶을 수 있다.  
+이것을 파드 안티-어피니티라고 한다. podAffinity 대신 podAntiAffinity 속성을 사용한다는 점을 제외하고 파드 어피니티 설정과 동일한 방식으로 지정한다.  
+결과적으로 스케줄러는 podAntiAffinity의 레이블 셀렉터와 일치하는 파드가 실행 중인 노드를 선택하지 않는다.  
+
+![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_advanced_scheduling_002.png)
 
 #### 같은 디플로이먼트의 파드를 분산시키기 위해 안티-어피니티 사용 
 
+```yaml
+apiVersion: extension/v1beta1 
+kind: Deployment 
+metadata: 
+  name: frontend 
+spec:
+  replicas: 5
+  template: 
+    metadata: 
+      labels: # 프론트엔드 파드는 app=frontend 레이블을 갖는다. 
+        app: frontend
+    spec:
+      affinity:
+        podAntiAffinity: # 파드의 안티 어피니티를 위한 필수 요구 사항을 정의한다. 
+          requiredDuringSchedulingIgnoredDuringExecution: 
+          - topologyKey: kubernetes.io/hostname  # 프론트 엔드 파드는 app=frontend 레이블이 있는 파드와 동일한 머신에 스케줄링 돼서는 안된다.   
+            labelSelector: 
+              matchLabels: 
+                app: frontend 
+```
+
 #### 선호하는 파드 안티-어피니티 사용하기 
+
+requiredDuringSchedulingIgnoredDuringExecution 속성을 사용해 필수 요구 사항 대신 소프트한 요구 사항을 지정해야 한다. 어쨋든 두 개의 프론트엔드 파드가 동일한 노드에서  
+실행돼도 크게 문제되지 않는다. 그러나 이게 문제가 되는 비즈니스 시나리오의 경우에는 requiredDuringScheduling 을 사용하는 것이 적절하다.  
+파드 어피니티와 마찬가지로 topologyKey 속성은 파드를 배포해서는 안되는 범위를 결정한다. 이를 사용해 파드가 동일한 랙, 가용 영역, 리전 또는 사용자 지정 노드 레이블을 사용해  
+만든 사용자 지정 범위에 배포되지 않도록 할 수 있다.  
