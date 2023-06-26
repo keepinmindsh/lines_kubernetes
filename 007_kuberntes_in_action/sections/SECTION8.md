@@ -74,7 +74,7 @@ NAS 유형에 저장돼야 한다.
 
 ### GCE 퍼시스턴트 디스크를 파드 볼륨으로 사용하기
 
-![](https://keepinmindsh.github.io/lines/assets/img/k8s-gcepersistencedisk.png){: .align-center}
+![](https://keepinmindsh.github.io/lines/assets/img/k8s-gcepersistencedisk.png)
 
 동일 location 에 퍼시스턴트 디스크를 만들기 위해서 gke clusters의 생성 위치를 확인한다.
 
