@@ -64,12 +64,18 @@
 
 ```shell
 kubectl get po 
+# 파드 상태는 컨테이너가 계속 크래시되기 때문에 Kubelet 재시작을 지연한다고 나타난다. 
 
 kubectl describe rs crashing-pods 
+# 현재 레플리카와 의도하는 레플리카가 일치하기 때문에 컨트롤러가 아무런 조치도 취하지 않는다. 
+# 레플리카 세 개가 실행 중이다. 
 
-kubectl describe po crashing-pods-fitcd 
+kubectl describe po crashing-pods-fitcd # kubectl 은 파드의 상태가 실행 중임을 보여준다.   
 ```
 ### 원하는 순서로 파드 시작 
+
+파드에서 실행되는 애플리케이션과 수동으로 관리되는 애플리케이션의 또 다른 차이점은 애플리케이션을 배포하는 담당자가 애플리케이션 간의 의존성을 알고 있다는 것이다.  
+이것은 애플리케이션을 순서대로 시작할 수 있게 해준다. 
 
 #### 파드 시작 방법 
 
