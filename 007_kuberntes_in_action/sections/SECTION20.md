@@ -79,9 +79,30 @@ kubectl describe po crashing-pods-fitcd # kubectl 은 파드의 상태가 실행
 
 #### 파드 시작 방법 
 
+쿠버네티스 API 서버는 YAML/JSON의 오브젝트를 나열된 순서대로 처리하지만 이는 etcd에 순서대로 기록됨을 의미한다. 파드가 그 순서대로 시작된다는 보장은 없다. 
+
 #### 초기화 컨테이너 소개 
 
+파드는 여러 개의 초기화 컨테이너를 가질 수 있다. 순차적으로 실행되며 마지막 컨테이너가 완료된 후에 파드의 주 컨테이너가 시작된다. 즉, 초기화 컨테이너를 사용해  
+파드의 주 컨테이너 시작을 지연시킬 수 있다. 초기화 컨테이너가 시작되면, 초기화 컨테이너는 종료되고 주 컨테이너가 시작될 수 있게 한다. 이렇게 하면 주 컨테이너가 준비되기 
+전까지 서비스를 사용하지 않게 된다. 
+
 #### 파드에 초기화 컨테이너 추가 
+
+초기화 컨테이너는 주 컨테이너와 같이 파드 스펙에 정의될 수 있지만 spec.initContainers 필드에 정의할 수도 있다.  
+
+```yaml
+spec: 
+  initContainers:
+  - name: init 
+    image: busybox 
+    command: 
+    - sh
+    - -c 
+    - 'while true; do echo "Waiting for fortune service to come up..."; 
+       wget http://fortune -q -T 1 -O /dev/null > /dev/null 2> /dev/nul; 
+       && break; sleep 1; done; echo "Service is up! Starting main container."'
+```
 
 #### 파드간 의존성 처리를 위한 모범 사례 
 
