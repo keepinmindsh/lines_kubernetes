@@ -133,6 +133,30 @@ $ kubectl logs fortune-client -c init
 애플리케이션을 건드리지 ㅇ낳고도 추가 명령을 실행할 수 있다. 애플리케이션이 시작되고 있는 외부 리스너에게 시그널을 보내거나 
 애플리케이션을 초기화하는 작업을 시작할 수 있다.  
 
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod-with-poststart-hook
+spec: 
+  containers:
+  - image: luksa/kubia 
+    name: kubia 
+    lifecycle: 
+      posStart: 
+        exec: 
+          command: 
+          - sh 
+          - -c 
+          - "echo 'hook will fail with exit code 15'; sleep 5; exit 15"
+```
+
+명령어 기반이 시작 후 훅의 표준 출력과 표준 오류 출력은 어디에도 로깅되지 않으므로 훅 호출 프로세스를 컨테이너의 파일 시스템에 있는 파일에 기록하고 다음과 같이 파일의 내용을 확인할 수 있습니다 
+
+```shell
+$ kubectl exec my-pod cat logfile.txt 
+```
+
 ## 모든 클라이언트 요청의 적절한 처리 보장
 ## 쿠버네티스에서 애플리케이션을 쉽게 실행하고 관리할 수 있게 만들기
 ## 개발 및 테스트 모범 사례 
