@@ -150,7 +150,7 @@ Deleted [https://www.googleapis.com/compute/v1/projects/lines-infra/zones/us-cen
 
 ### 다른 유형의 볼륨 사용하기
 
-GCE 퍼시스턴트 디스크 볼륨은 쿠버네티스 클러스터를 구글 쿠버네티스 에진에서 실행 중이기 때문이었다. 다른 곳에서 실행 중이라면 기반 인프라 스트럭처에 따라
+GCE 퍼시스턴트 디스크 볼륨은 쿠버네티스 클러스터를 구글 쿠버네티스 엔진에서 실행 중이기 때문이었다. 다른 곳에서 실행 중이라면 기반 인프라 스트럭처에 따라
 다른 유형의 볼륨을 사용해야 한다.
 
 - AWS Elastic Block Store 볼륨 사용하기
