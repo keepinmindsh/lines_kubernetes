@@ -17,6 +17,45 @@ kubectl create pdb my-pdb --selector=app=nginx --min-available=50%
 
 - 여러 프로세스를 단일 구조로 묶지 않기 때문에, 컨테이너를 함께 묶고 하나의 단위로 관리할 수 있는 또 다른 상위 구조가 필요하다.
 
+### 기본 파드의 정의 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80
+```
+
+파드를 직접적으로 정의하기 보다는 주로 Deployment, Job, StatefulSet 내에서 정의되어 많이 사용된다. 
+
+- Pods 는 하나의 단일 컨테이너로서 동작한다. 
+- Pods 는 강하게 결합되어 동작해야하는 경우 다중 컨테이너를 하나의 파드 내에 구성하여 리소스를 공유할 수 있습니다.
+
+#### Pod Template 으로서 Kubernetes 오브젝트 내에서 활용하기 
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    # This is the pod template
+    spec:
+      containers:
+      - name: hello
+        image: busybox:1.28
+        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
+      restartPolicy: OnFailure
+    # The pod template ends here
+```
+
 ### 같은 파드에서 컨테이너간 부분 격리
 
 파드의 모든 컨테이너는 동일한 네트워크 네임스페이스와 UTS 네임스페이스 안에서 실행되기 때문에, 모든 컨테이너는 같은 호스트 이름과 네트워크 인터페이스를 공유한다.  
