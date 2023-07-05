@@ -1,5 +1,21 @@
 # Section 16 - 클러스터 노드와 네트워크 보안 
 
+## Cheat Sheet 
+
+```shell
+# Create a role named "pod-reader" that allows user to perform "get", "watch" and "list" on pods
+kubectl create role pod-reader --verb=get --verb=list --verb=watch --resource=pods
+
+# Create a role named "pod-reader" with ResourceName specified
+kubectl create role pod-reader --verb=get --resource=pods --resource-name=readablepod --resource-name=anotherpod
+
+# Create a role named "foo" with API Group specified
+kubectl create role foo --verb=get,list,watch --resource=rs.extensions
+
+# Create a role named "foo" with SubResource specified
+kubectl create role foo --verb=get,list,watch --resource=pods,pods/status
+```
+
 ## 파드에서 호스트 노드의 네임스페이스 사용
 
 파드의 컨테이너는 일반적으로 별도의 리눅스 네임스페이스에서 실행되므로 프로세스가 다른 컨테이너 또는 노드의 기본 네임스페이스에서 실행 중인 프로세스와 분리된다.  

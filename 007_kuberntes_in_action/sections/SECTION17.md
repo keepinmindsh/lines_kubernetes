@@ -1,5 +1,15 @@
 # Section 17 - 파드의 컴퓨팅 리소스 관리 
 
+## Cheat sheet 
+
+```shell
+# Create a new resource quota named my-quota
+kubectl create quota my-quota --hard=cpu=1,memory=1G,pods=2,services=3,replicationcontrollers=2,resourcequotas=1,secrets=5,persistentvolumeclaims=10
+
+# Create a new resource quota named best-effort
+kubectl create quota best-effort --hard=pods=100 --scopes=BestEffort
+```
+
 ## 파드 컨테이너의 리소스 요청
 
 파드를 생성할 때 컨테이너가 필요로 하는 CPU와 메모리 양과 사용할 수 있는 엄격한 제한을 지정할 수 있다.  
