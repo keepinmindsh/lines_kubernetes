@@ -105,6 +105,37 @@ spec:
   - OnFailure 
   - Never 
 
+## Pod's Conditions 
+
+- PodScheduled
+- PodHasNetwork 
+- ContainerReady 
+- Ready 
+
+## Sample of Pod Status 
+
+```yaml 
+kind: Pod
+...
+spec:
+  readinessGates:
+    - conditionType: "www.example.com/feature-1"
+status:
+  conditions:
+    - type: Ready                              # a built in PodCondition
+      status: "False"
+      lastProbeTime: null
+      lastTransitionTime: 2018-01-01T00:00:00Z
+    - type: "www.example.com/feature-1"        # an extra PodCondition
+      status: "False"
+      lastProbeTime: null
+      lastTransitionTime: 2018-01-01T00:00:00Z
+  containerStatuses:
+    - containerID: docker://abcd...
+      ready: true
+...
+```
+
 ## YAML 또는 JSON 디스크립터로 파드 생성
 
 ### [API References](https://kubernetes.io/docs/reference/)
