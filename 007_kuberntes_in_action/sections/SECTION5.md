@@ -335,7 +335,9 @@ k get po
 
 데몬셋을 삭제하거나 대상으로 타케팅된 레이블이 변경될 경우 daemonSet에 의해서 생성된 파드도 삭제된다.
 
-> [Update Daemon Set](https://kubernetes.io/ko/docs/tasks/manage-daemon/update-daemon-set/)
+> [Update Daemon Set](https://kubernetes.io/ko/docs/tasks/manage-daemon/update-daemon-set/)   
+> [Rollback Daemon Set](https://kubernetes.io/ko/docs/tasks/manage-daemon/rollback-daemon-set/)   
+> [Running Pod On Some Nodes](https://kubernetes.io/docs/tasks/manage-daemon/pods-some-nodes/)  
 
 ## 완료 가능한 단일 태스크를 수행하는 파드 실행
 
