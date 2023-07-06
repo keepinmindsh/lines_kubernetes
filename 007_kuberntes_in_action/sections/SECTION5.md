@@ -445,6 +445,8 @@ spec:
 
 잡 파드는 하나씩 차례로 실행하는 대신 잡이 여러 파드를 병렬로 실행할 수도 있다.
 
+> [Job](https://kubernetes.io/ko/docs/concepts/workloads/controllers/job/)  
+
 ### 잡스케일링
 
 잡이 실행되는 동안 parallelism 속성을 변경할 수도 있다. 이것은 레플리카셋이나 레플리케이션 컨트롤러를 스케일링 하는 것과 유사하며, kubectl scale 명령을
