@@ -71,10 +71,11 @@ spec:
 쿠버네티스의 모든 파드는 하나의 플랫한 공유 네트워크 주소 공간에 상주하므로 모든 파드는 다른 파드의 IP 주소를 사용해 접근하는 것이 가능하다.
 둘 사이에서는 어떠한 NAT 도 존재하지 않는다. 두 파드가 서로 네트워크 패킷을 보내면, 상대방의 실제 IP 주소를 패킷 안에 있는 출발지 IP 주소에서 찾을 수 있다.
 
+- 동일한 network namespace 내의 하나의 파드 내의 컨테이너는 IP, Port를 모두 공유한다. 
+  - Pod 내의 Container에서의 호출은 Localhost를 이용하여 호출이 가능하다. 
+
 ### 파드에서 컨테이너의 적절한 구성
 
-#### 다계층 애플리케이션을 여러 파드로 분할
-#### 개별확장이 가능하도록 여러 파드로 분할
 #### 파드에서 여러 컨테이너를 사용하는 경우
 
 - 컨테이너를 함께 실행해야 하는가, 혹슨 서로 다른 호스트에서 실행할 수 있는가?
@@ -82,6 +83,27 @@ spec:
 - 컨테이너가 함께, 혹은 개별적으로 스케일링돼야 하는가?
 
 **컨테이너는 여러 프로세스를 실행하지 말아야 한다. 파드는 동일한 머신에서 실행할 필요가 없다면 여러 컨테이너를 포함하지 말아야 한다.**
+
+## Pod's LifeCycle 
+
+- Pod's Phase 
+  - Pending 
+  - Running 
+  - Succeeded 
+  - Failed 
+  - UnKown 
+
+- Container State 
+  - Waiting
+  - Running 
+  - Terminated
+
+## Pod's Restart Policy 
+
+- restartPolicy 
+  - Always ( default value )
+  - OnFailure 
+  - Never 
 
 ## YAML 또는 JSON 디스크립터로 파드 생성
 
