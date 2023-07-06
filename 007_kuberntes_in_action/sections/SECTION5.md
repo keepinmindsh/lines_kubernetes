@@ -1,4 +1,41 @@
-# Section 5 - 레플리카셋
+# Section 5 - 파드를 안정적으로 유지하기 그리고 레플리카셋
+
+## 파드를 안정적으로 유지하기 
+
+### 라이브니스 프로브 
+
+쿠버네티스는 라이브니스 프로브를 통해서 컨테이너가 살아있는지 확인할 수 있다. 
+
+> 애플리케이션 시작시간을 고려해 초기 지연을 설정해야 한다는 점을 명심할 것! 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-exec
+spec:
+  containers:
+  - name: liveness
+    image: registry.k8s.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 30; rm -f /tmp/healthy; sleep 600
+    livenessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+```
+
+라이브니스 프로브를 위해 특정 URL 경로에 요청하도록 프로브를 구성해 애플리케이션 내에서 실행 중인 모든 주요 구성 요소가 살아 있는지 
+또는 응답이 없는지 확인하도록 구성할 수 있다. 
+
+> HTTP 엔드 포인트에 인증이 필요하지 않는지 확인하라. 그렇지 않으면 프로브가 항상 실패해 컨테이너가 무한정으로 재시작된다. 
 
 ## 레플리카셋
 
@@ -117,13 +154,91 @@ selector:
 $ k delete rs kubia 
 ```
 
+### 레플리카 셋을 사용하는 시기 
+
+레플리카셋은 지정된 수의 파드 레플리카가 항상 실행되도록 보장한다. 그러나 디플로이먼트는 레플리카셋을 관리하고 다른 유용한 기능과 함께 
+파드에 대한 선언적 업데이트를 제공하는 상위개념이다. 
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  # 케이스에 따라 레플리카를 수정한다.
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3
+```
+
+### Replica Set 설정시 주의해야할 사항 
+
+단독 파드를 생성하는 것에는 문제가 없지만, 단독 파드가 레플리카셋의 셀렉터와 일치하는 레이블을 가지지 않도록 
+하는 것을 강력하게 권장한다. 그 이유는 레플리카셋이 소유하는 파드가 템플릿에 명시된 파드에만 국한되지 않고,  
+이전 섹션에서 명시된 방식에 의해서도 다른 파드의 획득이 가능하기 때문이다.  
+
+이와 같은 경우에는 
+
+- 처음 동작 
+
+```shell
+$ kubectl get pods
+NAME             READY   STATUS        RESTARTS   AGE
+frontend-b2zdv   1/1     Running       0          10m
+frontend-vcmts   1/1     Running       0          10m
+frontend-wtsmm   1/1     Running       0          10m
+pod1             0/1     Terminating   0          1s
+pod2             0/1     Terminating   0          1s
+```
+
+- 최종 결과 
+
+```shell
+$ kubectl get pods
+NAME             READY   STATUS    RESTARTS   AGE
+frontend-hmmj2   1/1     Running   0          9s
+pod1             1/1     Running   0          36s
+pod2             1/1     Running   0          36s
+```
+
+### 레플리카 셋의 대안 
+
+#### 디플로이먼트 권장 
+
+디플로이먼트는 레플리카 셋을 소유하거나 업데이트를 하고, 파드의 선언적인 업데이트와 서버측 롤링 업데이트를 할 수 있는 오브젝트이다.  
+디플로이먼트는 레플리카 셋을 소유하거나 관리한다. 따라서 레플리카 셋을 원한다면 디플로이먼트를 사용하는 것을 권장한다.  
+
+#### 잡 
+
+스스로 종료되는 것이 예상되는 파드의 경우에는 레플리카셋 대신 잡을 이용한다. 
+
+#### 데몬셋 
+
+머신 모니터링 및 머신 로깅과 같은 머신 레벨의 기능을 제공하는 파드를 위해서는 레플리카셋 대신 데몬셋을 사용한다. 
+
 ## 데몬셋
 
 ### 데몬셋을 사용해 각 노드에서 정확히 한개의 파드 실행
 
-클러스터의 모든 노드에, 노드당 하나의 파드가 실행되길 원하는 경우가 있을 수 있다.
+클러스터의 모든 노드에, 노드당 하나의 파드가 실행되길 원하는 경우가 있을 수 있다. 노드가 클러스터에 추가되면 파드도 추가된다.  
 
-예) 로그수집기, 리소스 모니터, Kube-proxy 프로세스 등등
+예) 로그수집기, 리소스 모니터, Kube-proxy 프로세스 등등  
+
+- 모든 노드에서 클러스터 스토리지 데몬 실행 
+- 모든 노드에서 로그 수집 데몬 실행 
+- 모든 노드에서 노드 모니터링 데몬 실행 
 
 ### 데몬셋으로 모든 노드에 파드 실행하기
 
@@ -160,6 +275,54 @@ spec:
 k create -f ~/sources/02_linesgits/lines_kubernetes/007_kuberntes_in_action/p191_deamonsets/deamon_sets_sample.yaml
 ```
 
+### 좀더 자세항 사양 작성 ( 데몬 셋 ) 
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-elasticsearch
+  template:
+    metadata:
+      labels:
+        name: fluentd-elasticsearch
+    spec:
+      tolerations:
+      # 이 톨러레이션(toleration)은 데몬셋이 컨트롤 플레인 노드에서 실행될 수 있도록 만든다.
+      # 컨트롤 플레인 노드가 이 파드를 실행해서는 안 되는 경우, 이 톨러레이션을 제거한다.
+      - key: node-role.kubernetes.io/control-plane
+        operator: Exists
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: fluentd-elasticsearch
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+```
+
+
 ### 필요한 레이블을 노드에 추가하기
 
 ```shell
@@ -171,6 +334,8 @@ k get po
 ```
 
 데몬셋을 삭제하거나 대상으로 타케팅된 레이블이 변경될 경우 daemonSet에 의해서 생성된 파드도 삭제된다.
+
+> [Update Daemon Set](https://kubernetes.io/ko/docs/tasks/manage-daemon/update-daemon-set/)
 
 ## 완료 가능한 단일 태스크를 수행하는 파드 실행
 
