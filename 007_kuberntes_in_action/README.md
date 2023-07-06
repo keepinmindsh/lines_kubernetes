@@ -13,7 +13,7 @@
 ## [Section 11 - 파드 메타데이터와 리소스 액세스 하기](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION11.md)
 ## [Section 12 - 배포에 대하여](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION12.md)
 ## [Section 13 - 스테이트풀셋에 대하여](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION13.md)
-## [Section 14 - 쿠버네티스 아키첵처의 이해](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION14.md)
+## [Section 14 - 쿠버네티스 아키텍처의 이해](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION14.md)
 ## [Section 15 - 쿠버네티스 인증의 이해](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION15.md)
 ## [Section 16 - 쿠버네티스 보안, 네트워크 격리](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION16.md)
 ## [Section 17 - 리소스 제한 및 관리](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION17.md)

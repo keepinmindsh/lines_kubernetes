@@ -2,14 +2,22 @@
 
 ## 아키텍처 이해
 
-- 쿠버네티스 컨트롤 플레인
-    - etcd 분산 저장 스토리리
-    - API 서버
-    - 스케쥴러
-    - 컨트롤러 매니저
-- 워커노드
+- 쿠버네티스 컨트롤 플레인 ( Master Node )
+    - Kube-apiserver 
+      - 전체 서비스와 연결되어 외부와 통신이 가능하게 한다. 
+    - etcd 분산 저장 스토리지 
+      - Etcd Cluster ( Key - Value Model )
+    - 스케쥴러 ( Kube-Scheduler )
+    - 컨트롤러 매니저 
+      - Controller Manager 
+      - Node Controller 
+      - Replication Controller 
+- 워커노드 ( Worker Nodes )
     - Kubelet
+      - Master Node 와 상호작용한다. 
     - 쿠버네티스 서비스 프록시 ( kube-proxy )
+      - 서로 다른 노드 간에 접근하기 위해서 사용할 수 있다. 
+      - Container 간의 통신을 위하여 
     - 컨테이너 런타임 ( Docker, rkt 외 기타 )
 - 애드온 구성 요소
     - 쿠버네티스 DNS 서버
@@ -17,6 +25,7 @@
     - 인그레스 컨트롤러
     - 힙스터
     - 컨테이너 네트워크 인터페이스 플러그인
+- Container Runtime 
 
 ### 쿠버네티스 구성 요소의 분산 특성
 
