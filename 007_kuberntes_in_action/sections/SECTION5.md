@@ -204,6 +204,22 @@ spec:
         image: gcr.io/google_samples/gb-frontend:v3
 ```
 
+### 파드 삭제 비용 
+
+[https://kubernetes.io/ko/docs/reference/labels-annotations-taints/#pod-deletion-cost](https://kubernetes.io/ko/docs/reference/labels-annotations-taints/#pod-deletion-cost) 어노테이션을 이용하여, 
+레플리카 셋을 스케일 다운 할 때 어떤 파드부터 먼저 삭제할 지에 대한 우선순위를 설정할 수 있다.  
+
+이 어노테이션은 파드에 설정되어야 하며, [-2147483647, 2147483647] 범위를 갖는다.   
+이 어노테이션은 하나의 레플리카셋에 있는 다른 파드와의 상대적 삭제 비용을 나타낸다.   
+삭제 비용이 낮은 파드는 삭제 비용이 높은 파드보다 삭제 우선순위가 높다.
+
+### Replica Set 의 스케일링  
+
+- Pending 상태인 (+ 스케줄링할 수 없는) 파드가 먼저 스케일 다운된다.
+- controller.kubernetes.io/pod-deletion-cost 어노테이션이 설정되어 있는 파드에 대해서는, 낮은 값을 갖는 파드가 먼저 스케일 다운된다.
+- 더 많은 레플리카가 있는 노드의 파드가 더 적은 레플리카가 있는 노드의 파드보다 먼저 스케일 다운된다.
+- 파드 생성 시간이 다르면, 더 최근에 생성된 파드가 이전에 생성된 파드보다 먼저 스케일 다운된다. (LogarithmicScaleDown 기능 게이트가 활성화되어 있으면 생성 시간이 정수 로그 스케일로 버킷화된다)
+
 ### Replica Set 설정시 주의해야할 사항 
 
 단독 파드를 생성하는 것에는 문제가 없지만, 단독 파드가 레플리카셋의 셀렉터와 일치하는 레이블을 가지지 않도록 
@@ -326,8 +342,6 @@ spec:
         ports:
         - containerPort: 80
 ```
-
-
 
 ## 데몬셋
 
