@@ -18,6 +18,32 @@ $ kubectl create deployment my-dep --image=nginx --replicas=3
 $ kubectl create deployment my-dep --image=busybox --port=5701
 ```
 
+```shell
+$ kubectl rollout undo deployment/abc 
+
+$ kubectl rollout status daemonset/foo
+
+$ kubectl rollout history deployment/abc
+
+$ kubectl rollout history daemonset/abc --revision=3
+
+$ kubectl rollout pause deployment/nginx
+
+$ kubectl rollout restart deployment/nginx 
+
+$ kubectl rollout restart daemonset/abc
+
+$ kubectl rollout resume deployment/nginx
+
+$ kubectl rollout status deployment/nginx
+
+$ kubectl rollout undo deployment/abc
+
+$ kubectl rollout undo daemonset/abc --to-revision=3 
+
+$ kubectl rollout undo --dry-run=server deployment/abc
+```
+
 ## 파드에서 실행 중인 애플리케이션 업데이트
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/pod_application_update.png)
