@@ -418,3 +418,68 @@ $ kubectl cp localfile foo-pod:/etc/remotefile
 새로운 리소스 유형을 정의하려면 CustomResourceDefinition 오브젝트를 쿠버네티스 API 서버에 게시하면 된다.   
 CustomResourceDefinition 오브젝트는 사용자 정의 리소스 유형에 관한 설명이다. CRD 가 게시되면 사용자는 다른 쿠버네티스  
 리소스와 마찬가지로 JSON 또는 YAML 매니페스트를 API 서버에 게시해 사용자 정의 리소스 인스턴스를 만들 수 있다.
+
+### 예제 소개 
+
+쿠버네티스 클러스터에서 사용자가 파드, 서비스와 기타 쿠버네티스 리소스를 처리할 필요 없이 정적 웹사이트를 최대한 쉽게 실행할 수 있게 한다고  
+가정해보자. 여기서 하고자 하는 것은 사용자가 웹 사이트 이름과 웹사이트 파일을 얻을 수 있는 소스를 초함하는 Website 유형의 오브젝트를 만드는 것이다.  
+깃 리포지토리를 해당 파일의 소스로 사용한다. 사용자가 WebSite 리소스의 인스턴스를 만들면 쿠버네티스가 새 웹 서버 파드를 기동하고 서비스를 통해  
+노출하도록 한다.  
+
+```yaml
+kind: Website 
+metadata: 
+  name: kubia 
+spec: 
+  gitRepo: https://github.com/luksa/kubia-website-example.git
+```
+
+### CustomResourceDefinition 오브젝트 생성 
+
+쿠버네티스가 사용자 정의 Website 리소스 인스턴스를 허용하게 하려면 작성한 CustomResourceDefinition을 API 서버에 게시해야 한다.  
+
+```yaml
+apiVersion: apiextention.k8s.io/v1beta1 
+kind: CustomResourceDefinition # CustomResourceDefinition 은 이 API 그룹과 버전에 속한다. 
+metadata: 
+  name: websites.extensions.example.com # 사용자 정의 오브젝트의 전체 이름 
+spec: 
+  scope: Namespaced  # Website 리소스가 네임스페이스 범위로 지정되길 원한다. 
+  group: extension.example.com # Website 리소스의 API 그룹과 버전을 정의한다. 
+  version: v1 
+  names: 
+    kind: Website # 사용자 정의 오브젝트 이름의 다양한 형태를 지정한다, 
+    singular: websites 
+    plural: websites
+```
+
+### 사용자 정의 리소스의 인스턴스 생성 
+
+```yaml
+apiVersion: extensions.example.com/v1 
+kind: Website 
+metadata: 
+  name: kubia 
+spec:
+  ...
+```
+
+```shell
+$ kubectl create -f kubia-website.yml 
+
+$ kubectl get websites 
+```
+
+### 사용자 정의 리소스 인스턴스 검색 
+
+```shell
+$ kubectl get websites
+
+$ kubectl get website kubia -o yaml 
+```
+
+### 사용자 정의 오브젝트의 인스턴스 삭제
+
+```shell
+$ kubectel delete website kubia 
+```
