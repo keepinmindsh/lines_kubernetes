@@ -23,6 +23,7 @@
 ### [Section 21 - Cron Job](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION21.md)
 ### [Section 22 - Job](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION22.md)
 ### [Section 23 - PriorityClass](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION23.md)
+## [Section 24 - Kubectl Debug/Trouble Shooting](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION24.md)
 ## [Section 99 - Certificated Kubernetes Architecture](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION99.md)
 
 # Tips

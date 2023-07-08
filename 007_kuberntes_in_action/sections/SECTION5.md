@@ -642,4 +642,5 @@ k delete cronjob.batch/hello
 
 > [How to find all ReplicaSets that have not enough running replicas](https://github.com/kubernetes/kubectl/issues/717)    
 >   - [From a string, formatted as a table with spaces, how to grep all values that are equal for all columns?](https://serverfault.com/questions/985559/from-a-string-formatted-as-a-table-with-spaces-how-to-grep-all-values-that-are/985578#985578)      
-> [ReplicaSet](https://subicura.com/k8s/guide/replicaset.html#replicaset-%E1%84%86%E1%85%A1%E1%86%AB%E1%84%83%E1%85%B3%E1%86%AF%E1%84%80%E1%85%B5)  
+> [ReplicaSet](https://subicura.com/k8s/guide/replicaset.html#replicaset-%E1%84%86%E1%85%A1%E1%86%AB%E1%84%83%E1%85%B3%E1%86%AF%E1%84%80%E1%85%B5)     
+> [중단(disruption)](https://kubernetes.io/ko/docs/concepts/workloads/pods/disruptions/)   
