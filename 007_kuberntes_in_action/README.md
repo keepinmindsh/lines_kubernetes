@@ -29,4 +29,5 @@
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
+- [gcloud console cheat sheet](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/gcloud_cheat_sheet/gcloud-cheat-sheet.pdf)
 
