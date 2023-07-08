@@ -56,27 +56,39 @@ spec:
 
 
 ```yaml
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name: kubia
+  name: frontend
+  labels:
+    app: guestbook
+    tier: frontend
 spec:
+  # 케이스에 따라 레플리카를 수정한다.
   replicas: 3
   selector:
     matchLabels:
-      app: kubia
+      tier: frontend
   template:
     metadata:
       labels:
-        app: kubia
+        tier: frontend
     spec:
       containers:
-      - name: kubia
-        image: luksa/kubia 
+        - name: php-redis
+          image: gcr.io/google_samples/gb-frontend:v3
 ```
 
 - selector ~ : 여기서는 레플리케이션컨트롤러와 유사한 간단한 matchLabels 셀렉터를 사용한다.
 - template ~ : 템플릿은 레플리케이션 컨트롤러와 동일하다.
+
+```shell
+$ kubectl describe rs/frontend
+
+$ kubectl get pods
+
+$ kubectl get pods frontend-b2zdv -o yaml
+```
 
 > API 버전 속성에 대해서
 > - API 그룹 ( apps )
@@ -85,6 +97,8 @@ spec:
     > 최신 쿠버네티스 버전에서 도입된 다른 리소스는 여러 API 그룹으로 분류된다.
 
 ### 리플리카셋 생성, 검사
+
+레플리카셋은 모든 쿠버네티스 API 오브젝트와 마찬가지로 apiVersion, kind, metadata 필드가 필요하다. 레플리카셋에 대한 kind 필드의 값은 항상 레플리카셋이다.
 
 - replicaset 조회
 
@@ -219,6 +233,30 @@ pod2             1/1     Running   0          36s
 
 디플로이먼트는 레플리카 셋을 소유하거나 업데이트를 하고, 파드의 선언적인 업데이트와 서버측 롤링 업데이트를 할 수 있는 오브젝트이다.  
 디플로이먼트는 레플리카 셋을 소유하거나 관리한다. 따라서 레플리카 셋을 원한다면 디플로이먼트를 사용하는 것을 권장한다.  
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+```
 
 #### 잡 
 
