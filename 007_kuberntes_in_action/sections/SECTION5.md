@@ -637,3 +637,8 @@ k get cronjob
 
 k delete cronjob.batch/hello
 ```
+
+## References 
+
+> [How to find all ReplicaSets that have not enough running replicas](https://github.com/kubernetes/kubectl/issues/717)    
+>   - [From a string, formatted as a table with spaces, how to grep all values that are equal for all columns?](https://serverfault.com/questions/985559/from-a-string-formatted-as-a-table-with-spaces-how-to-grep-all-values-that-are/985578#985578)    
