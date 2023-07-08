@@ -1,5 +1,23 @@
 # Section 5 - 파드를 안정적으로 유지하기 그리고 레플리카셋
 
+## Cheat Sheet 
+
+```shell
+$ kubectl autoscale deployment foo --min=2 --max=10
+
+$ kubectl autoscale rc foo --max=5 --cpu-percent=80
+
+$ kubectl scale --replicas=3 rs/foo 
+
+$ kubectl scale --replicas=3 -f foo.yaml
+
+$ kubectl scale --current-replicas=2 --replicas=3 deployment/mysql 
+
+$ kubectl scale --replicas=5 rc/foo rc/bar rc/baz 
+
+$ kubectl scale --replicas=3 statefulset/web
+```
+
 ## 파드를 안정적으로 유지하기 
 
 ### 라이브니스 프로브 
