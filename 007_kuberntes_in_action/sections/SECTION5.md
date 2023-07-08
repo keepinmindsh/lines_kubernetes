@@ -39,6 +39,13 @@ spec:
 
 ## 레플리카셋
 
+k8s 에서 사용하는 가장 작은 단위가 바로 Pod 입니다. 이 Pod 하나로 서비스를 올린다면, HA(고가용성)을 보장하지 못하기 때문에  
+Pod를 복제하여 Pod 의 FailOver 시에 자동적으로 다른 Pod로 서빙해주어야 합니다. 그것을 k8s 에서 Object Controller 형식으로 
+지원해주는 것이 바로 ReplicaSet 입니다. 
+
+- Selector 는 **라벨을 기반**으로 하며, 라벨을 지정하면 해당 라벨을 가신 **모든 Pod를 관리**합니다.  
+- Selector 는 **집합 단위**로 사용됩니다. 즉, **in, notin, exists** 같은 연산자를 사용 가능합니다. 
+
 ### 레플리카셋과 리플리케이션 컨트롤러 비교
 
 레플리카 셋은 레플리케이션 컨트롤러와 똑같이 동작하지만 좀 더 풍부한 표현식을 사용하는 파드 셀렉터를 갖고 있다. 레플리케이션컨터롤러의 레이블 셀렉터는 특정 레이블이 있는 파드만
@@ -265,6 +272,62 @@ spec:
 #### 데몬셋 
 
 머신 모니터링 및 머신 로깅과 같은 머신 레벨의 기능을 제공하는 파드를 위해서는 레플리카셋 대신 데몬셋을 사용한다. 
+
+### ReplicaSet 의 다양한 사례 
+
+- ReplicaSet 
+
+```yaml
+apiVersion: apps/v1 
+kind: ReplicaSet   
+Metadata: 
+  name: some-name
+  labels:
+    app: some-App
+    tier: some-Tier
+Spec: 
+  replicas: 3 # Here we tell k8s how many replicas we want
+  Selector: # A label selector field. 
+    matchLabels:
+      tier: some-Tier
+    matchExpressions:
+      - {key: tier, operator: In, values: [some-Tier]} #set-based operators
+  template:
+    metadata:
+      labels:
+        app: some-App
+        tier: someTier
+    Spec: 
+      Containers:
+```
+
+- Deployment 
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+```
+
+
 
 ## 데몬셋
 
