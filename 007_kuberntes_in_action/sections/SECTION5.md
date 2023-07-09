@@ -518,21 +518,22 @@ $ k logs pi-gwdzd
 
 ### 잡에서 여러 파드 실행하기
 
-- Non-parallel Jobs
-  normally, only one Pod is started, unless the Pod fails.
-  the Job is complete as soon as its Pod terminates successfully.
-- Parallel Jobs with a fixed completion count:
-  specify a non-zero positive value for .spec.completions.
-  the Job represents the overall task, and is complete when there are .spec.completions successful Pods.
-  when using .spec.completionMode="Indexed", each Pod gets a different index in the range 0 to .spec.completions-1.
-- Parallel Jobs with a work queue:
-  do not specify .spec.completions, default to .spec.parallelism.
-  the Pods must coordinate amongst themselves or an external service to determine what each should work on. For example, a Pod might fetch a batch of up to N items from the work queue.
-  each Pod is independently capable of determining whether or not all its peers are done, and thus that the entire Job is done.
-  when any Pod from the Job terminates with success, no new Pods are created.
-  once at least one Pod has terminated with success and all Pods are terminated, then the Job is completed with success.
-  once any Pod has exited with success, no other Pod should still be doing any work for this task or writing any output. They should all be in the process of exiting.
+- 비 병렬 작업:
+일반적으로 Pod가 실패하지 않는 한 Pod는 하나만 시작됩니다.
+Pod가 성공적으로 종료되면 Job은 완료됩니다.
 
+- 고정 완료 횟수를 가진 병렬 작업:
+.spec.completions에 0 이상의 양수 값을 지정합니다.
+Job은 전체 작업을 나타내며, .spec.completions 개의 성공한 Pod가 있을 때 완료됩니다.
+.spec.completionMode="Indexed"를 사용할 때, 각 Pod는 0부터 .spec.completions-1까지 다른 인덱스를 가집니다.
+
+- 작업 큐를 사용하는 병렬 작업:
+.spec.completions을 지정하지 않으면 기본적으로 .spec.parallelism을 사용합니다.
+Pod는 자체적으로 또는 외부 서비스를 통해 각자 작업할 내용을 결정하기 위해 협력해야 합니다. 예를 들어, Pod는 작업 큐에서 최대 N개의 항목을 가져올 수 있습니다.
+각 Pod는 독립적으로 모든 동료 Pod가 완료되었는지 여부를 판단하고, 따라서 전체 Job이 완료되었는지 여부를 알 수 있습니다.
+Job에서 하나의 Pod가 성공적으로 종료되면 새로운 Pod는 생성되지 않습니다.
+최소한 하나의 Pod가 성공적으로 종료되었고 모든 Pod가 종료된 후에 Job은 성공으로 완료됩니다.
+하나의 Pod가 성공적으로 종료되었을 때, 다른 Pod는 해당 작업 또는 출력에 대해 더 이상 작업을 수행하지 않아야 합니다. 모든 Pod는 종료 프로세스에 참여해야 합니다.
 위의 영어 설명에 따라서 잡은 2개 이상의 파드 인스턴스를 생성해 병렬 또는 순차적으로 실행하도록 구성할 수 있다.
 
 
