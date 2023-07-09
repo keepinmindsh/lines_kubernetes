@@ -49,6 +49,22 @@ kubectl create ingress ingdefault --class=default \
 
 쿠버네티스의 서비스는 동일한 서비스를 제공하는 파드 그룹에 지속적인 단일 접점을 만들려고 할 때 생성하는 리소스다. 각 서비스는 서비스가 존재하는 동안 절대 바뀌지 않는 IP 주소와 포트가 있다.
 
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+``` 
+
+> 서비스는 모든 수신 port를 targetPort에 매핑할 수 있다. 기본적으로 그리고 편의상, targetPort는 port 필드와 같은 값으로 설정된다. 
+
 ### Service 구성
 
 서비스는 다수 파드 앞에서 로드 밸런서 역할을 한다. 파드가 하나가 있으면 서비스는 이 파드 하나에 정적주소를 제공한다.
@@ -106,6 +122,64 @@ $ k exec kubia-7nog1 -- curl -s http://10.111.249.153
 > 명령어의 더블 대시(--)는 kubectl 명령줄 옵션의 끝을 의미한다. 더블 대시 뒤의 모든 것은 파드 내에서 실행돼야 하는 명령이다.  
 > 명령 줄에 대시로 시작하는 인수가 없는 경우 더블 대시를 사용할 필요가 없다.
 
+#### 서비스에 파드를 설정하는 방법 
+
+파드의 포트 정의에 이름이 있으므로, 서비스의 targetPort 속성에서 이 이름을 참조할 수 있다. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app.kubernetes.io/name: proxy
+spec:
+  containers:
+  - name: nginx
+    image: nginx:stable
+    ports:
+      - containerPort: 80
+        name: http-web-svc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app.kubernetes.io/name: proxy
+  ports:
+  - name: name-of-service-port
+    protocol: TCP
+    port: 80
+    targetPort: http-web-svc
+```
+
+#### 동일한 서비스에서 여러 개의 포트 노출 ( 멀티 포트 서비스 )
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 9376
+    - name: https
+      protocol: TCP
+      port: 443
+      targetPort: 9377
+```
+
+> 쿠버네티스의 일반적인 이름과 마찬가지로, 포트 이름은 소문자 영숫자와 - 만 포함해야 한다. 포트 이름은 영숫자로 시작하고 끝나야 한다.
+> 예를 들어, 123-abc 와 web 은 유효하지만, 123_abc 와 -web 은 유효하지 않다.
+
 #### 서비스의 세션 어피니티 구성
 
 특정 클라이언트의 모든 요청을 매번 같은 파드로 리디렉션하려면 서비스의 세션 어피니티 속성을 기본값 None 대신 ClientIP로 설정한다.  
@@ -118,64 +192,49 @@ spec:
   sessionAffinity: ClientIP 
   ...
 ```
+#### 엔드포인트 슬라이스 - 셀렉터가 없는 서비스   
 
-#### 동일한 서비스에서 여러 개의 포트 노출
-```yaml
-apiVersion: v1 
-kind: Service 
-metadata:
-    name: kubia 
-spec: 
-  ports:
-    - name: http 
-      port: 80 
-      targetPort: 8080
-    - name: https
-      port: 443 
-      targetPort: 8443
-```
+서비스는 일반적으로 셀렉터를 이용하여 쿠버네티스 파드에 대한 접근을 추상화하지만, 셀렉터에 대신 매칭되는 엔드포인트슬라이스 오브젝트와 함께 사용되면,  
+다른 종류의 백엔드도 추상화할 수 있으며, 여기에는 클러스터 외부에서 실행되는 것도 포함된다. 
 
-#### 이름이 지정된 포트 사용
+- 프로덕션 환경에서는 외부 데이터베이스 클러스터를 사용하려고 하지만, 테스트 환경에서는 자체 데이터 베이스를 사용한다. 
+- 한 서비스에서 다른 네임스페이스 또는 다른 클러스터의 서비스를 지정하려고 한다. 
+- 워크로드를 쿠버네티스로 마이그레이션하고 있다. 해당 방식을 평가하는 동안, 쿠버네티스에서는 백엔드의 일부만 실행한다.
+  
+이 서비스에는 셀렉터가 없으므로, 매칭되는 엔드포인트슬라이스 (및 레거시 엔드포인트) 오브젝트가 자동으로 생성되지 않는다.   
+엔드포인트슬라이스 오브젝트를 수동으로 추가하여, 서비스를 실행 중인 네트워크 주소 및 포트에 서비스를 수동으로 매핑할 수 있다.  
+
 ```yaml
-apiVersion: v1
-kind: Pod
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
 metadata:
-  name: lines-sample
+  name: my-service-1 # 관행적으로, 서비스의 이름을
+                     # 엔드포인트슬라이스 이름의 접두어로 사용한다.
   labels:
-    creation_method: manual
-    env: prod
-spec:
-  containers:
-  - name: kubia
-    image: luksa/kubia
-    resources:
-      limits:
-        memory: "128Mi"
-        cpu: "128m"
-    ports:
-      - name: http 
-        containerPort: 8080
-      - name: https
-        containerPort: 8443
+    # "kubernetes.io/service-name" 레이블을 설정해야 한다.
+    # 이 레이블의 값은 서비스의 이름과 일치하도록 지정한다.
+    kubernetes.io/service-name: my-service
+addressType: IPv4
+ports:
+  - name: '' # 9376 포트는 (IANA에 의해) 잘 알려진 포트로 할당되어 있지 않으므로
+             # 이 칸은 비워 둔다.
+    appProtocol: http
+    protocol: TCP
+    port: 9376
+endpoints:
+  - addresses:
+      - "10.4.5.6" # 이 목록에 IP 주소를 기재할 때 순서는 상관하지 않는다.
+      - "10.1.2.3"
 ```
 
-#### 서비스에 이름이 지정된 포트 참조하기
+서비스를 위한 엔드포인트슬라이스 오브젝트를 생성할 때, 엔드포인트슬라이스 이름으로는 원하는 어떤 이름도 사용할 수 있다. 
+네임스페이스 내의 각 엔드포인트슬라이스 이름은 고유해야 한다. 해당 엔드포인트슬라이스에 kubernetes.io/service-name 레이블을 설정하여 
+엔드포인트슬라이스를 서비스와 연결할 수 있다.
 
-- 포트 80은 http라는 컨테이너 포트에 매핑된다.
-- 포트 443은 컨테이너 포트의 이름이 https인 것에 매핑된다.
+> 엔드포인트 IP는 루프백(loopback) (IPv4의 경우 127.0.0.0/8, IPv6의 경우 ::1/128), 또는 링크-로컬 (IPv4의 경우 169.254.0.0/16와 224.0.0.0/24, IPv6의 경우 fe80::/64)이 되어서는 안된다.
+> 엔드포인트 IP 주소는 다른 쿠버네티스 서비스의 클러스터 IP일 수 없는데, kube-proxy는 가상 IP를 목적지(destination)로 지원하지 않기 때문이다.
 
-```yaml
-apiVersion: v1 
-kind: Service 
-spec: 
-  ports:
-    - name: http 
-      port: 80 
-      targetPort: http
-    - name: https
-      port: 443 
-      targetPort: https
-```
+
 
 #### 환경 변수를 통한 서비스 검색
 
@@ -204,8 +263,6 @@ LINES_ADMIN_NEXTJS_SERVICE_SERVICE_PORT=3000
 LINES_ADMIN_NEXTJS_SERVICE_PORT=tcp://10.124.3.83:3000
 HOME=/home/bloguser
 ```
-
-
 
 #### DNS를 통한 서비스 검색
 
@@ -327,6 +384,7 @@ subsets:
 엔드 포인트 오브젝트는 서비스와 이름이 같아야 하고 서비스를 제공하는 대상 IP 주소와 포트 목록을 가져야 한다. 서비스와 엔드 포인트 리소스가 모두 서버에 게시되면 파드 셀렉터가 있는
 일반 서비스 처럼 서비스를 사용할 수 있다. 서비스가 만들어진 후 만들어진 컨테이너에는 서비스의 환경 변수가 포함되며 IP:포트 쌍에 대한 모든 연결은 서비스 엔드 포인트 간에 로드 밸런싱 한다.
 
+> 엔드포인트 대신 엔드포인트슬라이스 API를 사용하는 것을 권장한다.
 
 #### 외부 서비스를 위한 별칭 생성
 
@@ -725,4 +783,7 @@ metadata:
 - FQDN이나 그 일부  서비스에 액세스 하려고 하는데 동작하지 않는 경우, FQDN 대신 클러스터 IP를 사용해 액세스 할 수 있는지 확인한다.
 - 대상 포트가 아닌 서비스로 노출된 포트에 연결하고 있는지 확인한다.
 - 파드 IP에 직접 연결해 파드가 올바른 포트에 연결돼 있는지 확인한다.
-- 파드 IP로 애플리케이션에 액세스 할 수 없는 경우 애플리케이션이 로컬 호스트에만 바인딩하고 있는지 확인한다. 
+- 파드 IP로 애플리케이션에 액세스 할 수 없는 경우 애플리케이션이 로컬 호스트에만 바인딩하고 있는지 확인한다.
+
+
+> [Kubernetes - Service](https://kubernetes.io/ko/docs/concepts/services-networking/service/)
