@@ -467,6 +467,14 @@ sepc:
   externalTrafficPolicy: Local
 ```
 
+### 자신의 IP 주소 선택 
+
+서비스 생성시 고유한 클러스터 IP 주소를 지정할 수 있다. 이를 위해, .spec.clusterIP 필드를 설정한다.  
+예를 들어, 재사용하려면 기존 DNS 항목이 있거나, 특정 IP 주소로 구성되어 재구성이 어려운 레거시 시스템인 경우이다. 
+
+선택한 IP 주소는 API 서버에 대해 구성된 service-cluster-ip-range CIDR 범위 내에 유효한 IPv4 또는 IPv6 주소여야 한다.  
+유효하지 않은 clusterIP 주소 값으로 서비스를 생성하려고 하면, API 서버는 422 HTTP 상태 코드를 리턴하여 문제점이 있음을 알린다. 
+
 ### 인그레스 리소스로 서비스 외부 노출
 
 인그레스 : 들어가거나 들어가는 행위, 들어갈 권리, 틀어갈 수단이나 장소, 진입로
@@ -673,7 +681,7 @@ apiVersion: v1
 kind: ReplicationController 
 ```
 
-실제 샘플
+##### 실제 샘플
 
 > [Readiness & Liveness Prove](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
 
@@ -731,7 +739,10 @@ $ k get po kubia-2r1qb
 
 #### 헤드리스 서비스 생성
 
-서비스 스펙의 ClusterIP 필드를 None으로 설정하면 쿠버네티스는 클라이언트가 서비스의 파드에 연결할 수 있는 클러스터 IP를 할당하지 않기 때문에 서비스가 헤드리스 상태가 된다.
+때때로 로드-밸런싱과 단일 서비스 IP는 필요치 않다. 이 경우, "헤드리스" 서비스라는 것을 만들 수 있는데.  
+명시적으로 클러스터 IP(.spec.clusterIO)에 "None"을 지정한다. 
+
+서비스 스펙의 ClusterIP 필드를 None으로 설정하면 쿠버네티스는 클라이언트가 서비스의 파드에 연결할 수 있는 클러스터 IP를 할당하지 않기 때문에 서비스가 헤드리스 상태가 된다.   
 
 ```yaml
 apiVersion: v1 
@@ -746,6 +757,23 @@ spec:
   selector: 
     app: kubia 
 ```
+
+- 셀렉터가 있는 경우 
+
+셀렉터를 정의하는 헤드리스 서비스의 경우, 쿠버네티스 컨트롤 플레인은 쿠버네티스 API 내에서 엔드포인트 슬라이스 오브젝트를 생성하고,  
+서비스 하위 파드등을 직접 가리키는 A 또는 AAAA 레코드를 반환하도록 DNS 구성을 변경한다.  
+
+- 셀렉터가 없는 경우 
+
+셀렉터를 정의하지 않는 헤드리스 서비스의 경우, 쿠버네티스 컨트롤 플레인은 엔드포인트슬라이스 오브젝트를 생성하지 않는다.  
+하지만, DNS 시스템은 다음 중 하나를 탐색한 뒤 구성한다.
+
+**type: externalName**서비스에 대한 DNS CNAME 레코드 
+**externalName**이외의 모든 서비스 타입에 대해, 서비스의 활성 엔드 포인트의 모든 IP 주소에 대한 DNS A / AAAA 레코드   
+
+- IPv4 엔드포인트에 대해, DNS 시스템은 A 레코드를 생성한다. 
+- IPv6 엔트포인트에 대해, DNS 시스템은 AAAA 레코드를 생성한다. 
+
 
 #### DNS로 파드 찾기
 
