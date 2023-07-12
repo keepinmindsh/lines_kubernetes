@@ -194,6 +194,9 @@ spec:
 ```
 #### 엔드포인트 슬라이스 - 셀렉터가 없는 서비스   
 
+> [엔드포인트 슬라이스](https://kubernetes.io/ko/docs/concepts/services-networking/endpoint-slices/)   
+> [엔드포인트](https://kubernetes.io/ko/docs/concepts/services-networking/service/#endpoints)
+
 서비스는 일반적으로 셀렉터를 이용하여 쿠버네티스 파드에 대한 접근을 추상화하지만, 셀렉터에 대신 매칭되는 엔드포인트슬라이스 오브젝트와 함께 사용되면,  
 다른 종류의 백엔드도 추상화할 수 있으며, 여기에는 클러스터 외부에서 실행되는 것도 포함된다. 
 
@@ -235,6 +238,62 @@ endpoints:
 > 엔드포인트 IP 주소는 다른 쿠버네티스 서비스의 클러스터 IP일 수 없는데, kube-proxy는 가상 IP를 목적지(destination)로 지원하지 않기 때문이다.
 
 
+#### 엔드포인트 슬라이스 API 
+
+쿠버네티스에서 엔드포인트 슬라이스는 일련의 네트워크 엔드 포인트에 대한 참조를 포함한다. 
+쿠버네티스 서비스에 셀렉터가 지정되면 컨트롤 플레인은 자동으로 엔드 포인트 슬라이스를 생성한다.  
+이 엔드 포인스 슬라이스는 서비스 셀렉터와 매치되는 모든 파드들을 포함하고 참조한다.   
+
+엔드 포인트 슬라이스는 프로토콜, 포트번호 및 서비스 이름의 고유한 조합을 통해 네트워크 엔드포인트를 구룹화 한다.  
+엔드 포인트 슬라이스 오브젝트의 이름은 유효한 DNS 서브 도메인 이름이어야 한다. 
+
+```yaml
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: example-abc
+  labels:
+    kubernetes.io/service-name: example
+addressType: IPv4
+ports:
+  - name: http
+    protocol: TCP
+    port: 80
+endpoints:
+  - addresses:
+      - "10.1.2.3"
+    conditions:
+      ready: true
+    hostname: pod-1
+    nodeName: node-1  #엔드 포인트가 있는 노드의 이름 
+    zone: us-west2-a**** #엔드 포인트가 있는 영역
+```
+
+##### 주소 유형 
+
+- IPv4 
+- IPv6 
+- FQDN ( 전체 주소 도메인 이름 )
+
+##### 엔드포인트와 비교
+
+기존 엔드포인트 API는 쿠버네티스에서 네트워크 엔드포인트를 추적하는 간단하고 직접적인 방법을 제공했다.
+쿠버네티스 클러스터와 서비스가 더 많은 수의 백엔드 파드로 더 많은 트래픽을 처리하고 전송하는 방향으로 성장함에 따라,
+이 API의 한계가 더욱 눈에 띄게 되었다. 특히나, 많은 수의 네트워크 엔드포인트로 확장하는 것에 어려움이 있었다.
+
+서비스에 대한 모든 네트워크 엔드포인트가 단일 엔드포인트 객체에 저장되기 때문에 이러한 엔드포인트 객체들이 상당히 커지는 경우도 있었다. 
+안정적인 서비스(오랜 기간 동안 같은 엔드포인트 세트)의 경우 영향은 비교적 덜 눈에 띄지만, 
+여전히 쿠버네티스의 일부 사용 사례들은 잘 처리되지 않았다.
+
+서비스가 많은 백엔드 엔드포인트를 가지고 워크로드가 자주 증가하거나, 새로운 변경사항이 자주 롤 아웃 될 경우,
+해당 서비스의 단일 엔드포인트 객체에 대한 각 업데이트는 쿠버네티스 클러스터 컴포넌트 사이(컨트롤 플레인 내, 그리고 노드와 API 서버 사이)에
+상당한 네트워크 트래픽이 발생할 것임을 의미했다. 이러한 추가 트래픽은 또한 CPU 사용 관점에서도 굉장한 비용을 발생시켰다.
+
+엔드포인트슬라이스 사용 시, 단일 파드를 추가하거나 삭제하는 작업은 (다수의 파드를 추가/삭제하는 작업과 비교했을 때) 
+해당 변경을 감시하고 있는 클라이언트에 동일한 _수_의 업데이트를 트리거한다. 
+하지만, 파드 대규모 추가/삭제의 경우 업데이트 메시지의 크기는 훨씬 작다.
+
+엔드포인트슬라이스는 듀얼 스택 네트워킹과 토폴로지 인식 라우팅과 같은 새로운 기능에 대한 혁신을 가능하게 했다.
 
 #### 환경 변수를 통한 서비스 검색
 
@@ -822,3 +881,7 @@ metadata:
 
 
 > [Kubernetes - Service](https://kubernetes.io/ko/docs/concepts/services-networking/service/)
+> [서비스와 애플리케이션 연결하기](https://kubernetes.io/ko/docs/tutorials/services/connect-applications-service/)    
+> [클러스터 내 애플리케이션에 접근하기 위해 서비스 사용하기](https://kubernetes.io/ko/docs/tasks/access-application-cluster/service-access-application-cluster/)
+> [서비스를 사용하여 프론트엔드를 백엔드에 연결](https://kubernetes.io/ko/docs/tasks/access-application-cluster/service-access-application-cluster/)         
+> [외부 로드밸랜서 생성하기](https://kubernetes.io/ko/docs/tasks/access-application-cluster/service-access-application-cluster/)   
