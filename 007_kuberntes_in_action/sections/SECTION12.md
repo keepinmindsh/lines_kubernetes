@@ -33,6 +33,8 @@ $ kubectl rollout restart deployment/nginx
 
 $ kubectl rollout restart daemonset/abc
 
+$ kubectl rollout restart deployments/abc -n {name_space} 
+
 $ kubectl rollout resume deployment/nginx
 
 $ kubectl rollout status deployment/nginx
