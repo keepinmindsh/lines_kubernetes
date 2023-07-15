@@ -49,13 +49,20 @@ spec:
 
 ### 볼륨을 사용한 컨테이너 간 데이터 공유
 
-### emptyDir 볼륨 사용
+## emptyDir 볼륨 사용
 
 가장 간단한 불륨 유형은 emtpyDir 볼륨으로 어떻게 파드에 볼륨을 정의하는지 첫 번째 예제에서 살펴보자. 이름에서 알 수 있듯이 불륨이 빈 디렉터리로 시작된다. 파드에 실행 중인 애플리케이션은 어떤 파일이든
 볼륨에 쓸 수 있다. 볼륨의 라이프 사이클이 파드에 묶여 있으므로 파드가 삭제되면 볼륨의 컨텐츠는 사라진다.
 
 emptyDir 볼륨은 동일 파드에서 실행 중인 컨테이너 간 파일을 공유할 때 유용하다. 그러나 단일 컨테이너에서도 가용한 메모리에 넣기에 큰 데이터 세트의 정렬 작업을 수행하는 것과 같이
 임시 데이터를 디스크에 쓰는 목적인 경우 사용할 수 있다.
+
+> 컨테이너가 크래시되는 것은 노드에서 파드를 제거하지 않는다. emptyDir 볼륨의 데이터는 컨테이너 크래시로 안전하다. 
+
+- emptyDir의 용도 
+  - 디스크 기반의 병합 종류와 같은 스크래치 공간 
+  - 총돌로부터 복구하기 위해 긴 계산을 검사점으로 지정 
+  - 웹 서버 컨테이너가 데이터를 처리하는 동안 컨텐츠 매니저 컨테이너가 가져오는 파일을 보관 
 
 #### Sample
 
@@ -88,6 +95,38 @@ $ k port-forward fortune test-pd
 
 #### 깃 리포지터리를 볼륨으로 사용하기 
 
+## 컨피그맵(ConfigMap)
+
+컨피그맵은 구성 데이터를 파드에 주입하는 방법을 제공한다. 컨피그 맵에 저장된 데이터는 configMap 유형의 볼륨에서 참조되고  
+그런 다음 파드에서 실행되는 컨테이너화된 애플리케이션이 소비된다.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+    - name: test
+      image: busybox:1.28
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: log-config
+        items:
+          - key: log_level
+            path: log_level
+```
+
+log-config 컨피그맵은 볼륨으로 마운트되며, log_level 항목에 저장된 모든 컨텐츠는 파드의 /etc/config/log_level 경로에 마운트된다.  
+이 경로는 볼륨의 mountPath 와 log_level 로 키가 지정된 path 에서 파생된다.  
+
+> - 컨피그맵을 사용하기 위해서는 먼저 컨피그 맵을 생성해야 한다. 
+> - 컨피그맵을 subPath 볼륨 마운트로 사용하는 컨테이너는 컨피그맵 업데이트스를 수신하지 않는다. 
+> - 텍스트 데이터는 UTF-8 문자 인코딩을 사용하는 파일로 노출된다. 다른 문자 이니코딩의 경우, binaryData를 사용한다. 
 
 ## 워커 노드 파일 시스템의 파일 접근
 
@@ -181,7 +220,7 @@ lines-cluster  us-central1-c  1.24.9-gke.3200  104.197.11.14  e2-medium     1.24
 - 퍼시스턴트 디스크 생성하기
 
 ```shell
-$ gcloud compute disks create --size=10GB --zone=us-central1-c mongodb 
+$ gcloud compute disks create --size=500GB --zone=us-central1-a my-data-disk 
 NAME     ZONE           SIZE_GB  TYPE         STATUS
 mongodb  us-central1-c  10       pd-standard  READY
 
@@ -193,28 +232,20 @@ mongodb  us-central1-c  10       pd-standard  READY
 apiVersion: v1
 kind: Pod
 metadata:
-  name: mongodb
-  labels:
-    name: mongodb
+  name: test-pd
 spec:
-  volumes:
-    - name: mongodb-data
-      gcePersistentDisk:
-        pdName: mongodb
-        fsType: ext4
   containers:
-  - name: mongodb
-    image: mongo
-    resources:
-      limits:
-        memory: "128Mi"
-        cpu: "500m"
-    ports:
-      - containerPort: 8080
-        protocol: TCP
-    volumeMounts:
-      - mountPath: /data/db
-        name: mongodb-data
+    - image: registry.k8s.io/test-webserver
+      name: test-container
+      volumeMounts:
+        - mountPath: /test-pd
+          name: test-volume
+  volumes:
+    - name: test-volume
+      # 이 GCE PD는 이미 존재해야 한다.
+      gcePersistentDisk:
+        pdName: my-data-disk
+        fsType: ext4
 ```
 
 ```shell
