@@ -1,5 +1,30 @@
 # Section 7 - 볼륨에 대하여
 
+## Index 
+
+- [Volume](#Volume)
+  - [AWS EBS 구성 예시 ](#AWS-EBS-구성-예시)
+  - [사용 가능한 볼륨 유형 소개](#사용-가능한-볼륨-유형-소개)
+- [emptyDir 볼륨 사용](#emptyDir-볼륨-사용)
+  - [Sample](#Sample)
+- [컨피그맵(ConfigMap)](#컨피그맵configmap)
+- [subPath](#subPath)
+- [hostPath - 워커 노드 파일 시스템의 파일 접근](#hostpath---워커-노드-파일-시스템의-파일-접근)
+  - [hostPath](#hostPath)
+  - [hostPath 의 일부 용도](#hostPath-의-일부-용도)
+  - [hostPath 사용시 주의 사항](#hostPath-사용시-주의-사항)
+- [퍼시스턴트 스토리지](#퍼시스턴트-스토리지)
+  - [GCE 퍼시스턴트 디스크를 파드 볼륨으로 사용하기](#GCE-퍼시스턴트-디스크를-파드-볼륨으로-사용하기)
+    - [GCE 퍼시스턴트 디스크 생성하기](#GCE-퍼시스턴트-디스크-생성하기)
+  - [다른 유형의 볼륨 사용하기](#다른-유형의-볼륨-사용하기)
+- [NFS](#NFS)
+- [RDB](#RDB)
+- [기반 스토리지 기술과 파드 분리](#기반-스토리지-기술과-파드-분리)
+  - [퍼시스턴트 볼륨과 퍼시스턴트 볼륨 클레임](#퍼시스턴트-볼륨과-퍼시스턴트-볼륨-클레임)
+    - [퍼시스턴트 볼륨](#퍼시스턴트-볼륨)
+    - [퍼시스턴트 볼륨 클레임](#퍼시스턴트-볼륨-클레임)
+- [요약](#요약)
+  
 ## Volume
 
 쿠버네티스 볼륨은 파드의 구성 요소로 컨테이너와 동일하게 파드 스펙에서 정의된다. 볼륨은 독립적인 쿠버네티스 오브젝트가 아니므로 자체적으로 생성, 삭제될 수 없다.
@@ -46,8 +71,6 @@ spec:
 - cinder, cephfs, iscsi, flocker, glusterfs, quobyte, rbd, flexVolume, vsphere Volume, photonPersistentDis, scaleIO : 다른 유형의 네트워크 스토리지를 마운트 하는데 사용한다.
 - configMap, secret, downwardAPI : 쿠버네티스 리소스나 클러스터 정보를 파드에 노출하는데 사용되는 특별한 유형의 볼륨이다.
 - persistentVolumeClaim: 사전에 혹은 동적으로 프로비저닝된 퍼시스턴스 스토리지를 사용하는 방법이다.
-
-### 볼륨을 사용한 컨테이너 간 데이터 공유
 
 ## emptyDir 볼륨 사용
 
@@ -167,7 +190,7 @@ spec:
 
 ### hostPath
 
-![](https://keepinmindsh.github.io/lines/assets/img/k8s-hostpath_structure.png)
+![HostPath Structure](https://keepinmindsh.github.io/lines/assets/img/k8s-hostpath_structure.png)
 
 - hostPath 볼륨의 컨텐츠는 삭제되지 않는다.
     - 파드가 삭제되면 다음 파드가 호스트의 동일 경로를 가리키는 hostPath 볼륨을 사용하고, 이전 파드와 동일한 노드에 스케줄링된다는 조건에서 이전 파드가 남긴 모든 항목을 볼 수 있다.
@@ -237,7 +260,7 @@ spec:
 - 동일한 구성(파드템플릿으로 생성한 것과 같은)을 가진 파드는 노드에 있는 파일이 다르기 때문에 노드마다 다르게 동작할 수 있다. 
 - 기본 호스트에 생성된 파일 또는 디렉터리는 root만 쓸 수 있다. 프로세스를 특권을 가진(privileged) 컨테이너에서 루트로 실행하거나 hostPath 볼륨에 쓸 수 있도록 호스트의 파일 권한을 수정해야 한다.
 
-## 퍼시스턴트 스토리지 사용
+## 퍼시스턴트 스토리지
 
 파드에서 실행 중인 애플리케이션이 디스크에 데이터를 유지해야하고 파드가 다른 노드로 재스케쥴링 된 경우에도 동일한 데이터를
 사용해야 한다면 지금까지 언급한 볼륨 유형은 사용할 수 없다. 이러한 데이터는 어떤 클러스터 노드에서 접근이 필요하기 때문에
@@ -476,10 +499,6 @@ parameters:
   secretName: ""
 allowVolumeExpansion: true
 ```
-
-## 퍼시스턴트 볼륨의 동적 프로비저닝
-
-### 컨피그 맵의 활용 이유를 위한 사전 분석
 
 ## 요약
 
