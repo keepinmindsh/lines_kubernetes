@@ -126,7 +126,40 @@ log-config 컨피그맵은 볼륨으로 마운트되며, log_level 항목에 저
 > - 컨피그맵을 subPath 볼륨 마운트로 사용하는 컨테이너는 컨피그맵 업데이트스를 수신하지 않는다. 
 > - 텍스트 데이터는 UTF-8 문자 인코딩을 사용하는 파일로 노출된다. 다른 문자 이니코딩의 경우, binaryData를 사용한다. 
 
-## 워커 노드 파일 시스템의 파일 접근
+## subPath 
+
+때로는 단일 파드에서 여러 용도의 한 볼륨을 공유하는 것이 유용하다.  
+volumeMounts.subPath 속성을 사용해서 root 대시 참조하는 볼륨 내의 하위 경로를 지정할 수 있다. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-lamp-site
+spec:
+    containers:
+    - name: mysql
+      image: mysql
+      env:
+      - name: MYSQL_ROOT_PASSWORD
+        value: "rootpasswd"
+      volumeMounts:
+      - mountPath: /var/lib/mysql
+        name: site-data
+        subPath: mysql
+    - name: php
+      image: php:7.0-apache
+      volumeMounts:
+      - mountPath: /var/www/html
+        name: site-data
+        subPath: html
+    volumes:
+    - name: site-data
+      persistentVolumeClaim:
+        claimName: my-lamp-site-data
+```
+
+## hostPath - 워커 노드 파일 시스템의 파일 접근
 
 대부분의 파드는 호스트 노드를 인식하지 못하므로 노드의 파일 시스템에 있는 어떤 파일에도 접근하면 안된다. 그러나
 특정 시스템 레벨의 파드는 노드의 파일을 읽거나 파일 시스템을 통해 노드 디바이스에 접근하기 위해 노드의 파일시스템을
