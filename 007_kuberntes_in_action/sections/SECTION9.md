@@ -23,6 +23,12 @@ $ kubectl create configmap my-config --from-file=path/to/bar
 $ kubectl create configmap my-config --from-env-file=path/to/bar.env
 ```
 
+## Index 
+
+- [컨피그맵과 시크릿 : 애플리케이션 설정](#컨피그맵과-시크릿--애플리케이션-설정)
+- [컨테이너에 명령줄 인자 전달](#컨테이너에-명령줄-인자-전달)
+  - [ENTRYPOINT 와 CMD 이해](#ENTRYPOINT-와-CMD-이해)
+
 ## 컨피그맵과 시크릿 : 애플리케이션 설정
 
 컨피그 맵을 사용해 설정 데이터를 저장할지 여부에 관계없이 다음 방법을 통해 애플리케이션을 구성할 수 있다.
@@ -33,7 +39,7 @@ $ kubectl create configmap my-config --from-env-file=path/to/bar.env
 
 ## 컨테이너에 명령줄 인자 전달
 
-##### ENTRYPOINT 와 CMD 이해
+### ENTRYPOINT 와 CMD 이해
 
 - ENTRYPOINT는 컨테이너가 시작될 때 호출될 명령어를 정의한다.
 - CMD는 ENTRYPOINT에 전달하는 인자를 정의한다.
@@ -48,7 +54,7 @@ $ docker run <image>
 $ docker run <image> <argument> 
 ```
 
-##### shell과 exec 형식 간의 차이점
+### shell과 exec 형식 간의 차이점
 
 - shell 형식 - 예: ENTRYPOINT node app.js
 
