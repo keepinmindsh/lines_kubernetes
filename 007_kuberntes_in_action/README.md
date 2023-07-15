@@ -7,7 +7,6 @@
 ## [Section 5 - 레플리카셋](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION5.md)
 ## [Section 6 - 서비스에 대하여](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION6.md)
 ## [Section 7 - 볼륨에 대하여](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION7.md)
-## [Section 8 - 볼륨 핸들링](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION8.md)
 ## [Section 9 - 컨피그 맵에 대하여](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION9.md)
 ## [Section 10 - 시크릿에 대하여](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION10.md)
 ## [Section 11 - 파드 메타데이터와 리소스 액세스 하기](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION11.md)
