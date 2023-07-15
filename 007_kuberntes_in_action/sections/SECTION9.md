@@ -130,7 +130,7 @@ args:
 애플리케이션 구성의 요점은 환겨엥 따라 다르거나 자주 변경되는 설정 옵션을 애플리케이션 소스 코드와 별도로 유지하는 것이다.
 만약에 파드 정의를 애플리케이션의 소스 코드로 생각한다면, 설정을 파드 정의에서 밖으로 이동시켜야 한다는 것은 명확하다.
 
-#### 컨피그맵
+##  컨피그맵
 
 쿠버네티스에서는 설정 옵션을 컨피그 맵이라 부르는 별도 오브젝트로 분리할 수 있다. 컨피그맵은 짧은 문자열에서 전체 설정 파일에 이르는 값을 가지는 키/값    
 쌍으로 구성된 맵이다. 애플리케이션은 컨피그맵을 직접 읽거나 심지어 존재하는 것도 몰라도 된다. 대신 맵의 내용은 컨테이너의 환경변수 또는 볼륨 파일로 전달된다.
@@ -142,7 +142,12 @@ args:
 
 - 서로 다른 환경에서 사용하는 동일한 이름을 가진 두 개의 컨피그맵
 
-##### 컨피그맵 생성
+> 컨피그맵은 보안 또는 암호화를 제공하지 않는다. 저장하려는 데이터가 기밀인 경우, 컨피그맵 대신 시크릿 또는 추가(써드파티) 도구를 사용하여 데이터를 비공개로 유지하자.
+
+### 컨피그맵과 파드 
+
+컨피그맵을 참조하는 파드 spec 을 작성하고 컨피그 맵의 데이터를 기반으로 해당 파드의 컨테이너를 구성할 수 있다.  
+파드와 컨피그 맵은 동일한 네임스페이스에 있어야 한다.  
 
 > [ConfigMap Data of Kubernetes](https://pwittrock.github.io/docs/tasks/configure-pod-container/configure-pod-configmap/)
 
@@ -177,7 +182,55 @@ data:
     allow.textmode=true  
 ```
 
-- configmap를 별도로 쿠버네티스 오브젝트로 정의하고 Mapping 정의하는 방식
+#### 컨피그 맵을 사용하여 파드 내부에 컨테이너를 구성할 수 잇는 네가지 방법
+
+- 컨테이너 커맨드와 인수 내에서 
+- 컨테이너에 대한 환경 변수 
+- 애플리케이션이 읽을 수 있도록 읽기 전용 볼륨에 파일 추가 
+- 쿠버네티스 API를 사용하여 컨피그맵을 읽는 파드내에서 실행할 코드 작성 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-demo-pod
+spec:
+  containers:
+    - name: demo
+      image: alpine
+      command: ["sleep", "3600"]
+      env:
+        # 환경 변수 정의
+        - name: PLAYER_INITIAL_LIVES # 참고로 여기서는 컨피그맵의 키 이름과
+          # 대소문자가 다르다.
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo           # 이 값의 컨피그맵.
+              key: player_initial_lives # 가져올 키.
+        - name: UI_PROPERTIES_FILE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo
+              key: ui_properties_file_name
+      volumeMounts:
+        - name: config
+          mountPath: "/config"
+          readOnly: true
+  volumes:
+    # 파드 레벨에서 볼륨을 설정한 다음, 해당 파드 내의 컨테이너에 마운트한다.
+    - name: config
+      configMap:
+        # 마운트하려는 컨피그맵의 이름을 제공한다.
+        name: game-demo
+        # 컨피그맵에서 파일로 생성할 키 배열
+        items:
+          - key: "game.properties"
+            path: "game.properties"
+          - key: "user-interface.properties"
+            path: "user-interface.properties"
+```
+
+#### configmap를 별도로 쿠버네티스 오브젝트로 정의하고 Mapping 정의하는 방식
 
 ```yaml
 apiVersion: v1
@@ -198,7 +251,7 @@ spec:
       name: game-demo
 ```
 
-- configmap 을 직접 선언하는 방식
+#### configmap 을 직접 선언하는 방식
 
 ```yaml
 apiVersion: v1
@@ -241,7 +294,7 @@ spec:
         path: "user-interface.properties"
 ```
 
-##### 파일로 컨피그맵 생성
+### 파일로 컨피그맵 생성
 
 컨피그 맵에서는 전체 설정 파일 같은 데이터를 통째로 저장하는 것도 가능하다.
 
@@ -256,9 +309,33 @@ $ kubectl create configmap my-config --from-file=config-file.conf
 $ kubectl create configmap my-config --from-file=customkey=config-file.conf 
 ```
 
-이 명령은 파일 내용을 customkey라는 키 값으로 저장한다.
+이 명령은 파일 내용을 customkey라는 키 값으로 저장한다.   
 
-##### 디렉터리에 있는 파일로 컨피그 맵 생성
+- 컨피그맵을 생성하거나 기존 컨피그맵을 사용한다. 여러 파드가 동일한 컨피그맵을 참조할 수 있다. 
+- 파드 정의를 수정해서 .spec.volumes[] 아래에 볼륨을 추가한다. 볼륨 이름은 원하는 대로 정하고, 컨피그맵 오브젝트를 참조하도록 .spec.volumes[].configMap.name 필드를 설정한다. 
+- 컨피그 맵이 필요한 각 컨테이너에 .spec.containers[].volumeMounts[]를 추가한다. .spec.containers[].volumeMounts[].readOnly = true 를 설정하고 컨피그 맵이 연결되기를 원하는 곳에 사용하지 않는 디렉터리 이름으로 .spec.containers[].volumeMounts[].mountPath 를 지정한다. 
+- 프로그램이 해당 디텔러티에서 파일을 찾도록 이미지 또는 커맨드 라인을 수정한다. 컨피그맵의 data 맵 각 키는 mountPath 아래의 파일 이름이 된다. 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    configmap:
+      name: myconfigmap
+```
+
+### 디렉터리에 있는 파일로 컨피그 맵 생성
 
 각 파일을 개별적으로 추가하는 대신, 디렉터리 안에 있는 모든 파일을 가져올 수도 있다.
 
@@ -269,7 +346,7 @@ $ kubectl create configmap my-config --from-file=/path/to/dir
 이 명령에서 kubectl은 지정한 디렉터리 안에 있는 각 파일을 개별 항목으로 작성한다.
 이때 파일 이름이 컨피그맵 키로 사용하기 유효한 파일만 추가한다.
 
-##### 다양한 옵션 결합
+### 다양한 옵션 결합
 
 아래와 같은 다양한 옵션으로 config map 을 생성할 수 있다.
 
@@ -299,14 +376,14 @@ spec:
   restartPolicy: Never
 ```
 
-##### 파드에 존재하지 않는 컨피그맵 참조
+### 파드에 존재하지 않는 컨피그맵 참조
 
 파드를 생성할 때 존재하지 않는 컨피그 맵을 지정하면 어떻게 되는지 궁금할 것이다. 쿠버네티스는 파드를
 스케줄링하고 그 안에 있는 컨테이너를 실행하려고 시도한다. 컨테이너가 존재하지 않는 컨피그맵을 참조하려고
 하면 컨테이너는 시작하는 데 실패 한다. 하지만 참조하지 않는 다른 컨테이너는 정상적으로 시작된다. 그런 다음
 컨피그맵을 생성하면 실패했던 컨테이너는 파드를 만들지 않아도 시작된다.
 
-#### 컨피그맵의 모든 항목을 한 번에 환경변수로 전달
+### 컨피그맵의 모든 항목을 한 번에 환경변수로 전달
 
 컨피그맵에 여러 항목이 포함돼 있을 때 각 항목을 일일이 환경변수로 생성하는 일은 지루하고 오류가 발생하기 쉽다.  
 다행시 쿠버네티스 버전 1.6 부터는 컨피그 매의 모든 항목을 환경변수로 노출하는 방법을 제공한다.
