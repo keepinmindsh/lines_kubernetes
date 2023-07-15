@@ -14,6 +14,10 @@
 
 - [Basic Kubernetes](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes)
 
+### Kubernetes For CKA 
+
+- [Kubernetes for CKA](https://github.com/keepinmindsh/lines_kubernetes/tree/main/007_kuberntes_in_action)
+
 # Cloud Platform 
 
 - [GCP](https://github.com/keepinmindsh/lines_kubernetes/tree/main/006_GCP)
