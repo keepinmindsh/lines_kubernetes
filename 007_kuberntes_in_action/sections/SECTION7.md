@@ -93,8 +93,6 @@ spec:
 $ k port-forward fortune test-pd
 ```
 
-#### 깃 리포지터리를 볼륨으로 사용하기 
-
 ## 컨피그맵(ConfigMap)
 
 컨피그맵은 구성 데이터를 파드에 주입하는 방법을 제공한다. 컨피그 맵에 저장된 데이터는 configMap 유형의 볼륨에서 참조되고  
@@ -193,6 +191,18 @@ spec:
 ```
 
 **노드의 시스템 파일에 읽기/쓰기를 하는 경우에만 hostPath 볼륨을 사용한다는 것을 기억하라. 여러 파드에 걸쳐 데이터를 유지하기 위해서는 절대 사용하지 말라**
+
+### hostPath 의 일부 용도 
+
+- 도커 내부에 접근할 필요가 있는 실행중인 컨테이너. /var/lib/docker 를 hostPath로 이용함 
+- 컨테이너에서 cAdvisor 의 실행. /sys 를 hostPath 로 이용함 
+- 파드는 주어진 hostPath 를 파드가 실행되기 이전에 있어야 하거나, 생성해야 하는지 그래고 존재해야 하는 대상을 지정할 수 있도록 허용함. 
+
+### hostPath 사용시 주의 사항 
+
+- HostPath는 권한있는 시스템 자격 증명 (예 : Kubelet 용) 또는 권한있는 API (예 : 컨테이너 런타임 소켓)를 노출 할 수 있으며, 이는 컨테이너 이스케이프 또는 클러스터의 다른 부분을 공격하는 데 사용될 수 있다. 
+- 동일한 구성(파드템플릿으로 생성한 것과 같은)을 가진 파드는 노드에 있는 파일이 다르기 때문에 노드마다 다르게 동작할 수 있다. 
+- 기본 호스트에 생성된 파일 또는 디렉터리는 root만 쓸 수 있다. 프로세스를 특권을 가진(privileged) 컨테이너에서 루트로 실행하거나 hostPath 볼륨에 쓸 수 있도록 호스트의 파일 권한을 수정해야 한다.
 
 ## 퍼시스턴트 스토리지 사용
 
@@ -322,27 +332,62 @@ NFS 기반의 볼륨을 생성하려면 개발자는 NFS 익스포트가 위치�
 클러스터 사용자가 파드에 퍼시스턴트 스토리지를 사용해야 하면 먼저 최소 크기와 필요한 접근 모드를 명시한 퍼시스턴트볼륨클레임 매니페스트를 생성한다.  
 그런 다음 사용자는 퍼시스턴트볼륨클레임 매니페스트를 쿠버네티스 API 서버에 게시하고 쿠버네티스는 적절한 퍼시스턴트볼륨을 찾아 클레임에 볼륨을 바인딩한다.
 
-#### 퍼시스턴트 볼륨
+#### 퍼시스턴트 볼륨 
+
+```shell
+gcloud compute disks create --size=500GB my-data-disk
+  --region us-central1
+  --replica-zones us-central1-a,us-central1-b
+```
 
 ```yaml
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv0003
+  name: test-volume
 spec:
   capacity:
-    storage: 5Gi
-  volumeMode: Filesystem
+    storage: 400Gi
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Recycle
-  storageClassName: slow
-  mountOptions:
-    - hard
-    - nfsvers=4.1
-  nfs:
-    path: /tmp
-    server: 172.17.0.2
+  gcePersistentDisk:
+    pdName: my-data-disk
+    fsType: ext4
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            # 1.21 이전 버전에서는 failure-domain.beta.kubernetes.io/zone 키를 사용해야 한다.
+            - key: topology.kubernetes.io/zone
+              operator: In
+              values:
+                - us-central1-a
+                - us-central1-b
+```
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-pv
+spec:
+  capacity:
+    storage: 100Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /mnt/disks/ssd1
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - example-node
 ```
 
 #### 퍼시스턴트 볼륨 클레임
