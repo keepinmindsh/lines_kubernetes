@@ -7,7 +7,8 @@
   - [사용 가능한 볼륨 유형 소개](#사용-가능한-볼륨-유형-소개)
 - [emptyDir 볼륨 사용](#emptyDir-볼륨-사용)
   - [Sample](#Sample)
-- [컨피그맵(ConfigMap)](#컨피그맵configmap)
+- [configMap](#configmap)
+- [cephfs](#cephfs)
 - [subPath](#subPath)
 - [hostPath - 워커 노드 파일 시스템의 파일 접근](#hostpath---워커-노드-파일-시스템의-파일-접근)
   - [hostPath](#hostPath)
@@ -38,6 +39,42 @@
 쓰기 작업을 하면 추후 파일 시스템에 접근할 때 변경된 내용을 보게 될 것 이다.    
 
 볼륨은 이미지의 특정 경로에 마운트 된다. 파드에 정의된 각 컨테이너에 대해, 컨테이너가 사용할 각 볼륨을 어디에 마운트할지 명시해야 한다.  
+
+### Pod 위한 Volume 의 환경 구성 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: redis
+spec:
+  containers:
+  - name: redis
+    image: redis
+    volumeMounts:
+    - name: redis-storage
+      mountPath: /data/redis
+  volumes:
+  - name: redis-storage
+    emptyDir: {}
+```
+
+```shell
+kubectl apply -f redis.yaml 
+
+kubectl get pod redis --watch 
+
+kubectl exec -it redis -- /bin/bash 
+
+root@redis:/data# cd /data/redis/
+root@redis:/data/redis# echo Hello > test-file
+
+root@redis:/data/redis# apt-get update
+root@redis:/data/redis# apt-get install procps
+root@redis:/data/redis# ps aux
+
+root@redis:/data/redis# kill <pid>
+```
 
 ### AWS EBS 구성 예시 
 
@@ -116,7 +153,7 @@ spec:
 $ k port-forward fortune test-pd
 ```
 
-## 컨피그맵(ConfigMap)
+## ConfigMap
 
 컨피그맵은 구성 데이터를 파드에 주입하는 방법을 제공한다. 컨피그 맵에 저장된 데이터는 configMap 유형의 볼륨에서 참조되고  
 그런 다음 파드에서 실행되는 컨테이너화된 애플리케이션이 소비된다.
@@ -148,6 +185,15 @@ log-config 컨피그맵은 볼륨으로 마운트되며, log_level 항목에 저
 > - 컨피그맵을 사용하기 위해서는 먼저 컨피그 맵을 생성해야 한다. 
 > - 컨피그맵을 subPath 볼륨 마운트로 사용하는 컨테이너는 컨피그맵 업데이트스를 수신하지 않는다. 
 > - 텍스트 데이터는 UTF-8 문자 인코딩을 사용하는 파일로 노출된다. 다른 문자 이니코딩의 경우, binaryData를 사용한다. 
+
+## cephfs 
+
+cephfs 볼륨은 기존 CephFS 볼륨을 파드에 마운트 할 수 있다. 파드를 제거할 때 지워지는 emptyDir 와는 다르게 cephfs 볼륨의 내용은 유지되고,   
+볼륨은 그저 마운트 해제만 된다. 이 의미는 cephfs 볼륨에 데이터를 미리 채울 수 있으며, 해당 데이터는 파드 간에 공유될 수 있다.   
+cephfs 볼륨은 여러 작성자가 동시에 마운트할 수 있다.  
+
+> CephFS를 사용하기 위해선 먼저 Ceph 서버를 실행하고 공유를 내보내야 한다.     
+> [volumes - cephfs](https://github.com/kubernetes/examples/tree/master/volumes/cephfs/)   
 
 ## subPath 
 
@@ -511,4 +557,5 @@ allowVolumeExpansion: true
 - 각 퍼시스턴트 볼륨 클레임을 위해 퍼시스턴트 볼륨을 원하는 스토리지 클래스로 동적 프로비저닝 한다.
 - 퍼시스턴트 볼륨 클레임을 미리 프로비저닝된 퍼시스턴트 볼륨과 바인딩하고자 할 때 동적 프로비저너가 간섭하는 것을 막는다.
 
-> [WordPress 와 MySQL 을 퍼시스턴트 볼륨에 배포하기](https://kubernetes.io/ko/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/)
+> [WordPress 와 MySQL 을 퍼시스턴트 볼륨에 배포하기](https://kubernetes.io/ko/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/)      
+> [Kubernetes 에서 지원하는 Volume 구성](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#volume-v1-core)   
