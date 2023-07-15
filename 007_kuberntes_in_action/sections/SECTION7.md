@@ -312,6 +312,8 @@ spec:
 사용해야 한다면 지금까지 언급한 볼륨 유형은 사용할 수 없다. 이러한 데이터는 어떤 클러스터 노드에서 접근이 필요하기 때문에
 NAS 유형에 저장돼야 한다.
 
+> [Persistent Volume](https://kubernetes.io/ko/docs/concepts/storage/persistent-volumes/)
+
 ### GCE 퍼시스턴트 디스크를 파드 볼륨으로 사용하기
 
 ![](https://keepinmindsh.github.io/lines/assets/img/k8s-gcepersistencedisk.png)
@@ -568,5 +570,16 @@ allowVolumeExpansion: true
 - 각 퍼시스턴트 볼륨 클레임을 위해 퍼시스턴트 볼륨을 원하는 스토리지 클래스로 동적 프로비저닝 한다.
 - 퍼시스턴트 볼륨 클레임을 미리 프로비저닝된 퍼시스턴트 볼륨과 바인딩하고자 할 때 동적 프로비저너가 간섭하는 것을 막는다.
 
-> [WordPress 와 MySQL 을 퍼시스턴트 볼륨에 배포하기](https://kubernetes.io/ko/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/)      
-> [Kubernetes 에서 지원하는 Volume 구성](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#volume-v1-core)   
+> [WordPress 와 MySQL 을 퍼시스턴트 볼륨에 배포하기](https://kubernetes.io/ko/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/)         
+> [Kubernetes 에서 지원하는 Volume 구성](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.27/#volume-v1-core)       
+> [프로젝티드 볼륨](https://kubernetes.io/ko/docs/concepts/storage/projected-volumes/)   
+> [임시 볼륨](https://kubernetes.io/ko/docs/concepts/storage/ephemeral-volumes/)   
+> [스토리지 클래스](https://kubernetes.io/ko/docs/concepts/storage/storage-classes/)   
+> [동적 프로비저닝](https://kubernetes.io/ko/docs/concepts/storage/dynamic-provisioning/)   
+> [볼륨 스냅샷](https://kubernetes.io/ko/docs/concepts/storage/volume-snapshots/)    
+> [볼륨 스냅샷 클래스](https://kubernetes.io/ko/docs/concepts/storage/volume-snapshot-classes/)      
+> [CSI 볼륨 복제하기](https://kubernetes.io/ko/docs/concepts/storage/volume-pvc-datasource/)    
+> [스토리지 용량](https://kubernetes.io/ko/docs/concepts/storage/storage-capacity/)   
+> [노드별 볼륨 한도](https://kubernetes.io/ko/docs/concepts/storage/storage-limits/)    
+> [볼륨 헬스 모니터링](https://kubernetes.io/ko/docs/concepts/storage/volume-health-monitoring/)    
+> [윈도우 스토리지](https://kubernetes.io/ko/docs/concepts/storage/windows-storage/)    
