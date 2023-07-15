@@ -75,3 +75,39 @@ Create a configmap called myconfigmap with literal value appname=myapp
 - Deployment 를 이용해 replicas 를 5로 변경한다. 
 - kubectl 명령어를 이용해서 Pod의 replica를 1에서 5까지 증가시키는 명령어를 작성한다. 
 - 디플로이먼트 롤아웃 일시 중지로 PodTemplateSpec에 여러 수정 사항을 적용하고, 재개하여 새로운 롤아웃을 시작한다.
+- 해당 Deployment를 만드세요 
+
+``` 
+Deployment 이름 : nginx 
+Deployment Label : app: nginx 
+Deployment 복제수 : 3 
+Container 이름 : nginx 
+Container 이미지 : nginx:1.14.2 
+```
+
+Replicas 를 5로 조정합니다.  
+이미지를 nginx:1.19.5로 변경합니다.  
+
+- echo 서비스를 NodePort로 32000 포트로 오픈합니다. 
+
+```
+Deployment 이름 : echo 
+Deployment Label : app: echo 
+Deployment Replicas : 3 
+Container Name : echo 
+Container Image : {이미지 이름}
+NodePort Name : echo 
+NodePort Port : 3000 
+NodePort NodePort : 32000
+```
+
+- Ingress 를 만드세요  
+
+```
+Deployment 이름 : nginx 
+Deployment Label : app: nginx 
+Deployment Replicas : 3 
+Container Name : nginx 
+Container Image : nginx:latest 
+Ingress Domain : nginx.xxx.sslip.io
+```
