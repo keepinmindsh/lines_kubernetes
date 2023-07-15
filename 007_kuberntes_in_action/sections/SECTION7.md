@@ -310,6 +310,36 @@ volumes:
       path: /some/path 
 ```
 
+## NFS
+
+nfs 볼륨을 사용하면 기존 NFS (네트워크 파일 시스템) 볼륨을 파드에 마운트 할수 있다. 
+파드를 제거할 때 지워지는 emptyDir 와는 다르게 nfs 볼륨의 내용은 유지되고, 볼륨은 그저 마운트 해제만 된다. 
+이 의미는 NFS 볼륨에 데이터를 미리 채울 수 있으며, 파드 간에 데이터를 공유할 수 있다는 뜻이다.
+NFS는 여러 작성자가 동시에 마운트할 수 있다.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: registry.k8s.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /my-nfs-data
+      name: test-volume
+  volumes:
+  - name: test-volume
+    nfs:
+      server: my-nfs-server.example.com
+      path: /my-nfs-volume
+      readOnly: true
+```
+
+> 사용하려면 먼저 NFS 서버를 실행하고 공유를 내보내야 한다.
+> 또한 파드 스펙에 NFS 마운트 옵션을 명시할 수 없음을 기억하라. 
+
 ## 기반 스토리지 기술과 파드 분리
 
 지금까지 살펴본 모든 퍼시스턴트 볼륨 유형은 파드 개발자가 실제 네트워크 스토리지 인프라스트럭처에 관한 지식을 갖추고 있어야 한다.
