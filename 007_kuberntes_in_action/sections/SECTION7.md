@@ -183,8 +183,8 @@ log-config 컨피그맵은 볼륨으로 마운트되며, log_level 항목에 저
 이 경로는 볼륨의 mountPath 와 log_level 로 키가 지정된 path 에서 파생된다.  
 
 > - 컨피그맵을 사용하기 위해서는 먼저 컨피그 맵을 생성해야 한다. 
-> - 컨피그맵을 subPath 볼륨 마운트로 사용하는 컨테이너는 컨피그맵 업데이트스를 수신하지 않는다. 
-> - 텍스트 데이터는 UTF-8 문자 인코딩을 사용하는 파일로 노출된다. 다른 문자 이니코딩의 경우, binaryData를 사용한다. 
+> - 컨피그맵을 subPath 볼륨 마운트로 사용하는 컨테이너는 컨피그맵 업데이트를 수신하지 않는다. 
+> - 텍스트 데이터는 UTF-8 문자 인코딩을 사용하는 파일로 노출된다. 다른 문자 인코딩의 경우, binaryData를 사용한다. 
 
 ## cephfs 
 
@@ -236,7 +236,7 @@ spec:
 
 ### hostPath
 
-![HostPath Structure](https://keepinmindsh.github.io/lines/assets/img/k8s-hostpath_structure.png)
+![HostPath Structure](https://keepinmindsh.github.io/lines/assets/img/k8s_hostpath_structure.png)
 
 - hostPath 볼륨의 컨텐츠는 삭제되지 않는다.
     - 파드가 삭제되면 다음 파드가 호스트의 동일 경로를 가리키는 hostPath 볼륨을 사용하고, 이전 파드와 동일한 노드에 스케줄링된다는 조건에서 이전 파드가 남긴 모든 항목을 볼 수 있다.
