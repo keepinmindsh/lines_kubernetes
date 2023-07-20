@@ -40,8 +40,13 @@ $ docker build -t kubia .
 
 - [Docker files](https://github.com/keepinmindsh/lines_kubernetes/tree/main/004_DockerFiles)
 
+## CRI ( 쿠버네티스 컨테이너 런타임 ) / CTR 
 
-## CLI 
+2013년 Docker가 처음으로 세상에 나타난 이후 IT업계는 정말 크게 변했습니다. 어플리케이션의 배포단위는 이제 war, jar, zip 등이 아니라 Docker 이미지가 되었고 Docker를 사용할 수 있는 환경이기만 하면 어플리케이션은 Windows에서든, Ubuntu에서든 동일하게 동작하였습니다. Docker의 이러한 특성을 이용해 수백 수천대의 서버를 운영하는 환경에서 Docker를 도입하는 사례들이 늘어나기 시작했습니다.
+
+하지만 포맷과 런타임에 대한 특정한 규격이 없다 보니 컨테이너의 미래는 불안했습니다. 도커가 사실상의 컨테이너 표준 역할을 했지만 코어OS(CoreOS)는 도커와는 다른 규격으로 표준화를 추진하려 했습니다.
+
+이때 Docker Engine에는 API, CLI, 네트워크, 스토리지 등 많은 기능들이 하나의 패키지에 담겨있었고, Docker 측에서는 Monolithic한 Docker Engine의 구조를 나누는 작업을 시작했습니다.
 
 - Docker 
 - Container Runtime Interface > docker shim > Docker ( containerd : CLI, API, BUILD, VOLUMES, AUTH, SECURITY )
@@ -51,3 +56,13 @@ $ docker build -t kubia .
 ### CLI - crictl
 
 > [https://kr.linkedin.com/pulse/containerd%EB%8A%94-%EB%AC%B4%EC%97%87%EC%9D%B4%EA%B3%A0-%EC%99%9C-%EC%A4%91%EC%9A%94%ED%95%A0%EA%B9%8C-sean-lee](https://kr.linkedin.com/pulse/containerd%EB%8A%94-%EB%AC%B4%EC%97%87%EC%9D%B4%EA%B3%A0-%EC%99%9C-%EC%A4%91%EC%9A%94%ED%95%A0%EA%B9%8C-sean-lee)
+> [컨테이너 생태계에 대해서 잘 설명된 블로그 (참조)](https://blog.siner.io/2021/10/23/container-ecosystem/)
+> [https://wookiist.dev/142](https://wookiist.dev/142)
+> [https://ybchoi.com/22](https://ybchoi.com/22)
+
+### socket 
+
+- unix://var/run/dockershim.sock
+- unix://run/containerd/containerd.sock
+- unix://run/crio.sock 
+- unix://var/run/cri-dockerd.sock 
