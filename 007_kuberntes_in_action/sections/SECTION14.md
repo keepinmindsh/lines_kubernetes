@@ -124,7 +124,7 @@ etcd는 인스턴스를 일반적으로 홀수로 배포한다. 두 개의 인�
 ```shell
 ./etcdctrl 
 ```
-###### Etcd Cluster 
+##### Etcd Cluster 
 
 - Nodes
 - Pods 
@@ -135,7 +135,7 @@ etcd는 인스턴스를 일반적으로 홀수로 배포한다. 두 개의 인�
 - Bindings 
 - Others 
 
-###### Etcd Manual Installing 
+##### Etcd Manual Installing 
 
 > [https://github.com/etcd-io/etcd](https://github.com/etcd-io/etcd)
 
@@ -174,6 +174,16 @@ docker exec etcd-gcr-v3.4.27  /usr/local/bin/etcdctl version
 docker exec etcd-gcr-v3.4.27  /usr/local/bin/etcdctl endpoint health
 docker exec etcd-gcr-v3.4.27  /usr/local/bin/etcdctl put foo bar
 docker exec etcd-gcr-v3.4.27  /usr/local/bin/etcdctl get foo
+```
+
+##### Kubeadm 을 이용한 etcd-master 접근
+
+```shell
+kubectl get pods -n kube-system 
+```
+
+```shell
+kubectl exec etcd-master -n kube-system etcdctl get / --prefix -keys-only
 ```
 
 ### API 서버의 기능
