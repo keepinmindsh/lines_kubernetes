@@ -39,3 +39,15 @@ $ docker build -t kubia .
 ### Docker Files 
 
 - [Docker files](https://github.com/keepinmindsh/lines_kubernetes/tree/main/004_DockerFiles)
+
+
+## CLI 
+
+- Docker 
+- Container Runtime Interface > docker shim > Docker ( containerd : CLI, API, BUILD, VOLUMES, AUTH, SECURITY )
+
+### CLI - ctr 
+### CLI - nerdctl 
+### CLI - crictl
+
+> [https://kr.linkedin.com/pulse/containerd%EB%8A%94-%EB%AC%B4%EC%97%87%EC%9D%B4%EA%B3%A0-%EC%99%9C-%EC%A4%91%EC%9A%94%ED%95%A0%EA%B9%8C-sean-lee](https://kr.linkedin.com/pulse/containerd%EB%8A%94-%EB%AC%B4%EC%97%87%EC%9D%B4%EA%B3%A0-%EC%99%9C-%EC%A4%91%EC%9A%94%ED%95%A0%EA%B9%8C-sean-lee)
