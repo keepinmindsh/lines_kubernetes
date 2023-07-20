@@ -68,6 +68,9 @@ $ kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-b
 쿠버네티스 API 서버 만이 etcd와 직접적으로 통신하는 유일한 구성요소다. 다른 구성 요소는 API로 간접적으로 데이터를 읽거나
 쓸수 있다.
 
+> [https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/](https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/)   
+> [etcd의 사이즈 제한 및 관리에 대한 부분](https://cloud.google.com/kubernetes-engine/docs/concepts/planning-large-clusters#why_plan_for_large_clusters)
+
 ##### key-value store 
 
 > 낙관적 동시성 제어에 관하여 검토 해볼 것!
