@@ -61,14 +61,26 @@ $ kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-b
 
 ### 쿠버네티스가 etcd를 사용하는 방법
 
+#### Etcd 
+
 모든 오브젝트는 API 서버가 다시 시작되거나 실패하더라도 유지하기 위해서 메니페스트가 영구적으로 저장될 필요가 있음.
 이를 위해서 쿠버네티스는 빠르고, 분산해서 저장되며, 일관된 키-값 저장소를 제공하는 etcd를 사용한다.  
 쿠버네티스 API 서버 만이 etcd와 직접적으로 통신하는 유일한 구성요소다. 다른 구성 요소는 API로 간접적으로 데이터를 읽거나
 쓸수 있다.
 
+##### key-value store 
+
 > 낙관적 동시성 제어에 관하여 검토 해볼 것!
 
 - 리소스를 etcd에 저장하는 방법
+
+##### Operate Etcd
+
+```shell
+./etcdctl set key1 value1 
+
+./etcdctl get key1
+```
 
 ```shell
 $ etcdctl ls /registry
@@ -102,6 +114,26 @@ etcd는 인스턴스를 일반적으로 홀수로 배포한다. 두 개의 인�
 두 인스턴스 모두 과반이 필요하다. 둘중 하나라도 실패하면 과반이 존재하지 않기 때문에 상태를 변경할 수 없다. 두 개의 인스턴스를 갖는 것이 하나일 때 보다 오히러 더 좋지 않다.
 두개가 있으면, 전체 클러스터 장애 발생률이 단일 노드 클러스터에 비해 100% 증가된다. 세개와 네개에 대해서도 동일한다.  
 대규모 etcd 클러스터에서는 일반적으로 5대 혹은 7대 노드면 충분하다.
+
+##### Etcd Version 
+
+```shell
+./etcdctrl --version
+```
+
+```shell
+./etcdctrl 
+```
+###### Etcd Cluster 
+
+- Nodes
+- Pods 
+- Configs 
+- Secrets
+- Accounts 
+- Roles
+- Bindings 
+- Others 
 
 ### API 서버의 기능
 
