@@ -198,7 +198,7 @@ cephfs 볼륨은 여러 작성자가 동시에 마운트할 수 있다.
 ## subPath 
 
 때로는 단일 파드에서 여러 용도의 한 볼륨을 공유하는 것이 유용하다.  
-volumeMounts.subPath 속성을 사용해서 root 대시 참조하는 볼륨 내의 하위 경로를 지정할 수 있다. 
+volumeMounts.subPath 속성을 사용해서 root 대신 참조하는 볼륨 내의 하위 경로를 지정할 수 있다. 
 
 ```yaml
 apiVersion: v1
