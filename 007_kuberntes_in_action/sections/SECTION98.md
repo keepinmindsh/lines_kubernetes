@@ -1,5 +1,7 @@
 # Cheat Sheet 
 
+> [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
+
 ## Kubectl Apply 
 
 ```shell
