@@ -29,6 +29,42 @@ kubectl get rc,services
 kubectl get rc/web service/frontend pods/web-pod-13je7
 ```
 
+## Kubectl Run 
+
+Create and run a particular image in a pod.
+
+```shell
+kubectl run nginx --image=nginx
+
+kubectl run hazelcast --image=hazelcast/hazelcast --port=5701
+
+kubectl run hazelcast --image=hazelcast/hazelcast --env="DNS_DOMAIN=cluster" --env="POD_NAMESPACE=default"
+
+kubectl run nginx --image=nginx --overrides='{ "apiVersion": "v1", "spec": { ... } }'
+
+kubectl run -i -t busybox --image=busybox --restart=Never
+
+kubectl run nginx --image=nginx -- <arg1> <arg2> ... <argN>
+```
+
+## Kubectl Expose 
+
+```shell
+kubectl expose rc nginx --port=80 --target-port=8000
+
+kubectl expose -f nginx-controller.yaml --port=80 --target-port=8000
+
+kubectl expose pod valid-pod --port=444 --name=frontend
+
+kubectl expose service nginx --port=443 --target-port=8443 --name=nginx-https
+
+kubectl expose rc streamer --port=4100 --protocol=UDP --name=video-stream
+
+kubectl expose rs nginx --port=80 --target-port=8000
+
+kubectl expose deployment nginx --port=80 --target-port=8000
+```
+
 ## Kubectl Apply 
 
 ```shell
