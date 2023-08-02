@@ -113,6 +113,22 @@ kubectl debug mypod -it --image=busybox
 kubectl edit deployment/mydeployment -o yaml --save-config
 ```
 
+## Kubectl Label 
+
+```shell
+kubectl label pods foo unhealthy=true
+
+kubectl label --overwrite pods foo status=unhealthy
+
+kubectl label pods --all status=unhealthy
+
+kubectl label -f pod.json status=unhealthy
+
+kubectl label pods foo status=unhealthy --resource-version=1
+
+kubectl label pods foo bar-
+```
+
 ## Kubectl Replace 
 
 ```shell
