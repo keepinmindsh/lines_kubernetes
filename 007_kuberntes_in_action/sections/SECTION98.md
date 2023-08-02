@@ -141,7 +141,7 @@ kubectl replace -f ./pod.json
 kubectl rollout history deployment/abc
 ```
 
-## Kubectl scale 
+## Kubectl Scale 
 
 ```shell
 kubectl scale --replicas=3 rs/foo
@@ -149,7 +149,7 @@ kubectl scale --replicas=3 rs/foo
 kubectl scale --current-replicas=2 --replicas=3 deployment/mysql
 ```
 
-## Kubectl set
+## Kubectl Set
 
 ```shell
 kubectl set env deployment/registry STORAGE_DIR=/local
@@ -159,7 +159,7 @@ kubectl set env deployment/sample-build --list
 kubectl set env deployment/sample-build STORAGE_DIR=/data -o yaml
 ```
 
-## Kubectl wait
+## Kubectl Wait
 
 ```shell
 kubectl wait --for=condition=Ready pod/busybox1
@@ -167,7 +167,7 @@ kubectl wait --for=condition=Ready pod/busybox1
 kubectl wait --for=condition=Ready=false pod/busybox1
 ```
 
-## Kubectl attach 
+## Kubectl Attach 
 
 ```shell
 kubectl attach mypod
@@ -194,7 +194,7 @@ kubectl auth can-i --list --namespace=foo
 kubectl cp /tmp/foo_dir <some-pod>:/tmp/bar_dir
 ```
 
-## Kubectl exec 
+## Kubectl Exec 
 
 ```shell
 kubectl exec mypod -- date
