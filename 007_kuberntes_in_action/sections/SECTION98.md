@@ -3,6 +3,12 @@
 > [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
 
 
+## Kubectl Create 
+
+```shell
+kubectl create namespace <insert-namespace-name-here>
+```
+
 ## Kubectl Get 
 
 ```shell
