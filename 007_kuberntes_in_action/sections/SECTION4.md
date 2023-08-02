@@ -15,6 +15,34 @@ $ kubectl config view --minify | grep namespace:
 kubectl create namespace my-namespace
 ```
 
+## Basic Sample 
+
+```yaml
+apiVersion: v1 
+kind: Service 
+metadata: 
+  name: endpoint1 
+spec: 
+  selector: 
+    svc: endpoint 
+  ports: 
+    port: 8080
+```
+
+
+```yaml 
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: pod7 
+  labels: 
+    svc: endpoint
+spec: 
+  containers:
+    - name: container 
+      image: kubetm/app 
+```
+
 ## 레이블과 셀렉터를 이용한 파드 스케쥴링 제한
 
 쿠버네티스는 모든 노드를 하나의 대규모 배포 플랫폼으로 노출하기 때문에, 파드가 어느 노드에 스케쥴링 됐느냐는 중요하지 않다. 각 파드는 요청한 만큼의
