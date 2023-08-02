@@ -65,6 +65,16 @@ kubectl expose rs nginx --port=80 --target-port=8000
 kubectl expose deployment nginx --port=80 --target-port=8000
 ```
 
+## Kubectl Delete 
+
+```shell 
+kubectl delete -k dir
+
+kubectl delete pods,services -l name=myLabel
+
+kubectl delete pod foo --force
+```
+
 ## Kubectl Apply 
 
 ```shell
