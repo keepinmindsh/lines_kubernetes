@@ -2,6 +2,33 @@
 
 > [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
 
+
+## Kubectl Get 
+
+```shell
+kubectl get pods
+
+kubectl get pods -o wide
+
+kubectl get replicationcontroller web
+
+kubectl get deployments.v1.apps -o json
+
+kubectl get -o json pod web-pod-13je7
+
+kubectl get -f pod.yaml -o json
+
+kubectl get -k dir/
+
+kubectl get -o template pod/web-pod-13je7 --template={{.status.phase}}
+
+kubectl get pod test-pod -o custom-columns=CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image
+
+kubectl get rc,services
+
+kubectl get rc/web service/frontend pods/web-pod-13je7
+```
+
 ## Kubectl Apply 
 
 ```shell
