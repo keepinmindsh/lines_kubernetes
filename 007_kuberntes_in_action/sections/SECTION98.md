@@ -193,3 +193,50 @@ kubectl auth can-i --list --namespace=foo
 ```shell
 kubectl cp /tmp/foo_dir <some-pod>:/tmp/bar_dir
 ```
+
+## Kubectl exec 
+
+```shell
+kubectl exec mypod -- date
+
+kubectl exec mypod -c ruby-container -- date
+
+kubectl exec mypod -i -t -- ls -t /usr
+
+```
+
+## Kubectl Logs 
+
+```shell
+kubectl logs nginx
+
+kubectl logs -l app=nginx --all-containers=true
+
+kubectl logs --tail=20 nginx
+
+kubectl logs --since=1h nginx
+
+kubectl logs job/hello
+
+kubectl logs deployment/nginx -c nginx-1
+```
+
+## Kubectl Port Forward 
+
+```shell 
+kubectl port-forward pod/mypod 5000 6000
+
+kubectl port-forward service/myservice 8443:https
+
+kubectl port-forward --address 0.0.0.0 pod/mypod 8888:5000
+
+kubectl port-forward pod/mypod :5000
+```
+
+## Kubectl Top 
+
+```shell 
+kubectl top node 
+
+kubectl top pods 
+```
