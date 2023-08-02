@@ -67,3 +67,56 @@ kubectl replace -f ./pod.json
 ```shell
 kubectl rollout history deployment/abc
 ```
+
+## Kubectl scale 
+
+```shell
+kubectl scale --replicas=3 rs/foo
+
+kubectl scale --current-replicas=2 --replicas=3 deployment/mysql
+```
+
+## Kubectl set
+
+```shell
+kubectl set env deployment/registry STORAGE_DIR=/local
+
+kubectl set env deployment/sample-build --list
+
+kubectl set env deployment/sample-build STORAGE_DIR=/data -o yaml
+```
+
+## Kubectl wait
+
+```shell
+kubectl wait --for=condition=Ready pod/busybox1
+
+kubectl wait --for=condition=Ready=false pod/busybox1
+```
+
+## Kubectl attach 
+
+```shell
+kubectl attach mypod
+
+
+kubectl attach pod/{pod_id}
+```
+
+
+## Kubectl Auth 
+
+```shell
+kubectl auth can-i create pods
+
+kubectl auth can-i '*' '*'
+
+kubectl auth can-i --list --namespace=foo
+```
+
+
+## Kubectl Copy
+
+```shell
+kubectl cp /tmp/foo_dir <some-pod>:/tmp/bar_dir
+```
