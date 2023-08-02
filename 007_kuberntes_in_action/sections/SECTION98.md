@@ -240,3 +240,49 @@ kubectl top node
 
 kubectl top pods 
 ```
+
+## Kubectl Cluster-Info 
+
+```shell 
+kubectl cluster-info dump --output-directory=/path/to/cluster-state
+```
+
+## Kubectl Config 
+
+```shell
+kubectl config current-context
+
+kubectl config delete-cluster minikube
+
+kubectl config delete-context minikube
+
+kubectl config delete-user minikube
+
+kubectl config get-clusters
+
+kubectl config get-contexts
+
+kubectl config get-contexts my-context
+
+kubectl config get-users
+
+kubectl config rename-context old-name new-name 
+
+kubectl config set clusters.my-cluster.server https://1.2.3.4
+
+kubectl config set-context gce --user=cluster-admin
+
+kubectl config set-credentials cluster-admin --client-key=~/.kube/admin.key
+
+kubectl config unset current-context
+
+kubectl config use-context minikube
+
+kubectl config view
+```
+
+## Kubectl Version 
+
+```shell 
+kubectl version
+```
