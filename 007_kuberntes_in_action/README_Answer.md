@@ -48,6 +48,10 @@ nginx-jsh   2/2     2            2           70s
 # Exam 4
 
 ```shell
+ kubectl get [(-o|--output=)json|yaml|name|go-template|go-template-file|template|templatefile|jsonpath|jsonpath-as-json|jsonpath-file|custom-columns|custom-columns-file|wide] (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [flags]
+```
+
+```shell
 $ kubectl get namespace
 NAME              STATUS   AGE
 default           Active   63d
