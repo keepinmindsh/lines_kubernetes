@@ -7,17 +7,15 @@ gke-oscar-cluster-2-default-pool-a533dc83-ew5k   Ready    <none>   26d   v1.26.5
 gke-oscar-cluster-2-default-pool-b3cbdcb2-9wdi   Ready    <none>   26d   v1.26.5-gke.1200
 gke-oscar-cluster-2-default-pool-c68e7d97-44o9   Ready    <none>   26d   v1.26.5-gke.1200
 
-howard /Users/data/import_temp/import
+howard /Users/data/import_temp/import
  
 $ kubectl get nodes > howard-node.json
 
 $ vi howard-node.json
-
 NAME                                             STATUS   ROLES    AGE   VERSION
 gke-oscar-cluster-2-default-pool-a533dc83-ew5k   Ready    <none>   26d   v1.26.5-gke.1200
 gke-oscar-cluster-2-default-pool-b3cbdcb2-9wdi   Ready    <none>   26d   v1.26.5-gke.1200
 gke-oscar-cluster-2-default-pool-c68e7d97-44o9   Ready    <none>   26d   v1.26.5-gke.1200
-
 
 ```
 
@@ -25,12 +23,18 @@ gke-oscar-cluster-2-default-pool-c68e7d97-44o9   Ready    <none>   26d   v1.26.5
 # Exam 2 
 
 ```shell
+$ kubectl create namespace NAME [--dry-run=server|client|none]
+```
+
+```shell
 kubectl create namespace exam-jsh
 ```
 
-
 # Exam 3
 
+```shell 
+$ kubectl create deployment NAME --image=image -- [COMMAND] [args...]
+```
 
 ```shell 
 $ kubectl create deployment  nginx-jsh --image=nginx --replicas=2 --namespace=exam-jsh
@@ -40,7 +44,6 @@ $ kubectl get deployment -n exam-jsh
 NAME        READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-jsh   2/2     2            2           70s
 ```
-
 
 # Exam 4
 
