@@ -38,6 +38,42 @@ spec:
       optional: true
 ```
 
+### 시크릿 생성하기 
+
+- kubectl 사용하기 
+- 환경 설정 파일 사용하기 
+- kustomize 도구 사용하기 
+
+### 개별 시크릿 제한 
+
+개별 시크릿의 크기는 1MiB로 제한된다. 이는 API 서버 및 kubelet 메모리를 고갈시킬 수 있는 매우 큰 시크릿의 생성을 방지하기 위함이다.  
+그러나, 작은 크기의 시크릿을 많이 만드는 것도 메모리를 고갈 시킬수 있다. 
+
+### 시크릿 편집 
+
+```shell 
+kubectl edit secrets <secret-name>
+```
+
+```yaml
+# 아래 오브젝트를 편집하길 바란다. '#'로 시작하는 줄은 무시될 것이고,
+# 빈 파일은 편집을 중단시킬 것이다. 이 파일을 저장하는 동안 오류가 발생한다면
+# 이 파일은 관련된 오류와 함께 다시 열린다.
+#
+apiVersion: v1
+data:
+  password: UyFCXCpkJHpEc2I9
+  username: YWRtaW4=
+kind: Secret
+metadata:
+  creationTimestamp: "2022-06-28T17:44:13Z"
+  name: db-user-pass
+  namespace: default
+  resourceVersion: "12708504"
+  uid: 91becd59-78fa-4c85-823f-6d44436242ac
+type: Opaque
+```
+
 #### 기본 토큰 시크릿 소개
 
 모든 파드에는 secret 볼륨이 자동으로 연결돼 있다. 이전 kubectl describe 명령어의 출력은 설정되어 있는 시크릿을 참조한다. 시크릿은 리소스이기 때문에 k get secrets 명령어로 목록을 조회하고  
