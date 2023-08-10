@@ -184,6 +184,63 @@ $ kuectl create secret generic fortune-https --from-file=https.key --from-file-h
 > 여기에서는 일반적인(generic) 시크릿을 작성하지만, kubectl create secret tls 명령을 이용해 tls 시크릿을 생성할 수도 있다.   
 > 이렇게 하면 다른 항목 이름으로 시크릿을 생성할 수 있다.
 
+
+```yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+data:
+  USER_NAME: YWRtaW4=
+  PASSWORD: MWYyZDFlMmU2N2Rm
+```
+
+```shell 
+kubectl apply -f mysecret.yaml
+```
+
+```yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-test-pod
+spec:
+  containers:
+    - name: test-container
+      image: registry.k8s.io/busybox
+      command: [ "/bin/sh", "-c", "env" ]
+      envFrom:
+      - secretRef:
+          name: mysecret
+  restartPolicy: Never
+```
+
+```shell
+kubectl create secret generic ssh-key-secret --from-file=ssh-privatekey=/path/to/.ssh/id_rsa --from-file=ssh-publickey=/path/to/.ssh/id_rsa.pub
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-test-pod
+  labels:
+    name: secret-test
+spec:
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: ssh-key-secret
+  containers:
+  - name: ssh-test-container
+    image: mySshImage
+    volumeMounts:
+    - name: secret-volume
+      readOnly: true
+      mountPath: "/etc/secret-volume"
+```
+
 #### 컨피그맵과 시크릿 비교
 
 ```shell
@@ -371,6 +428,35 @@ tmpfs를 사용하는 이유는 민감한 데이터를 노출시킬 수도 있�
        name: fortune-https
        key: foo 
 ...
+```
+
+```shell 
+$ kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-env-pod
+spec:
+  containers:
+  - name: mycontainer
+    image: redis
+    env:
+      - name: SECRET_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: username
+            optional: false # 기본값과 동일하다
+                            # "mysecret"이 존재하고 "username"라는 키를 포함해야 한다
+      - name: SECRET_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: password
+            optional: false # 기본값과 동일하다
+                            # "mysecret"이 존재하고 "password"라는 키를 포함해야 한다
+  restartPolicy: Never
+EOF 
 ```
 
 - 변수는 시크릿 항목에서 설정된다.
