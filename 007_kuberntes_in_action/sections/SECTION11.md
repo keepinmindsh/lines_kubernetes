@@ -597,4 +597,10 @@ $ kubectl exec -it curl-with-ambassador -c main bash
 - kubectl proxy로 쿠버네티스 REST API를 탐색하는 방법
 - 쿠버네티스에 정의된 다른 서비스와 같은 방식으로 파드가 환경변수 또는 DNS 로 API 서버의 위치를 찾는 방법
 - 파드에서 실행되는 애플리케이션이 API 서버와 통신하는지 검증하고, 자신을 인증하는 방법
-- 클라이언트 라이브러리로 쉽게 쿠버네티스와 상호작용할 수 있는 방법 
+- 클라이언트 라이브러리로 쉽게 쿠버네티스와 상호작용할 수 있는 방법
+
+> [컨테이너를 위한 커맨드와 인자 정의하기](https://kubernetes.io/ko/docs/tasks/inject-data-application/define-command-argument-container/)     
+> [종속 환경 변수 정의하기](https://kubernetes.io/ko/docs/tasks/inject-data-application/define-interdependent-environment-variables/)   
+> [컨테이너를 위한 환경 변수 정의하기](https://kubernetes.io/ko/docs/tasks/inject-data-application/define-environment-variable-container/)      
+> [환경 변수로 컨테이너에 파드 정보 노출하기](https://kubernetes.io/ko/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)   
+> [파일로 컨테이너에 파드 정보 노출하기](https://kubernetes.io/ko/docs/tasks/inject-data-application/downward-api-volume-expose-pod-information/)   
