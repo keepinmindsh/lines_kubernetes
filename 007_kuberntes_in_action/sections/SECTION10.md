@@ -241,6 +241,138 @@ spec:
       mountPath: "/etc/secret-volume"
 ```
 
+#### 시크릿 보륨의 도트 파일 
+
+```yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dotfile-secret
+data:
+  .secret-file: dmFsdWUtMg0KDQo=
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-dotfiles-pod
+spec:
+  volumes:
+  - name: secret-volume
+    secret:
+      secretName: dotfile-secret
+  containers:
+  - name: dotfile-test-container
+    image: registry.k8s.io/busybox
+    command:
+    - ls
+    - "-l"
+    - "/etc/secret-volume"
+    volumeMounts:
+    - name: secret-volume
+      readOnly: true
+      mountPath: "/etc/secret-volume"
+```
+
+#### 서비스 어카운트 토큰 시크릿 
+
+Kubernetes.io/service-account-token 시크릿 타입은 서비스 어카운트를 확인하는 토큰 자격증명을 저장하기 위해서 사용한다.
+
+```yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-sa-sample
+  annotations:
+    kubernetes.io/service-account.name: "sa-name"
+type: kubernetes.io/service-account-token
+data:
+  # 사용자는 불투명 시크릿을 사용하므로 추가적인 키 값 쌍을 포함할 수 있다.
+  extra: YmFyCg==
+```
+
+#### 도커 컨피그 시크릿 
+
+이미지에 대한 도커 레지스트리 접속 자격 증명을 저장하기 위한 시크릿을 생성하기 위해서 다음의 type 값 중 하나를 사용할 수 있다.
+
+- kubernetes.io/dockercfg
+- kubernetes.io/dockerconfigjson
+
+```yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-dockercfg
+type: kubernetes.io/dockercfg
+data:
+  .dockercfg: |
+    "<base64 encoded ~/.dockercfg file>"  
+```
+
+#### 기본 인증(Basic authentication) 시크릿
+
+kubernetes.io/basic-auth 타입은 기본 인증을 위한 자격 증명을 저장하기 위해 제공된다. 이 시크릿 타입을 사용할 때는 시크릿의 data 필드가 다음의 두 키 중 하나를 포함해야 한다.
+
+- username: 인증을 위한 사용자 이름
+- password: 인증을 위한 암호나 토큰
+
+위의 두 키에 대한 두 값은 모두 base64로 인코딩된 문자열이다. 물론, 시크릿 생성 시 stringData 를 사용하여 평문 텍스트 콘텐츠(clear text content)를 제공할 수도 있다.
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin      # kubernetes.io/basic-auth 에서 요구하는 필드
+  password: t0p-Secret # kubernetes.io/basic-auth 에서 요구하는 필드
+```
+
+#### SSH 인증 시크릿
+
+이 빌트인 타입 kubernetes.io/ssh-auth 는 SSH 인증에 사용되는 데이터를 저장하기 위해서 제공된다. 이 시크릿 타입을 사용할 때는 ssh-privatekey 키-값 쌍을 사용할 SSH 자격 증명으로 data (또는 stringData) 필드에 명시해야 할 것이다.
+
+```yaml 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-ssh-auth
+type: kubernetes.io/ssh-auth
+data:
+  # 본 예시를 위해 축약된 데이터임
+  ssh-privatekey: |
+     MIIEpQIBAAKCAQEAulqb/Y ...
+```
+
+#### TLS 시크릿 
+
+쿠버네티스는 일반적으로 TLS를 위해 사용되는 인증서 및 관련된 키를 저장하기 위한 빌트인 시크릿 타입 kubernetes.io/tls 를 제공한다.
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-tls
+type: kubernetes.io/tls
+data:
+  # 본 예시를 위해 축약된 데이터임
+  tls.crt: |
+    MIIC2DCCAcCgAwIBAgIBATANBgkqh ...    
+  tls.key: |
+    MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ ... 
+```
+
+#### 시크릿을 불변으로 지정하기
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  ...
+data:
+  ...
+immutable: true
+```
+
 #### 컨피그맵과 시크릿 비교
 
 ```shell
