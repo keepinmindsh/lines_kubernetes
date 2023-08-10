@@ -152,20 +152,99 @@ $ service/jsh-service exposed
 # Exam 8 
 
 ```shell
-kubectl create deployment jsh-deployment --image=nginx:1.16 --namespace=exam-jsh --replicas=2
+$ kubectl create deployment jsh-deployment --image=nginx:1.16 --replicas=2
 deployment.apps/jsh-deployment created
 
-kubectl scale --replicas=1 deployment/jsh-deployment -n exam-jsh
+$ kubectl scale --replicas=1 deployment/jsh-deployment -n exam-jsh
 deployment.apps/jsh-deployment scaled
+
+$ kubectl rollout history deployment/jsh-deployment
+deployment.apps/jsh-deployment
+REVISION  CHANGE-CAUSE
+1         <none>
+
+$ kubectl apply -f - <<EOF 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-config
+data: 
+  hello.properties: |
+    hello=world
+    drink=good
+    happy=work
+EOF 
 ```
 
+```shell
+$ kubectl edit deployment jsh-deployment
+```
+
+
+```yaml 
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2023-08-10T12:58:16Z"
+  generation: 2
+  labels:
+    app: jsh-deployment
+  name: jsh-deployment
+  namespace: default
+  resourceVersion: "61660304"
+  uid: 6f86f7c5-2695-48ff-b2ff-bd50b6dcd3b0
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: jsh-deployment
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: jsh-deployment
+    spec:
+      containers:
+      - image: nginx:1.16
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts: 
+        - name: config 
+          mountPath: "/config" 
+          readOnly: true 
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      # 파드 레벨에서 볼륨을 설정한 다음, 해당 파드 내의 컨테이너에 마운트한다.
+      - name: config
+        configMap:
+          # 마운트하려는 컨피그맵의 이름을 제공한다.
+          name: game-demo
+          items: 
+          - key: "hello.properties"
+            path: "hello.properties"
+```
 
 # Exam 9 
 
 ```shell
 kubectl exec nginx-deploy-6b66b677ff-t8m2p -n exam-jsh  -it -- bin/sh
 
-#
 # echo "helloworld" > hello.txt
 
 # ls -al | grep hello
@@ -173,6 +252,8 @@ kubectl exec nginx-deploy-6b66b677ff-t8m2p -n exam-jsh  -it -- bin/sh
 ```
 
 # Exam 10 
+
+> [Init Container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/)
 
 
 ```shell 
@@ -186,4 +267,25 @@ nginx-deploy-6b66b677ff-dw5xk     1/1     Running    0          27m
 nginx-deploy-6b66b677ff-t8m2p     1/1     Running    0          27m
 nginx-jsh-675c95594c-69fl7        1/1     Running    0          44m
 nginx-jsh-675c95594c-7tthf        1/1     Running    0          44m
+```
+
+```yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app.kubernetes.io/name: MyApp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+  - name: init-mydb
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup mydb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done"]
 ```
