@@ -74,6 +74,58 @@ metadata:
 type: Opaque
 ```
 
+### 시크릿 사용하기 
+
+시크릿은 데이터 볼륨으로 마운트 되거나 파드의 컨테이너에서 사용할 환경변수로 노출될 수 있다. 또한, 시크릿은 파드에 직접 노출되지 않고, 시스테므이 다른 부분에서도 사용할 수 있다.  
+예를 들어, 시크릿은 시스템의 다른 부분이 사용자를 대신해서 외부 시스템과 상호 작용하는데 사용해야하는 자격 증명을 보유할 수 있다.  
+
+특정된 오브젝트 참조가 실제로 시크릿 유형의 오브젝트를 가리키는지 확인하기 위해, 시크릿 볼륨 소스의 유효성이 검사된다.   
+따라서, 시크릿은 자신에 의존하는 파드보다 먼제 생성되어야 한다.  
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    secret:
+      secretName: mysecret
+      optional: false # 기본값임; "mysecret" 은 반드시 존재해야 함
+```
+
+- 특정 경로에 대한 시크릿 키 투영 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    secret:
+      secretName: mysecret
+      items:
+      - key: username
+        path: my-group/my-username
+```
+
 #### 기본 토큰 시크릿 소개
 
 모든 파드에는 secret 볼륨이 자동으로 연결돼 있다. 이전 kubectl describe 명령어의 출력은 설정되어 있는 시크릿을 참조한다. 시크릿은 리소스이기 때문에 k get secrets 명령어로 목록을 조회하고  
