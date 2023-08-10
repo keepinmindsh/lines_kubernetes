@@ -47,24 +47,25 @@ nginx-jsh   2/2     2            2           70s
 
 # Exam 4
 
+우선 현재 기동되고 있는 Deployment 의 yaml 정보를 확인한다. 
+
+```shell
+# Deployments 목록 전체 조회 
+$ kubectl get deployments -o yaml
+
+# 특정 Deployment 단건 조회 
+$ kubectl get deployments oscar-server-2 -o yaml 
+```
+
 ```shell
  kubectl get [(-o|--output=)json|yaml|name|go-template|go-template-file|template|templatefile|jsonpath|jsonpath-as-json|jsonpath-file|custom-columns|custom-columns-file|wide] (TYPE[.VERSION][.GROUP] [NAME | -l label] | TYPE[.VERSION][.GROUP]/NAME ...) [flags]
 ```
 
-```shell
-$ kubectl get namespace
-NAME              STATUS   AGE
-default           Active   63d
-exam-daisy        Active   2m57s
-exam-dante        Active   2m59s
-exam-jsh          Active   4m37s
-exam-ryan         Active   3m28s
-exam-sean         Active   2m6s
-kube-node-lease   Active   63d
-kube-public       Active   63d
-kube-system       Active   63d
+```shell 
+$ kubectl get deployments oscar-server-2 -o custom-columns='DEPLOYMENT:.metadata.name','CONTAINER_IMAGE:.spec.template.spec.containers[*].image','READY_REPLICA:.status.readyReplicas','NAMESPACE:.metadata.namespace'
+DEPLOYMENT       CONTAINER_IMAGE                                                                                       READY_REPLICA   NAMESPACE
+oscar-server-2   gcr.io/swit-dev/oscar-image@sha256:5c6b0247ac0ea4135d2b27a28689b533208518d917328482c60cb2ad1e703c19   3               default
 ```
-
 
 # Exam 5
 
@@ -100,30 +101,52 @@ spec:
       targetPort: 8080
       # Optional field
       # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
-      nodePort: 30084
+      nodePort: 30083
 ```
 
 
 ```shell
-kubectl create -f service.yaml -n exam-jsh
+$ kubectl create -f service.yaml -n exam-jsh
 
-
-kubectl get service -n exam-jsh
+$ kubectl get service -n exam-jsh
 
 NAME              TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)          AGE
-web-application   NodePort   10.36.15.77   <none>        8080:30084/TCP   60s
+web-application   NodePort   10.36.15.77   <none>        8080:30083/TCP   60s
 ```
 
 
 # Exam 7 
 
 ```shell
+$ kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-jsh
+spec:
+  selector:
+    matchLabels:
+      run: hello-jsh-example
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        run: hello-jsh-example
+    spec:
+      containers:
+        - name: hello-jsh
+          image: gcr.io/google-samples/node-hello:1.0
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+EOF
 
-kubectl create service clusterip jsh-service  --clusterip="None" -n exam-jsh
+$ deployment.apps/hello-jsh created
+```
 
-
-kubectl expose service jsh-service --port=8080 --target-port=9191 -n exam-jsh
-
+```shell
+$ kubectl expose deployment hello-jsh --type=NodePort --name=jsh-service
+$ service/jsh-service exposed
 ```
 
 # Exam 8 
@@ -134,14 +157,10 @@ deployment.apps/jsh-deployment created
 
 kubectl scale --replicas=1 deployment/jsh-deployment -n exam-jsh
 deployment.apps/jsh-deployment scaled
-
-
-
 ```
 
 
 # Exam 9 
-
 
 ```shell
 kubectl exec nginx-deploy-6b66b677ff-t8m2p -n exam-jsh  -it -- bin/sh
