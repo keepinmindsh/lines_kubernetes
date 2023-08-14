@@ -263,7 +263,21 @@ Kubelet은 워커노드에서 실행하는 모든 것을 담당하는 구성 요
 Kubelet은 컨ㅌ이너 라이브니스 프로브를 실행하는 구성 요소이기도 하며, 프로브가 실패할 경으 컨테이너를 다시 시작한다.
 마지막으로 API 서버에서 파드가 삭제되면 컨테이너를 정지하고 파드가 종료된 것을 서버에 통보한다.
 
+> [Kubeadm 설치하기](https://kubernetes.io/ko/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+kubeadm의 경우 Kubelet을 자동으로 배포하기 않기 때문에 수동으로 설치해줘야함. 
+
+> [Kubelet, Kubeadm, Kubectl 설치하기](https://velog.io/@rapidrabbit76/kubelet-kubeadm-kubectl-%EC%84%A4%EC%B9%98)
+
+- kubelet 설치 여부 확인하기 
+
+```shell
+ps -aux | grep kubelet 
+```
+
 ### 쿠버네티스 서비스 프록시의 역할
+
+>  [쿠버네티스에서 프락시](https://kubernetes.io/ko/docs/concepts/cluster-administration/proxies/)
 
 Kubelet 외에도, 모든 워커 노드는 클라이언트가 쿠버네티스 API로 정의한 서빗에 연결할 수 있도록 해주는 kube-proxy 도 같이 실행한다.
 kube-proxy는 서비스의 IP와 포트로 들어온 접속을 서비스를 지원하는 파드 중 하나와 연결시켜준다.  
@@ -278,6 +292,8 @@ kube-proxy는 실제 프록시이기 때문에 그 이름을 얻었지만, 현�
 거치지 않고 패킷을 무작위로 선택한 백엔드 파드로 선택한다.
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_005.png)
+
+> [Kube Proxy 설치 방법 포함 - Tistory](https://dodo-devops.tistory.com/46)
 
 ### 쿠버네티스 애드온 소개
 
