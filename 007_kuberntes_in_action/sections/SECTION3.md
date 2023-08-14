@@ -40,6 +40,28 @@ spec:
 - Pods 는 하나의 단일 컨테이너로서 동작한다. 
 - Pods 는 강하게 결합되어 동작해야하는 경우 다중 컨테이너를 하나의 파드 내에 구성하여 리소스를 공유할 수 있습니다.
 
+#### Pod Yaml 기본 구조 
+
+- 들여쓰기 구조를 주의할 것 
+- label 명은 주로 metadata 의 name 과 맞추는 경우도 있고, 
+  - 그룹 단위의 라벨 지정 
+  - 카테고리 단위의 라벨 지정
+  - 기타 등등 
+- container 의 경우, 다중으로 컨테이너를 구성할 수 있기 때문에 name, image 를 구성한다. 
+
+```yaml
+apiVersion: v1 
+kind: Pod 
+metadata: 
+    name: myapp-pod 
+    labels: 
+        app: myapp 
+spec: 
+  containers: 
+    - name: 
+      image:
+```
+
 #### Pod Template 으로서 Kubernetes 오브젝트 내에서 활용하기 
 
 ```yaml
