@@ -106,17 +106,34 @@ kubectl annotate pods foo description='my frontend'
 kubectl autoscale deployment foo --min=2 --max=10
 ```
 
-
 ## Kubectl Debug 
 
 ```shell
 kubectl debug mypod -it --image=busybox
 ```
 
+## Kubectl Diff 
+
+```shell
+kubectl diff -f pod.json
+```
+
 ## Kubectl Edit 
 
 ```shell
 kubectl edit deployment/mydeployment -o yaml --save-config
+```
+
+## Kubectl kustomize 
+
+```shell 
+kubectl kustomize /home/config/production
+```
+
+## Kubectl Patch 
+
+```shell 
+kubectl patch -f node.json -p '{"spec":{"unschedulable":true}}
 ```
 
 ## Kubectl Label 
@@ -257,6 +274,12 @@ kubectl port-forward --address 0.0.0.0 pod/mypod 8888:5000
 kubectl port-forward pod/mypod :5000
 ```
 
+## Kubectl Proxy 
+
+```shell 
+kubectl proxy --api-prefix=/custom/
+```
+
 ## Kubectl Top 
 
 ```shell 
@@ -269,6 +292,31 @@ kubectl top pods
 
 ```shell 
 kubectl cluster-info dump --output-directory=/path/to/cluster-state
+```
+
+## Kubectl Cordon 
+
+```shell 
+# Mark node "foo" as unschedulable
+kubectl cordon foo
+```
+
+## Kubectl Drain 
+
+```shell 
+kubectl drain foo --grace-period=900
+```
+
+## Kubectl Taint 
+
+```shell 
+kubectl taint nodes foo dedicated=special-user:NoSchedule
+```
+
+## Kubectl Uncordon 
+
+```shell 
+kubectl uncordon foo
 ```
 
 ## Kubectl Config 
@@ -309,4 +357,16 @@ kubectl config view
 
 ```shell 
 kubectl version
+```
+
+## Kubectl Explain 
+
+```shell 
+kubectl explain pods
+```
+
+## Kubectl Options 
+
+```shell 
+kubectl options
 ```
