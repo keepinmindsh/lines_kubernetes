@@ -8,6 +8,126 @@
 이름과 같이 실행 시점까지 알려지지 않은 데이터의 경우는 어떨까? 파드의 레이블이나 어노테이션과 같이 어딘가에 이미 설정된 데이터라면 어떨까?  
 아마도 동일한 정보를 여러 곳에 반복해서 설정하고 싶지 않을 것이다.
 
+- fieldRef 활용
+
+```yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubernetes-downwardapi-volume-example
+  labels:
+    zone: us-est-coast
+    cluster: test-cluster1
+    rack: rack-22
+  annotations:
+    build: two
+    builder: john-doe
+spec:
+  containers:
+    - name: client-container
+      image: registry.k8s.io/busybox
+      command: ["sh", "-c"]
+      args:
+      - while true; do
+          if [[ -e /etc/podinfo/labels ]]; then
+            echo -en '\n\n'; cat /etc/podinfo/labels; fi;
+          if [[ -e /etc/podinfo/annotations ]]; then
+            echo -en '\n\n'; cat /etc/podinfo/annotations; fi;
+          sleep 5;
+        done;
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+  volumes:
+    - name: podinfo
+      downwardAPI:
+        items:
+          - path: "labels"
+            fieldRef:
+              fieldPath: metadata.labels
+          - path: "annotations"
+            fieldRef:
+              fieldPath: metadata.annotations
+```
+
+- resourceFieldRef 
+
+```yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubernetes-downwardapi-volume-example-2
+spec:
+  containers:
+    - name: client-container
+      image: k8s.gcr.io/busybox:1.24
+      command: ["sh", "-c"]
+      args:
+      - while true; do
+          echo -en '\n';
+          if [[ -e /etc/podinfo/cpu_limit ]]; then
+            echo -en '\n'; cat /etc/podinfo/cpu_limit; fi;
+          if [[ -e /etc/podinfo/cpu_request ]]; then
+            echo -en '\n'; cat /etc/podinfo/cpu_request; fi;
+          if [[ -e /etc/podinfo/mem_limit ]]; then
+            echo -en '\n'; cat /etc/podinfo/mem_limit; fi;
+          if [[ -e /etc/podinfo/mem_request ]]; then
+            echo -en '\n'; cat /etc/podinfo/mem_request; fi;
+          sleep 5;
+        done;
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "125m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+  volumes:
+    - name: podinfo
+      downwardAPI:
+        items:
+          - path: "cpu_limit"
+            resourceFieldRef:
+              containerName: client-container
+              resource: limits.cpu
+              divisor: 1m
+          - path: "cpu_request"
+            resourceFieldRef:
+              containerName: client-container
+              resource: requests.cpu
+              divisor: 1m
+          - path: "mem_limit"
+            resourceFieldRef:
+              containerName: client-container
+              resource: limits.memory
+              divisor: 1Mi
+          - path: "mem_request"
+            resourceFieldRef:
+              containerName: client-container
+              resource: requests.memory
+              divisor: 1Mi
+```
+
+```shell 
+# 실제 downward api에 의한 데이터 확인 용도 파드 배포 
+kubectl apply -f https://k8s.io/examples/pods/inject/dapi-volume.yaml
+
+# 파드 조회 
+kubectl get pods
+
+# 발생 로그 확인 
+kubectl logs kubernetes-downwardapi-volume-example
+
+# 실제 파일 생성 여부 확인을 위한 Pod Shell 접속
+kubectl exec -it kubernetes-downwardapi-volume-example -- sh
+
+# Label 조회 정보 확인 
+/# cat /etc/podinfo/labels
+```
+
 ### 사용 가능한 메타데이터 이해
 
 아래의 정보를 컨테이너에 전달할 수 있다.
@@ -23,6 +143,8 @@
 - 파드의 어노테이션
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/downward_flow.png)
+
+> [Downard API - out of date](https://kubernetes.io/ko/docs/concepts/workloads/pods/downward-api/)
 
 #### 환경변수를 활용한 메타데이터 노출하기
 
