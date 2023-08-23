@@ -246,6 +246,10 @@ kubectl exec mypod -it /bin/sh
 
 kubectl exec --stdin --tty shell-demo -- /bin/bash
 
+kubectl exec shell-demo -- ps aux
+kubectl exec shell-demo -- ls /
+kubectl exec shell-demo -- cat /proc/1/mounts
+
 ```
 
 ## Kubectl Logs 
