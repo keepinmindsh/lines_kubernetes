@@ -242,7 +242,9 @@ kubectl exec mypod -c ruby-container -- date
 
 kubectl exec mypod -i -t -- ls -t /usr
 
-kubectl exec mypod -it /bin/sh
+kubectl exec mypod -it /bin/sh 
+
+kubectl exec --stdin --tty shell-demo -- /bin/bash
 
 ```
 
