@@ -12,6 +12,7 @@ nignx   1/1     Running   0          79s
 kubectl exec nignx --namespace howard-exam  -it -- /bin/sh
 ```
 
+> [https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/)
 
 # Exam 2 
 
