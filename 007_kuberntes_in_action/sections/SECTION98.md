@@ -51,6 +51,8 @@ kubectl run nginx --image=nginx --overrides='{ "apiVersion": "v1", "spec": { ...
 kubectl run -i -t busybox --image=busybox --restart=Never
 
 kubectl run nginx --image=nginx -- <arg1> <arg2> ... <argN>
+
+kubectl scale deployment <deployment-name> --replicas=3 -n <namespace>
 ```
 
 ## Kubectl Expose 
