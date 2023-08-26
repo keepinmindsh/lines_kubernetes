@@ -14,6 +14,10 @@ kubectl exec nignx --namespace howard-exam  -it -- /bin/sh
 
 > [https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/)
 
+```
+ls -al #to view all files in a director
+```
+
 # Exam 2 
 
 ```
