@@ -14,6 +14,8 @@
 
 - [Basic Kubernetes](https://github.com/keepinmindsh/lines_kubernetes/tree/main/005_BasicKubernetes)
 
+- [Kubernetes In action]()
+
 ### Kubernetes For CKA 
 
 - [Kubernetes for CKA](https://github.com/keepinmindsh/lines_kubernetes/tree/main/007_kuberntes_in_action)
@@ -25,3 +27,8 @@
 # Tekton Pipeline 
 
 - [Tekton Pipeline](https://github.com/keepinmindsh/lines_kubernetes/tree/main/010_tekton_pipelines)
+
+# References 
+
+
+
