@@ -94,6 +94,11 @@ kubectl apply -k dir/
 
 
 cat pod.json | kubectl apply -f -
+
+
+kubectl apply -f - <<EOF
+  ~~중략~~
+EOF
 ```
 
 ## Kubectl Annotate 
