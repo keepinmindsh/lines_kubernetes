@@ -33,6 +33,10 @@ kubectl get pod test-pod -o custom-columns=CONTAINER:.spec.containers[0].name,IM
 kubectl get rc,services
 
 kubectl get rc/web service/frontend pods/web-pod-13je7
+
+kubectl get clusterrolebindings 
+ 
+kubectl get custerroles 
 ```
 
 ## Kubectl Run 
