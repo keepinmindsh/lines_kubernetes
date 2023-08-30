@@ -345,6 +345,8 @@ kubectl config delete-user minikube
 
 kubectl config get-clusters
 
+# Using Kubectl to Retrieve User Accounts
+# list include user name also
 kubectl config get-contexts
 
 kubectl config get-contexts my-context
