@@ -65,8 +65,7 @@ $ kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-b
 
 모든 오브젝트는 API 서버가 다시 시작되거나 실패하더라도 유지하기 위해서 메니페스트가 영구적으로 저장될 필요가 있음.
 이를 위해서 쿠버네티스는 빠르고, 분산해서 저장되며, 일관된 키-값 저장소를 제공하는 etcd를 사용한다.  
-쿠버네티스 API 서버 만이 etcd와 직접적으로 통신하는 유일한 구성요소다. 다른 구성 요소는 API로 간접적으로 데이터를 읽거나
-쓸수 있다.
+쿠버네티스 API 서버 만이 etcd와 직접적으로 통신하는 유일한 구성요소다. 다른 구성 요소는 API로 간접적으로 데이터를 읽거나 쓸수 있다.  
 
 > [https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/](https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/)   
 > [etcd의 사이즈 제한 및 관리에 대한 부분](https://cloud.google.com/kubernetes-engine/docs/concepts/planning-large-clusters#why_plan_for_large_clusters)
@@ -220,7 +219,8 @@ API 서버의 감시 메커니즘을 통해 새로 생성될 파드를 기다리
 
 - 기본 스케쥴링 알고리즘 이해
     - 모든 노드 중에서 파드를 스케쥴링 할 수 있는 노드 목록을 필터링 한다.
-    - 수용 가능한 노드의 우선 순위를 정하고 점수가 높은 노드를 선택한다. 만약 여러 노드가 같은 최상위 점수를 가지고 있다면, 파드가 모든 노드에 고르게 배포되도록 라운드-로빈을 사용한다.
+    - 수용 가능한 노드의 우선 순위를 정하고 점수가 높은 노드를 선택한다. 
+    - 만약 여러 노드가 같은 최상위 점수를 가지고 있다면, 파드가 모든 노드에 고르게 배포되도록 라운드-로빈을 사용한다.
 
 ![](https://github.com/keepinmindsh/lines_kubernetes/blob/main/assets/k8s_architecture_004.png)
 
@@ -279,7 +279,7 @@ ps -aux | grep kubelet
 
 >  [쿠버네티스에서 프락시](https://kubernetes.io/ko/docs/concepts/cluster-administration/proxies/)
 
-Kubelet 외에도, 모든 워커 노드는 클라이언트가 쿠버네티스 API로 정의한 서빗에 연결할 수 있도록 해주는 kube-proxy 도 같이 실행한다.
+Kubelet 외에도, 모든 워커 노드는 클라이언트가 쿠버네티스 API로 정의한 서빗에 연결할 수 있도록 해주는 kube-proxy도 같이 실행한다.
 kube-proxy는 서비스의 IP와 포트로 들어온 접속을 서비스를 지원하는 파드 중 하나와 연결시켜준다.  
 서비스가 둘 이상의 파드에서 지원되는 경우 프록시 파드 간에 로드 밸런싱을 수행한다.
 
