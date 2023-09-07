@@ -276,16 +276,20 @@ pod "nginx-prod" deleted
 
 # Exam 13 
 
-```
-kubectl get pods -o yaml
+> kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'
 
-kubectl get pods  -o custom-columns=CONTAINER:.metadata.namespace,IMAGE:.metadata.
-```
-
+- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 # Exam 14 
 
+> kubectl get pods --sort-by='.status.containerStatuses[0].restartCount' 
+
+- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 # Exam 15 
+
+> kubectl get pods --sort-by='.status.containerStatuses[0].restartCount'
+
+- [Kubernetes Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 
