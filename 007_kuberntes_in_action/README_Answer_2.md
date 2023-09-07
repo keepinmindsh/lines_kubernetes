@@ -49,6 +49,12 @@ lrwxrwxrwx   1 root root   10 Aug 14 00:00 libx32 -> usr/libx32
 
 # Exam 3 
 
+아래의 명령어 중 container 내에서 명령어 실행시 bin/sh -c 의 역할 확인 
+
+- [https://stackoverflow.com/questions/3985193/what-is-bin-sh-c](https://stackoverflow.com/questions/3985193/what-is-bin-sh-c)
+
+If the -c option is present, then commands are read from string. If there are arguments after the string, they are assigned to the positional parameters, starting with.  
+
 ```
 kubectl run busybox --image=busybox -- bin/sh -c "while true; do echo 'Hi I am from Main container' >> /var/log/index.html; sleep 5; done"
 pod/busybox created
@@ -61,19 +67,16 @@ bin/sh: can't create /var/log/index.html: nonexistent directory
 
 ```
 
-# Exam 5 
-
-```
-
-kubectl run busybox-3 --image=busybox --command -- bin/sh -c "ls; sleep 3600;"  "echo Hello World; sleep 3600;" "echo this is the third container; sleep 3600"
-```
-
-
 # Exam 4
 
+Labeling을 통해서 각 지정된 Pod의 로그를 가져와서 볼수 있음 
+> kubectl logs -l app=busybox --all-containers=true
+
 
 ```
-kubectl logs busybox-3
+kubectl label pods --all app=busybox
+
+kubectl logs -l app=busybox --all-containers=true
 
 bin
 dev
@@ -89,6 +92,18 @@ usr
 var
 
 ```
+
+# Exam 5 
+
+
+> kubectl run busybox-3 --image busybox --command -- bin/sh -c "ls; sleep 3600;"  "echo Hello World; sleep 3600;" "echo this is the third container; sleep 3600" && kubectl patch deploy mypod --patch '{"spec": {"template": {"spec": {  "replicas": 3, "containers": [{"name": "busybox-3", "image": "busybox"}]}}}}'
+
+```
+kubectl run busybox-3 --image=busybox --command -- bin/sh -c "ls; sleep 3600;"  "echo Hello World; sleep 3600;" "echo this is the third container; sleep 3600"
+```
+
+
+> [https://stackoverflow.com/questions/58121529/how-to-create-multi-container-pod-from-without-yaml-config-of-pod-or-deployment](https://stackoverflow.com/questions/58121529/how-to-create-multi-container-pod-from-without-yaml-config-of-pod-or-deployment)
 
 
 # Exam 6
@@ -111,7 +126,6 @@ spec:
       sizeLimit: 500Mi
 
 
-
 kubectl get pods
 NAME        READY   STATUS    RESTARTS   AGE
 busybox     1/1     Running   0          3m
@@ -120,6 +134,9 @@ test-pd     1/1     Running   0          8s
 ```
 
 # Exam 7
+
+- kubectl set image 를 활용하는 방식 검토 필요 
+  - [https://bcho.tistory.com/1266](https://bcho.tistory.com/1266)
 
 ```
 
@@ -186,12 +203,15 @@ status:
 # Exam 8 
 
 
+- kubectl set image pod/change-alpine change-alpine=1.16-alpine
+- kubectl get po change-alpine -w -n external 
+
 ```
 kubectl run change-alpine --image=1.11-alpine
 
 kubectl edit pods change-alpine 
 
-kubectl get pods chnage-alpine -o yaml 
+kubectl get pods change-alpine -o yaml 
 
 ```
 
@@ -199,7 +219,6 @@ kubectl get pods chnage-alpine -o yaml
 
 ```
 kubectl run nginx --image nginx
-
 
 pod/nginx created
 
@@ -231,15 +250,24 @@ pod "change-test" deleted
 
 # Exam 12 
 
+- Delete a pod with minimal delay
+> kubectl delete pod foo --now   
+
+- Force delete a pod on a dead node
+> kubectl delete pod foo --force    
+> kubectl delete pods name-of-pod --grace-period=0 --force
+
+- [Kubectl Force Delete Pod](https://linuxhint.com/kubectl-force-delete-pod/)
 
 ```
-  kubectl run nginx-dev --image=nginx
+kubectl run nginx-dev --image=nginx
 pod/nginx-dev created
- howard  ~/sources/01_company_git
-  kubectl run nginx-prod --image=nginx
+
+kubectl run nginx-prod --image=nginx
+
 pod/nginx-prod created
- howard  ~/sources/01_company_git
- kubectl delete pod nginx-dev nginx-prod
+
+kubectl delete pod nginx-dev nginx-prod
 pod "nginx-dev" deleted
 pod "nginx-prod" deleted
 
