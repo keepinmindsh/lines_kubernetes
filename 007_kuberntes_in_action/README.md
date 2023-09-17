@@ -26,6 +26,8 @@
 ## [Section 24 - Kubectl Debug/Trouble Shooting](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION24.md)
 ## [Section 99 - Certificated Kubernetes Architecture](https://github.com/keepinmindsh/lines_kubernetes/blob/main/007_kuberntes_in_action/sections/SECTION99.md)
 
+# Study References 
+
 # Tips
 
 - [kubernetes cheat sheet](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-strong-getting-started-strong-)
