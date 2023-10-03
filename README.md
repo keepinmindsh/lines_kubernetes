@@ -29,3 +29,7 @@
   - [ Config](https://github.com/keepinmindsh/lines_kubernetes/blob/main/001_kubernetes/sections/SECTION25.md)
 - [ Kubectl Debug/Trouble Shooting](https://github.com/keepinmindsh/lines_kubernetes/blob/main/001_kubernetes/sections/SECTION24.md)
 - [ Certificated Kubernetes Architecture](https://github.com/keepinmindsh/lines_kubernetes/blob/main/001_kubernetes/sections/SECTION99.md)
+
+# UseCases 
+
+- 
