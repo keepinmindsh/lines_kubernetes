@@ -32,4 +32,4 @@
 
 # UseCases 
 
-- 
+- [Kubectl Deployment 에 대해서](https://github.com/keepinmindsh/lines_kubernetes/blob/main/001_kubernetes/usecases/usecase01.md)
