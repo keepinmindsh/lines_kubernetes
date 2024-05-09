@@ -79,6 +79,18 @@ kubectl get pods --show-labels
 # 어떤 노드가 준비됐는지 확인
 JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
  && kubectl get nodes -o jsonpath="$JSONPATH" | grep "Ready=True"
+
+# 클러스터에서 실행 중인 모든 이미지
+kubectl get pods -A -o=custom-columns='DATA:spec.containers[*].image'
+
+# `default` 네임스페이스의 모든 이미지를 파드별로 그룹지어 출력
+kubectl get pods --namespace default --output=custom-columns="NAME:.metadata.name,IMAGE:.spec.containers[*].image"
+
+ # "registry.k8s.io/coredns:1.6.2" 를 제외한 모든 이미지
+kubectl get pods -A -o=custom-columns='DATA:spec.containers[?(@.image!="registry.k8s.io/coredns:1.6.2")].image'
+
+# 이름에 관계없이 메타데이터 아래의 모든 필드
+kubectl get pods -A -o=custom-columns='DATA:metadata.*'
 ```
 
 ## Kubectl Run 
