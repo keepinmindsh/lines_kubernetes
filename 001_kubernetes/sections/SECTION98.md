@@ -37,6 +37,48 @@ kubectl get rc/web service/frontend pods/web-pod-13je7
 kubectl get clusterrolebindings 
  
 kubectl get custerroles 
+
+# Name으로 정렬된 서비스의 목록 조회
+kubectl get services --sort-by=.metadata.name
+
+# 재시작 횟수로 정렬된 파드의 목록 조회
+kubectl get pods --sort-by='.status.containerStatuses[0].restartCount'
+
+# PersistentVolumes을 용량별로 정렬해서 조회
+kubectl get pv --sort-by=.spec.capacity.storage
+
+# app=cassandra 레이블을 가진 모든 파드의 레이블 버전 조회
+kubectl get pods --selector=app=cassandra -o \
+  jsonpath='{.items[*].metadata.labels.version}'
+
+# 예를 들어 'ca.crt'와 같이 점이 있는 키값을 검색한다
+kubectl get configmap myconfig \
+  -o jsonpath='{.data.ca\.crt}'
+
+# 밑줄(`_`) 대신 대시(`-`)를 사용하여 base64 인코딩된 값을 조회
+kubectl get secret my-secret --template='{{index .data "key-name-with-dashes"}}'
+
+# 모든 워커 노드 조회 (셀렉터를 사용하여 'node-role.kubernetes.io/control-plane'
+# 으로 명명된 라벨의 결과를 제외)
+kubectl get node --selector='!node-role.kubernetes.io/control-plane'
+
+# 네임스페이스의 모든 실행 중인 파드를 조회
+kubectl get pods --field-selector=status.phase=Running
+
+# 모든 노드의 외부IP를 조회
+kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.type=="ExternalIP")].address}'
+
+# 특정 RC에 속해있는 파드 이름의 목록 조회
+# "jq" 커맨드는 jsonpath를 사용하는 매우 복잡한 변환에 유용하다. https://stedolan.github.io/jq/ 에서 확인할 수 있다.
+sel=${$(kubectl get rc my-rc --output=json | jq -j '.spec.selector | to_entries | .[] | "\(.key)=\(.value),"')%?}
+echo $(kubectl get pods --selector=$sel --output=jsonpath={.items..metadata.name})
+
+# 모든 파드(또는 레이블을 지원하는 다른 쿠버네티스 오브젝트)의 레이블 조회
+kubectl get pods --show-labels
+
+# 어떤 노드가 준비됐는지 확인
+JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
+ && kubectl get nodes -o jsonpath="$JSONPATH" | grep "Ready=True"
 ```
 
 ## Kubectl Run 
