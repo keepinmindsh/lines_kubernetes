@@ -370,6 +370,8 @@ kubectl config unset current-context
 kubectl config use-context minikube
 
 kubectl config view
+
+kubectl config set-context --current --namespace=ggckad-s2
 ```
 
 ## Kubectl Version 
